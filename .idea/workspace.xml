@@ -5,32 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.dockerignore" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/.dockerignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MIGRATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/MIGRATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/core_agent_lines.sh" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/core_agent_lines.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fix_sessions.py" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/fix_sessions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/agent/context.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/context.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/agent/loop.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/loop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/agent/memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/bus/events.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/bus/events.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/server/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/server/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/config/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/config/loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/cron/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/cron/service.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nanobot/session/manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/session/manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot_arch.png" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/nanobot_arch.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_exa.py" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/test_exa.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_web_search.py" beforeDir="false" afterPath="$PROJECT_DIR$/uesless/test_web_search.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_cli_input.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_commands.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_consolidate_offset.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_docker.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_email_channel.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/test_tool_validation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/memory/MEMORY.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/sessions/dingtalk_0122575929271255072045.jsonl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/sessions/dingtalk_01531937510226598025.jsonl" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/sessions/dingtalk_02230414491237813542.jsonl" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,18 +47,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.app.executor": "Run",
-    "Python.commands.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/Users/lianghaoyun/project/nanobot",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.commands.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/lianghaoyun/project/nanobot&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/uesless" />
