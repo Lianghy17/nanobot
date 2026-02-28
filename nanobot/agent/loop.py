@@ -187,13 +187,30 @@ class AgentLoop:
         while iteration < self.max_iterations:
             iteration += 1
 
-            response = await self.provider.chat(
-                messages=messages,
-                tools=self.tools.get_definitions(),
-                model=self.model,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-            )
+            # 打印请求参数
+            logger.info(f"[LLM Request] iteration={iteration}, model={self.model}, temperature={self.temperature}, max_tokens={self.max_tokens}")
+            logger.info(f"[LLM Request] messages count={len(messages)}, tools count={len(self.tools.get_definitions() or [])}")
+
+            try:
+                response = await self.provider.chat(
+                    messages=messages,
+                    tools=self.tools.get_definitions(),
+                    model=self.model,
+                    temperature=self.temperature,
+                    max_tokens=self.max_tokens,
+                )
+            except Exception as e:
+                logger.error(f"[LLM Error] 调用失败: {type(e).__name__}: {e}")
+                raise
+
+            # 打印响应参数
+            logger.info(f"[LLM Response] content={response.content[:200] if response.content else None}...")
+            logger.info(f"[LLM Response] tool_calls={len(response.tool_calls)}, finish_reason={response.finish_reason}, usage={response.usage}")
+            if response.reasoning_content:
+                logger.info(f"[LLM Response] reasoning_content={response.reasoning_content[:200]}...")
+            if response.tool_calls:
+                for tc in response.tool_calls:
+                    logger.info(f"[LLM Response] tool_call: id={tc.id}, name={tc.name}, args={tc.arguments}")
 
             if response.has_tool_calls:
                 if on_progress:
@@ -454,6 +471,7 @@ class AgentLoop:
 Respond with ONLY valid JSON, no markdown fences."""
 
         try:
+            logger.info(f"[Memory LLM] 开始记忆整合, model={self.model}")
             response = await self.provider.chat(
                 messages=[
                     {"role": "system", "content": "You are a memory consolidation agent. Respond only with valid JSON."},
@@ -461,6 +479,7 @@ Respond with ONLY valid JSON, no markdown fences."""
                 ],
                 model=self.model,
             )
+            logger.info(f"[Memory LLM] 响应: content={response.content[:200] if response.content else None}...")
             text = (response.content or "").strip()
             if not text:
                 logger.warning("Memory consolidation: LLM returned empty response, skipping")

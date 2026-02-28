@@ -96,6 +96,8 @@ class CronService:
                         created_at_ms=j.get("createdAtMs", 0),
                         updated_at_ms=j.get("updatedAtMs", 0),
                         delete_after_run=j.get("deleteAfterRun", False),
+                        owner_channel=j.get("ownerChannel", ""),
+                        owner_user=j.get("ownerUser", ""),
                     ))
                 self._store = CronStore(jobs=jobs)
             except Exception as e:
@@ -143,6 +145,8 @@ class CronService:
                     "createdAtMs": j.created_at_ms,
                     "updatedAtMs": j.updated_at_ms,
                     "deleteAfterRun": j.delete_after_run,
+                    "ownerChannel": j.owner_channel,
+                    "ownerUser": j.owner_user,
                 }
                 for j in self._store.jobs
             ]
@@ -254,11 +258,41 @@ class CronService:
     
     # ========== Public API ==========
     
-    def list_jobs(self, include_disabled: bool = False) -> list[CronJob]:
-        """List all jobs."""
+    def list_jobs(
+        self,
+        include_disabled: bool = False,
+        owner_channel: str | None = None,
+        owner_user: str | None = None,
+    ) -> list[CronJob]:
+        """List jobs, optionally filtered by owner channel and user."""
         store = self._load_store()
         jobs = store.jobs if include_disabled else [j for j in store.jobs if j.enabled]
+        
+        # Filter by owner
+        if owner_channel is not None:
+            jobs = [j for j in jobs if j.owner_channel == owner_channel]
+        if owner_user is not None:
+            jobs = [j for j in jobs if j.owner_user == owner_user]
+        
         return sorted(jobs, key=lambda j: j.state.next_run_at_ms or float('inf'))
+    
+    def get_job(
+        self,
+        job_id: str,
+        owner_channel: str | None = None,
+        owner_user: str | None = None,
+    ) -> CronJob | None:
+        """Get a job by ID, optionally verifying owner."""
+        store = self._load_store()
+        for job in store.jobs:
+            if job.id == job_id:
+                # Verify owner if specified
+                if owner_channel is not None and job.owner_channel != owner_channel:
+                    return None
+                if owner_user is not None and job.owner_user != owner_user:
+                    return None
+                return job
+        return None
     
     def add_job(
         self,
@@ -269,8 +303,10 @@ class CronService:
         channel: str | None = None,
         to: str | None = None,
         delete_after_run: bool = False,
+        owner_channel: str = "",
+        owner_user: str = "",
     ) -> CronJob:
-        """Add a new job."""
+        """Add a new job with owner isolation."""
         store = self._load_store()
         now = _now_ms()
         
@@ -290,34 +326,68 @@ class CronService:
             created_at_ms=now,
             updated_at_ms=now,
             delete_after_run=delete_after_run,
+            owner_channel=owner_channel,
+            owner_user=owner_user,
         )
         
         store.jobs.append(job)
         self._save_store()
         self._arm_timer()
         
-        logger.info(f"Cron: added job '{name}' ({job.id})")
+        logger.info(f"Cron: added job '{name}' ({job.id}) for {owner_channel}:{owner_user}")
         return job
     
-    def remove_job(self, job_id: str) -> bool:
-        """Remove a job by ID."""
+    def remove_job(
+        self,
+        job_id: str,
+        owner_channel: str | None = None,
+        owner_user: str | None = None,
+    ) -> bool:
+        """Remove a job by ID, optionally verifying owner."""
         store = self._load_store()
-        before = len(store.jobs)
-        store.jobs = [j for j in store.jobs if j.id != job_id]
-        removed = len(store.jobs) < before
         
-        if removed:
+        # Find and verify ownership
+        job_to_remove = None
+        for job in store.jobs:
+            if job.id == job_id:
+                # Verify owner if specified
+                if owner_channel is not None and job.owner_channel != owner_channel:
+                    logger.warning(f"Cron: denied remove job {job_id} - owner mismatch")
+                    return False
+                if owner_user is not None and job.owner_user != owner_user:
+                    logger.warning(f"Cron: denied remove job {job_id} - user mismatch")
+                    return False
+                job_to_remove = job
+                break
+        
+        if job_to_remove:
+            store.jobs = [j for j in store.jobs if j.id != job_id]
             self._save_store()
             self._arm_timer()
             logger.info(f"Cron: removed job {job_id}")
+            return True
         
-        return removed
+        return False
     
-    def enable_job(self, job_id: str, enabled: bool = True) -> CronJob | None:
-        """Enable or disable a job."""
+    def enable_job(
+        self,
+        job_id: str,
+        enabled: bool = True,
+        owner_channel: str | None = None,
+        owner_user: str | None = None,
+    ) -> CronJob | None:
+        """Enable or disable a job, optionally verifying owner."""
         store = self._load_store()
         for job in store.jobs:
             if job.id == job_id:
+                # Verify owner if specified
+                if owner_channel is not None and job.owner_channel != owner_channel:
+                    logger.warning(f"Cron: denied toggle job {job_id} - owner mismatch")
+                    return None
+                if owner_user is not None and job.owner_user != owner_user:
+                    logger.warning(f"Cron: denied toggle job {job_id} - user mismatch")
+                    return None
+                
                 job.enabled = enabled
                 job.updated_at_ms = _now_ms()
                 if enabled:
@@ -329,11 +399,25 @@ class CronService:
                 return job
         return None
     
-    async def run_job(self, job_id: str, force: bool = False) -> bool:
-        """Manually run a job."""
+    async def run_job(
+        self,
+        job_id: str,
+        force: bool = False,
+        owner_channel: str | None = None,
+        owner_user: str | None = None,
+    ) -> bool:
+        """Manually run a job, optionally verifying owner."""
         store = self._load_store()
         for job in store.jobs:
             if job.id == job_id:
+                # Verify owner if specified
+                if owner_channel is not None and job.owner_channel != owner_channel:
+                    logger.warning(f"Cron: denied run job {job_id} - owner mismatch")
+                    return False
+                if owner_user is not None and job.owner_user != owner_user:
+                    logger.warning(f"Cron: denied run job {job_id} - user mismatch")
+                    return False
+                
                 if not force and not job.enabled:
                     return False
                 await self._execute_job(job)

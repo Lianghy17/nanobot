@@ -50,6 +50,14 @@ class CronJob:
     created_at_ms: int = 0
     updated_at_ms: int = 0
     delete_after_run: bool = False
+    # Owner isolation: channel + user identify who owns this job
+    owner_channel: str = ""  # e.g. "dingtalk", "telegram", "api"
+    owner_user: str = ""     # e.g. user_id, chat_id
+    
+    @property
+    def owner_key(self) -> str:
+        """Unique key for owner isolation: channel:user"""
+        return f"{self.owner_channel}:{self.owner_user}"
 
 
 @dataclass

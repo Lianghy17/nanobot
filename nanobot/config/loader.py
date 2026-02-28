@@ -2,13 +2,17 @@
 
 import json
 from pathlib import Path
-
 from nanobot.config.schema import Config
-
+from loguru import logger
 
 def get_config_path() -> Path:
     """Get the default configuration file path."""
-    return Path.home() / ".nanobot" / "config.json"
+    # 优先使用当前项目的 config.json
+    project_config = Path(__file__).parent.parent.parent / "config.json"
+    if project_config.exists():
+        return project_config
+    else:
+        raise FileNotFoundError(f"配置文件已被梁浩云改造，应当为本文件夹中的config.json.地址：{project_config}")
 
 
 def get_data_dir() -> Path:
@@ -28,7 +32,7 @@ def load_config(config_path: Path | None = None) -> Config:
         Loaded configuration object.
     """
     path = config_path or get_config_path()
-
+    logger.info(f"APP START config path: {path}")
     if path.exists():
         try:
             with open(path) as f:

@@ -121,6 +121,7 @@ class CronTool(Tool):
         else:
             return "Error: either every_seconds, cron_expr, or at is required"
         
+        # Owner isolation: use current session's channel and chat_id as owner
         job = self._cron.add_job(
             name=message[:30],
             schedule=schedule,
@@ -129,19 +130,31 @@ class CronTool(Tool):
             channel=self._channel,
             to=self._chat_id,
             delete_after_run=delete_after,
+            owner_channel=self._channel,
+            owner_user=self._chat_id,
         )
         return f"Created job '{job.name}' (id: {job.id})"
     
     def _list_jobs(self) -> str:
-        jobs = self._cron.list_jobs()
+        # Owner isolation: only list jobs owned by current user
+        jobs = self._cron.list_jobs(
+            include_disabled=False,
+            owner_channel=self._channel,
+            owner_user=self._chat_id,
+        )
         if not jobs:
-            return "No scheduled jobs."
+            return "No scheduled jobs for you."
         lines = [f"- {j.name} (id: {j.id}, {j.schedule.kind})" for j in jobs]
-        return "Scheduled jobs:\n" + "\n".join(lines)
+        return "Your scheduled jobs:\n" + "\n".join(lines)
     
     def _remove_job(self, job_id: str | None) -> str:
         if not job_id:
             return "Error: job_id is required for remove"
-        if self._cron.remove_job(job_id):
+        # Owner isolation: verify ownership before removing
+        if self._cron.remove_job(
+            job_id,
+            owner_channel=self._channel,
+            owner_user=self._chat_id,
+        ):
             return f"Removed job {job_id}"
-        return f"Job {job_id} not found"
+        return f"Job {job_id} not found or access denied"

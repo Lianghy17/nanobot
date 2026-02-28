@@ -1,0 +1,69 @@
+Traceback (most recent call last):
+  File "/Users/lianghaoyun/project/nanobot/nanobot/channels/manager.py", line 12, in <module>
+    from nanobot.channels.base import BaseChannel
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/nanobot/channels/__init__.py", line 4, in <module>
+    from nanobot.channels.manager import ChannelManager
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/nanobot/channels/manager.py", line 13, in <module>
+    from nanobot.config.schema import Config
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/nanobot/config/__init__.py", line 3, in <module>
+    from nanobot.config.loader import load_config, get_config_path
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/nanobot/config/loader.py", line 6, in <module>
+    from nanobot.config.schema import Config
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/nanobot/config/schema.py", line 6, in <module>
+    from pydantic_settings import BaseSettings
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic_settings/__init__.py", line 2, in <module>
+    from .main import BaseSettings, CliApp, SettingsConfigDict
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic_settings/main.py", line 21, in <module>
+    from .sources import (
+    ...<17 lines>...
+    )
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic_settings/sources/__init__.py", line 3, in <module>
+    from .base import (
+    ...<6 lines>...
+    )
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic_settings/sources/base.py", line 23, in <module>
+    from .utils import (
+    ...<7 lines>...
+    )
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic_settings/sources/utils.py", line 11, in <module>
+    from pydantic import BaseModel, Json, RootModel, Secret
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/__init__.py", line 446, in __getattr__
+    module = import_module(module_name, package=package)
+  File "/Users/lianghaoyun/.local/share/uv/python/cpython-3.14.2-macos-aarch64-none/lib/python3.14/importlib/__init__.py", line 88, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/root_model.py", line 32, in <module>
+    class RootModel(BaseModel, Generic[RootModelRootType], metaclass=_RootModelMetaclass):
+    ...<122 lines>...
+            yield 'root', self.root
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/_internal/_model_construction.py", line 255, in __new__
+    complete_model_class(
+    ~~~~~~~~~~~~~~~~~~~~^
+        cls,
+        ^^^^
+    ...<3 lines>...
+        create_model_module=_create_model_module,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/_internal/_model_construction.py", line 671, in complete_model_class
+    cls.__pydantic_validator__ = create_schema_validator(
+                                 ~~~~~~~~~~~~~~~~~~~~~~~^
+        schema,
+        ^^^^^^^
+    ...<5 lines>...
+        config_wrapper.plugin_settings,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/plugin/_schema_validator.py", line 37, in create_schema_validator
+    from ._loader import get_plugins
+  File "/Users/lianghaoyun/project/nanobot/.venv/lib/python3.14/site-packages/pydantic/plugin/_loader.py", line 3, in <module>
+    import importlib.metadata as importlib_metadata
+  File "/Users/lianghaoyun/.local/share/uv/python/cpython-3.14.2-macos-aarch64-none/lib/python3.14/importlib/metadata/__init__.py", line 8, in <module>
+    import email
+  File "/Users/lianghaoyun/project/nanobot/nanobot/channels/email.py", line 7, in <module>
+    import smtplib
+  File "/Users/lianghaoyun/.local/share/uv/python/cpython-3.14.2-macos-aarch64-none/lib/python3.14/smtplib.py", line 45, in <module>
+    import email.utils
+ModuleNotFoundError: No module named 'email.utils'; 'email' is not a package

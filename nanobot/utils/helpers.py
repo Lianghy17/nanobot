@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from datetime import datetime
+from loguru import logger
 
 
 def ensure_dir(path: Path) -> Path:
@@ -12,7 +13,9 @@ def ensure_dir(path: Path) -> Path:
 
 def get_data_path() -> Path:
     """Get the nanobot data directory (~/.nanobot)."""
-    return ensure_dir(Path.home() / ".nanobot")
+    project_config = Path(__file__).parent.parent.parent / "workspace/data"
+    logger.info(f"APP START data path : {project_config}")
+    return project_config
 
 
 def get_workspace_path(workspace: str | None = None) -> Path:
@@ -20,17 +23,22 @@ def get_workspace_path(workspace: str | None = None) -> Path:
     Get the workspace path.
     
     Args:
-        workspace: Optional workspace path. Defaults to ~/.nanobot/workspace.
+        workspace: Optional workspace path. Defaults to nanobot/workspace.
     
     Returns:
         Expanded and ensured workspace path.
     """
-    if workspace:
-        path = Path(workspace).expanduser()
-    else:
-        path = Path.home() / ".nanobot" / "workspace"
-    return ensure_dir(path)
+    # if workspace:
+    #     path = Path(workspace).expanduser()
+    # else:
+    #     project_config = Path(__file__).parent.parent.parent
+    #     path = project_config / "workspace"
+    # return ensure_dir(path)
 
+    project_config = Path(__file__).parent.parent.parent
+    path = project_config / "workspace"
+    logger.info(f"APP START workspace path : {path}")
+    return ensure_dir(path)
 
 def get_sessions_path() -> Path:
     """Get the sessions storage directory."""
@@ -40,7 +48,7 @@ def get_sessions_path() -> Path:
 def get_skills_path(workspace: Path | None = None) -> Path:
     """Get the skills directory within the workspace."""
     ws = workspace or get_workspace_path()
-    return ensure_dir(ws / "skills")
+    return ensure_dir(ws / "extra_skills")
 
 
 def timestamp() -> str:
