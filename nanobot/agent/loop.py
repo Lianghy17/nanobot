@@ -339,7 +339,10 @@ class AgentLoop:
             asyncio.create_task(self._consolidate_memory(session))
 
         self._set_tool_context(msg.channel, msg.chat_id)
-        initial_messages = self.context.build_messages(
+        
+        # Create context builder with memory_key (user_id:channel) for memory isolation
+        context = ContextBuilder(self.workspace, memory_key=msg.memory_key)
+        initial_messages = context.build_messages(
             history=session.get_history(max_messages=self.memory_window),
             current_message=msg.content,
             media=msg.media if msg.media else None,
@@ -397,7 +400,12 @@ class AgentLoop:
         session_key = f"{origin_channel}:{origin_chat_id}"
         session = self.sessions.get_or_create(session_key)
         self._set_tool_context(origin_channel, origin_chat_id)
-        initial_messages = self.context.build_messages(
+        
+        # Create context builder with memory_key (user_id:channel) for memory isolation
+        # For system messages, use origin_chat_id as user_id
+        memory_key = f"{origin_chat_id}:{origin_channel}"
+        context = ContextBuilder(self.workspace, memory_key=memory_key)
+        initial_messages = context.build_messages(
             history=session.get_history(max_messages=self.memory_window),
             current_message=msg.content,
             channel=origin_channel,
@@ -425,7 +433,14 @@ class AgentLoop:
             archive_all: If True, clear all messages and reset session (for /new command).
                        If False, only write to files without modifying session.
         """
-        memory = MemoryStore(self.workspace)
+        # Parse memory_key from session key (session.key = "channel:user_id")
+        # memory_key format = "user_id:channel"
+        memory_key = None
+        if ":" in session.key:
+            parts = session.key.split(":", 1)
+            memory_key = f"{parts[1]}:{parts[0]}"  # user_id:channel
+        
+        memory = MemoryStore(self.workspace, memory_key=memory_key)
 
         if archive_all:
             old_messages = session.messages
@@ -460,9 +475,9 @@ class AgentLoop:
 
 1. "history_entry": A paragraph (2-5 sentences) summarizing the key events/decisions/topics. Start with a timestamp like [YYYY-MM-DD HH:MM]. Include enough detail to be useful when found by grep search later.
 
-2. "memory_update": The updated long-term memory content. Add any new facts: user location, preferences, personal info, habits, project context, technical decisions, tools/services used. If nothing new, return the existing content unchanged.
+2. "memory_update": The updated user-level memory content. Add any new facts: user preferences, personal info, habits, project context. If nothing new, return the existing content unchanged.
 
-## Current Long-term Memory
+## Current Memory (may include Global and Personal sections)
 {current_memory or "(empty)"}
 
 ## Conversation to Process
@@ -492,10 +507,10 @@ Respond with ONLY valid JSON, no markdown fences."""
                 return
 
             if entry := result.get("history_entry"):
-                memory.append_history(entry)
+                memory.append_history(entry, level="user")
             if update := result.get("memory_update"):
                 if update != current_memory:
-                    memory.write_long_term(update)
+                    memory.write_long_term(update, level="user")
 
             if archive_all:
                 session.last_consolidated = 0
@@ -519,8 +534,8 @@ Respond with ONLY valid JSON, no markdown fences."""
         Args:
             content: The message content.
             session_key: Session identifier (overrides channel:chat_id for session lookup).
-            channel: Source channel (for tool context routing).
-            chat_id: Source chat ID (for tool context routing).
+            channel: Source channel (for tool context routing and memory isolation).
+            chat_id: Source chat ID (for tool context routing and memory isolation).
             on_progress: Optional callback for intermediate output.
         
         Returns:
@@ -534,5 +549,7 @@ Respond with ONLY valid JSON, no markdown fences."""
             content=content
         )
         
-        response = await self._process_message(msg, session_key=session_key, on_progress=on_progress)
+        response = await self._process_message(
+            msg, session_key=session_key, on_progress=on_progress
+        )
         return response.content if response else ""

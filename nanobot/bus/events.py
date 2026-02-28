@@ -11,7 +11,7 @@ class InboundMessage:
     
     channel: str  # telegram, discord, slack, whatsapp
     sender_id: str  # User identifier
-    chat_id: str  # Chat/channel identifier
+    chat_id: str  # Chat/channel identifier (for reply routing)
     content: str  # Message text
     timestamp: datetime = field(default_factory=datetime.now)
     media: list[str] = field(default_factory=list)  # Media URLs
@@ -19,8 +19,13 @@ class InboundMessage:
     
     @property
     def session_key(self) -> str:
-        """Unique key for session identification."""
-        return f"{self.channel}:{self.chat_id}"
+        """Unique key for session identification (channel:user_id)."""
+        return f"{self.channel}:{self.sender_id}"
+    
+    @property
+    def memory_key(self) -> str:
+        """Unique key for memory isolation (user_id:channel)."""
+        return f"{self.sender_id}:{self.channel}"
 
 
 @dataclass

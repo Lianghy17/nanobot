@@ -9,6 +9,7 @@ from nanobot import __logo__, __version__
 from nanobot.config.loader import load_config, get_config_path, save_config
 from nanobot.bus.queue import MessageBus
 from nanobot.agent.loop import AgentLoop
+from nanobot.agent.memory import MemoryManager
 from nanobot.session.manager import SessionManager
 from nanobot.cron.service import CronService
 from nanobot.cron.types import CronSchedule, CronPayload, CronJob
@@ -19,6 +20,7 @@ from nanobot.utils.helpers import get_workspace_path, get_data_path
 _app = None
 _agent: AgentLoop | None = None
 _session_manager: SessionManager | None = None
+_memory_manager: MemoryManager | None = None
 _cron_service: CronService | None = None
 _channel_manager: ChannelManager | None = None
 _bus: MessageBus | None = None
@@ -52,7 +54,7 @@ def _run_background_tasks():
 
 def create_app() -> Flask:
     """Create and configure the Flask application."""
-    global _agent, _session_manager, _cron_service, _channel_manager, _bus
+    global _agent, _session_manager, _memory_manager, _cron_service, _channel_manager, _bus
 
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
@@ -63,11 +65,13 @@ def create_app() -> Flask:
     data_dir = get_data_path()
     cron_store_path = data_dir / "cron" / "jobs.json"
 
-    # Create shared message bus， 创建了一个消息总线 (MessageBus)，包含 inbound 和 outbound 两个队列
+    # Create shared message bus
     _bus = MessageBus()
     # Create session manager
     _session_manager = SessionManager(workspace)
-    # Create cron service，
+    # Create memory manager
+    _memory_manager = MemoryManager(workspace)
+    # Create cron service
     _cron_service = CronService(cron_store_path)
 
     # Create provider ，创建了一个提供者 (Provider)
@@ -135,8 +139,21 @@ def create_app() -> Flask:
             "endpoints": {
                 "agent": {
                     "chat": "POST /api/agent/chat",
-                    "sessions": "GET /api/agent/sessions",
-                    "session": "GET /api/agent/sessions/<session_id>",
+                },
+                "sessions": {
+                    "list": "GET /api/sessions",
+                    "channels": "GET /api/sessions/channels",
+                    "channel_users": "GET /api/sessions/channels/<channel>/users",
+                    "get": "GET /api/sessions/<session_id>",
+                    "delete": "DELETE /api/sessions/<session_id>",
+                    "clear": "POST /api/sessions/<session_id>/clear",
+                },
+                "memory": {
+                    "stats": "GET /api/memory/stats",
+                    "global": "GET/PUT /api/memory/global",
+                    "users": "GET /api/memory/users",
+                    "user": "GET/PUT/DELETE /api/memory/users/<user_id>/<channel>",
+                    "combined": "GET /api/memory/combined?user_id=xxx&channel=xxx",
                 },
                 "config": {
                     "get": "GET /api/config",
@@ -182,45 +199,6 @@ def create_app() -> Flask:
             "response": response,
             "session_id": session_id,
         })
-
-    @app.route("/api/agent/sessions", methods=["GET"])
-    def list_sessions():
-        """List all sessions."""
-        if _session_manager is None:
-            return jsonify({"error": "Session manager not initialized"}), 500
-
-        sessions = _session_manager.list_sessions()
-        return jsonify({"sessions": sessions})
-
-    @app.route("/api/agent/sessions/<path:session_id>", methods=["GET"])
-    def get_session(session_id):
-        """Get session history."""
-        if _session_manager is None:
-            return jsonify({"error": "Session manager not initialized"}), 500
-
-        # Replace underscores back to colons
-        key = session_id.replace("_", ":", 1)
-        session = _session_manager.get_or_create(key)
-
-        return jsonify({
-            "key": session.key,
-            "messages": session.get_history(),
-            "created_at": session.created_at.isoformat(),
-            "updated_at": session.updated_at.isoformat(),
-        })
-
-    @app.route("/api/agent/sessions/<path:session_id>", methods=["DELETE"])
-    def clear_session(session_id):
-        """Clear a session."""
-        if _session_manager is None:
-            return jsonify({"error": "Session manager not initialized"}), 500
-
-        key = session_id.replace("_", ":", 1)
-        session = _session_manager.get_or_create(key)
-        session.clear()
-        _session_manager.save_session(session)
-
-        return jsonify({"message": f"Session '{key}' cleared"})
 
     # ========== Config Routes ==========
 
@@ -424,6 +402,183 @@ def create_app() -> Flask:
             return jsonify({"message": f"Job '{job_id}' triggered"})
         else:
             return jsonify({"error": f"Job '{job_id}' not found, disabled, or access denied"}), 404
+
+    # ========== Session Routes ==========
+
+    @app.route("/api/sessions", methods=["GET"])
+    def list_sessions():
+        """List all sessions with optional channel filter."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        channel = request.args.get("channel")
+        limit = int(request.args.get("limit", 100))
+        offset = int(request.args.get("offset", 0))
+
+        sessions = _session_manager.list_sessions(channel=channel, limit=limit, offset=offset)
+        stats = _session_manager.get_stats()
+
+        return jsonify({
+            "sessions": sessions,
+            "stats": stats,
+        })
+
+    @app.route("/api/sessions/channels", methods=["GET"])
+    def list_session_channels():
+        """List all channels with sessions."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        channels = _session_manager.list_channels()
+        return jsonify({"channels": channels})
+
+    @app.route("/api/sessions/channels/<channel>/users", methods=["GET"])
+    def list_channel_users(channel):
+        """List all users for a specific channel."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        users = _session_manager.get_channel_users(channel)
+        return jsonify({
+            "channel": channel,
+            "users": users,
+        })
+
+    @app.route("/api/sessions/<path:session_id>", methods=["GET"])
+    def get_session(session_id):
+        """Get session history."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        # Replace underscores back to colons
+        key = session_id.replace("_", ":", 1)
+        session = _session_manager.get_or_create(key)
+
+        return jsonify({
+            "key": session.key,
+            "channel": session.channel,
+            "chat_id": session.chat_id,
+            "messages": session.get_history(),
+            "created_at": session.created_at.isoformat(),
+            "updated_at": session.updated_at.isoformat(),
+        })
+
+    @app.route("/api/sessions/<path:session_id>", methods=["DELETE"])
+    def delete_session(session_id):
+        """Delete a session."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        key = session_id.replace("_", ":", 1)
+        success = _session_manager.delete(key)
+
+        if success:
+            return jsonify({"message": f"Session '{key}' deleted"})
+        else:
+            return jsonify({"error": f"Session '{key}' not found"}), 404
+
+    @app.route("/api/sessions/<path:session_id>/clear", methods=["POST"])
+    def clear_session(session_id):
+        """Clear a session's messages."""
+        if _session_manager is None:
+            return jsonify({"error": "Session manager not initialized"}), 500
+
+        key = session_id.replace("_", ":", 1)
+        session = _session_manager.get_or_create(key)
+        session.clear()
+        _session_manager.save(session)
+
+        return jsonify({"message": f"Session '{key}' cleared"})
+
+    # ========== Memory Routes ==========
+
+    @app.route("/api/memory/stats", methods=["GET"])
+    def get_memory_stats():
+        """Get memory statistics."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        stats = _memory_manager.get_stats()
+        return jsonify(stats)
+
+    @app.route("/api/memory/global", methods=["GET"])
+    def get_global_memory():
+        """Get global memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        return jsonify(_memory_manager.get_global_memory())
+
+    @app.route("/api/memory/global", methods=["PUT"])
+    def set_global_memory():
+        """Set global memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        data = request.get_json()
+        if not data or "memory" not in data:
+            return jsonify({"error": "Missing 'memory' field"}), 400
+
+        _memory_manager.set_global_memory(data["memory"])
+        return jsonify({"message": "Global memory updated"})
+
+    @app.route("/api/memory/users", methods=["GET"])
+    def list_memory_users():
+        """List all users with memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        users = _memory_manager.list_users()
+        return jsonify({"users": users})
+
+    @app.route("/api/memory/users/<user_id>/<channel>", methods=["GET"])
+    def get_user_memory(user_id, channel):
+        """Get user-level memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        return jsonify(_memory_manager.get_user_memory(user_id, channel))
+
+    @app.route("/api/memory/users/<user_id>/<channel>", methods=["PUT"])
+    def set_user_memory(user_id, channel):
+        """Set user-level memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        data = request.get_json()
+        if not data or "memory" not in data:
+            return jsonify({"error": "Missing 'memory' field"}), 400
+
+        _memory_manager.set_user_memory(user_id, channel, data["memory"])
+        return jsonify({"message": f"User '{user_id}:{channel}' memory updated"})
+
+    @app.route("/api/memory/users/<user_id>/<channel>", methods=["DELETE"])
+    def delete_user_memory(user_id, channel):
+        """Delete user-level memory."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        success = _memory_manager.delete_user_memory(user_id, channel)
+        if success:
+            return jsonify({"message": f"User '{user_id}:{channel}' memory deleted"})
+        else:
+            return jsonify({"error": f"User '{user_id}:{channel}' memory not found"}), 404
+
+    @app.route("/api/memory/combined", methods=["GET"])
+    def get_combined_memory():
+        """Get combined memory for a specific context."""
+        if _memory_manager is None:
+            return jsonify({"error": "Memory manager not initialized"}), 500
+
+        user_id = request.args.get("user_id")
+        channel = request.args.get("channel")
+
+        combined = _memory_manager.get_combined_memory(user_id=user_id, channel=channel)
+        return jsonify({
+            "user_id": user_id,
+            "channel": channel,
+            "memory": combined,
+        })
 
     # ========== Channel Routes ==========
 

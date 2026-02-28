@@ -1,4 +1,4 @@
-"""Session management for conversation history."""
+"""Session management for conversation history with channel/user isolation."""
 
 import json
 from pathlib import Path
@@ -30,6 +30,20 @@ class Session:
     metadata: dict[str, Any] = field(default_factory=dict)
     last_consolidated: int = 0  # Number of messages already consolidated to files
     
+    @property
+    def channel(self) -> str:
+        """Extract channel from key."""
+        if ":" in self.key:
+            return self.key.split(":", 1)[0]
+        return "unknown"
+    
+    @property
+    def chat_id(self) -> str:
+        """Extract chat_id from key."""
+        if ":" in self.key:
+            return self.key.split(":", 1)[1]
+        return self.key
+    
     def add_message(self, role: str, content: str, **kwargs: Any) -> None:
         """Add a message to the session."""
         msg = {
@@ -57,13 +71,32 @@ class Session:
         self.messages = []
         self.last_consolidated = 0
         self.updated_at = datetime.now()
+    
+    def to_dict(self) -> dict[str, Any]:
+        """Convert session to dict for API response."""
+        return {
+            "key": self.key,
+            "channel": self.channel,
+            "chat_id": self.chat_id,
+            "message_count": len(self.messages),
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "metadata": self.metadata,
+        }
 
 
 class SessionManager:
     """
-    Manages conversation sessions.
+    Manages conversation sessions with channel/user isolation.
 
-    Sessions are stored as JSONL files in the sessions directory.
+    Directory structure:
+    workspace/
+    └── sessions/
+        ├── _index.json           # Channel/user index
+        ├── cli_direct.jsonl
+        ├── telegram_123.jsonl
+        ├── slack_456.jsonl
+        └── ...
     """
 
     def __init__(self, workspace: Path):
@@ -71,7 +104,22 @@ class SessionManager:
         self.sessions_dir = ensure_dir(self.workspace / "sessions")
         self.legacy_sessions_dir = Path.home() / ".nanobot" / "sessions"
         self._cache: dict[str, Session] = {}
-    
+        self._index_path = self.sessions_dir / "_index.json"
+        self._index: dict[str, dict[str, Any]] = self._load_index()
+
+    def _load_index(self) -> dict[str, dict[str, Any]]:
+        """Load session index from disk."""
+        if self._index_path.exists():
+            try:
+                return json.loads(self._index_path.read_text())
+            except Exception:
+                return {}
+        return {}
+
+    def _save_index(self) -> None:
+        """Save session index to disk."""
+        self._index_path.write_text(json.dumps(self._index, indent=2))
+
     def _get_session_path(self, key: str) -> Path:
         """Get the file path for a session."""
         safe_key = safe_filename(key.replace(":", "_"))
@@ -81,6 +129,17 @@ class SessionManager:
         """Legacy global session path (~/.nanobot/sessions/)."""
         safe_key = safe_filename(key.replace(":", "_"))
         return self.legacy_sessions_dir / f"{safe_key}.jsonl"
+    
+    def _update_index(self, session: Session) -> None:
+        """Update index entry for a session."""
+        self._index[session.key] = {
+            "channel": session.channel,
+            "chat_id": session.chat_id,
+            "created_at": session.created_at.isoformat(),
+            "updated_at": session.updated_at.isoformat(),
+            "message_count": len(session.messages),
+        }
+        self._save_index()
     
     def get_or_create(self, key: str) -> Session:
         """
@@ -164,35 +223,143 @@ class SessionManager:
                 f.write(json.dumps(msg) + "\n")
 
         self._cache[session.key] = session
+        self._update_index(session)
     
     def invalidate(self, key: str) -> None:
         """Remove a session from the in-memory cache."""
         self._cache.pop(key, None)
     
-    def list_sessions(self) -> list[dict[str, Any]]:
+    def delete(self, key: str) -> bool:
+        """Delete a session from disk and cache."""
+        path = self._get_session_path(key)
+        deleted = False
+        
+        if path.exists():
+            path.unlink()
+            deleted = True
+        
+        self._cache.pop(key, None)
+        self._index.pop(key, None)
+        self._save_index()
+        
+        return deleted
+    
+    # ==================== Query Methods ====================
+
+    def list_sessions(
+        self,
+        channel: str | None = None,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[dict[str, Any]]:
         """
-        List all sessions.
+        List sessions with optional channel filter.
+        
+        Args:
+            channel: Filter by channel (e.g., "telegram", "slack").
+            limit: Max number of results.
+            offset: Offset for pagination.
         
         Returns:
             List of session info dicts.
         """
         sessions = []
         
+        for key, info in self._index.items():
+            if channel and info.get("channel") != channel:
+                continue
+            sessions.append({
+                "key": key,
+                **info,
+            })
+        
+        # Sort by updated_at descending
+        sessions.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
+        
+        return sessions[offset:offset + limit]
+    
+    def list_channels(self) -> list[dict[str, Any]]:
+        """List all channels with session counts."""
+        channels: dict[str, dict[str, Any]] = {}
+        
+        for key, info in self._index.items():
+            channel = info.get("channel", "unknown")
+            if channel not in channels:
+                channels[channel] = {
+                    "name": channel,
+                    "session_count": 0,
+                    "latest_activity": None,
+                }
+            channels[channel]["session_count"] += 1
+            updated = info.get("updated_at", "")
+            if not channels[channel]["latest_activity"] or updated > channels[channel]["latest_activity"]:
+                channels[channel]["latest_activity"] = updated
+        
+        return list(channels.values())
+    
+    def get_channel_users(self, channel: str) -> list[dict[str, Any]]:
+        """Get all users for a specific channel."""
+        users = []
+        
+        for key, info in self._index.items():
+            if info.get("channel") == channel:
+                users.append({
+                    "chat_id": info.get("chat_id"),
+                    "key": key,
+                    "message_count": info.get("message_count", 0),
+                    "updated_at": info.get("updated_at"),
+                })
+        
+        users.sort(key=lambda x: x.get("updated_at", ""), reverse=True)
+        return users
+    
+    def get_stats(self) -> dict[str, Any]:
+        """Get overall session statistics."""
+        channels = self.list_channels()
+        total_sessions = len(self._index)
+        total_messages = sum(info.get("message_count", 0) for info in self._index.values())
+        
+        return {
+            "total_sessions": total_sessions,
+            "total_messages": total_messages,
+            "channel_count": len(channels),
+            "channels": channels,
+        }
+    
+    def rebuild_index(self) -> int:
+        """Rebuild index from session files. Returns count of sessions indexed."""
+        self._index = {}
+        count = 0
+        
         for path in self.sessions_dir.glob("*.jsonl"):
+            if path.stem.startswith("_"):
+                continue
+            
             try:
-                # Read just the metadata line
                 with open(path) as f:
                     first_line = f.readline().strip()
                     if first_line:
                         data = json.loads(first_line)
                         if data.get("_type") == "metadata":
-                            sessions.append({
-                                "key": path.stem.replace("_", ":"),
-                                "created_at": data.get("created_at"),
-                                "updated_at": data.get("updated_at"),
-                                "path": str(path)
-                            })
-            except Exception:
-                continue
+                            # Reconstruct key from filename
+                            key = path.stem.replace("_", ":", 1)
+                            
+                            # Parse channel/chat_id from key
+                            if ":" in key:
+                                channel, chat_id = key.split(":", 1)
+                            else:
+                                channel, chat_id = "unknown", key
+                            
+                            self._index[key] = {
+                                "channel": channel,
+                                "chat_id": chat_id,
+                                "created_at": data.get("created_at", ""),
+                                "updated_at": data.get("updated_at", ""),
+                                "message_count": 0,  # Will count messages
+                            }
+                            count += 1
+            except Exception as e:
+                logger.warning(f"Failed to index {path}: {e}")
         
-        return sorted(sessions, key=lambda x: x.get("updated_at", ""), reverse=True)
+        self._save_index()
+        return count

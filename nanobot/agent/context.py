@@ -16,13 +16,23 @@ class ContextBuilder:
     
     Assembles bootstrap files, memory, skills, and conversation history
     into a coherent prompt for the LLM.
+    
+    Supports user-level memory isolation with memory_key format "user_id:channel".
     """
     
     BOOTSTRAP_FILES = ["AGENTS.md", "SOUL.md", "USER.md", "TOOLS.md", "IDENTITY.md"]
     
-    def __init__(self, workspace: Path):
+    def __init__(self, workspace: Path, memory_key: str | None = None):
+        """
+        Initialize context builder.
+        
+        Args:
+            workspace: Workspace root path.
+            memory_key: Memory key in format "user_id:channel" for user-level isolation.
+        """
         self.workspace = workspace
-        self.memory = MemoryStore(workspace)
+        self.memory_key = memory_key
+        self.memory = MemoryStore(workspace, memory_key=memory_key)
         self.skills = SkillsLoader(workspace)
     
     def build_system_prompt(self, skill_names: list[str] | None = None) -> str:
@@ -80,6 +90,9 @@ Skills with available="false" need dependencies installed first - you can try in
         system = platform.system()
         runtime = f"{'macOS' if system == 'Darwin' else system} {platform.machine()}, Python {platform.python_version()}"
         
+        # Build memory paths info based on current context
+        memory_info = self._get_memory_paths_info()
+        
         return f"""# nanobot 🐈
 
 You are nanobot, a helpful AI assistant. You have access to tools that allow you to:
@@ -97,8 +110,7 @@ You are nanobot, a helpful AI assistant. You have access to tools that allow you
 
 ## Workspace
 Your workspace is at: {workspace_path}
-- Long-term memory: {workspace_path}/memory/MEMORY.md
-- History log: {workspace_path}/memory/HISTORY.md (grep-searchable)
+{memory_info}
 - Custom skills: {workspace_path}/skills/{{skill-name}}/SKILL.md
 
 IMPORTANT: When responding to direct questions or conversations, reply directly with your text response.
@@ -106,8 +118,28 @@ Only use the 'message' tool when you need to send a message to a specific chat c
 For normal conversation, just respond with text - do not call the message tool.
 
 Always be helpful, accurate, and concise. Before calling tools, briefly tell the user what you're about to do (one short sentence in the user's language).
-When remembering something important, write to {workspace_path}/memory/MEMORY.md
-To recall past events, grep {workspace_path}/memory/HISTORY.md"""
+When remembering something important, write to the appropriate memory file based on scope:
+- Personal preferences/facts → user memory
+- Channel-wide info → channel memory  
+- System-wide knowledge → global memory"""
+    
+    def _get_memory_paths_info(self) -> str:
+        """Get memory paths info for current context."""
+        paths = self.memory.get_memory_paths()
+        lines = []
+
+        # User memory (most specific)
+        if paths["user_memory"]:
+            lines.append(f"- Personal memory: {paths['user_memory']}")
+
+        # Global memory
+        lines.append(f"- Global memory: {paths['global_memory']}")
+
+        # History
+        if paths["user_history"]:
+            lines.append(f"- Personal history: {paths['user_history']} (grep-searchable)")
+
+        return "\n".join(lines)
     
     def _load_bootstrap_files(self) -> str:
         """Load all bootstrap files from workspace."""
