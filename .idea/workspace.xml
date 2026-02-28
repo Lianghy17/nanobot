@@ -6,9 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/config/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/config/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/cron/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/cron/service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/session/manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/session/manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/__main__.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/__main__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/cli/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/cli/commands.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/sessions/_index.json" beforeDir="false" afterPath="$PROJECT_DIR$/workspace/sessions/_index.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/sessions/dingtalk_01531937510226598025.jsonl" beforeDir="false" afterPath="$PROJECT_DIR$/workspace/sessions/dingtalk_01531937510226598025.jsonl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,16 +147,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/nanobot/cli/commands.py</url>
-          <line>346</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

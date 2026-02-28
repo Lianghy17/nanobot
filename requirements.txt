@@ -1,5 +1,4 @@
 # Core dependencies
-typer>=0.9.0
 litellm>=1.0.0
 pydantic>=2.0.0
 pydantic-settings>=2.0.0
@@ -9,8 +8,8 @@ httpx>=0.25.0
 oauth-cli-kit>=0.1.1
 loguru>=0.7.0
 readability-lxml>=0.8.0
-rich>=13.0.0
 croniter>=2.0.0
+flask>=3.0.0
 
 # Messaging channels
 dingtalk-stream>=0.4.0
@@ -26,7 +25,6 @@ python-socketio>=5.11.0
 python-socks[asyncio]>=2.4.0
 
 # Tools
-prompt-toolkit>=3.0.0
 mcp>=1.0.0
 msgpack>=1.0.8
 json-repair>=0.30.0
