@@ -5,20 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/nanobot/config/d.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nanobot/server/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nanobot/server/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/case/code.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/case/memory.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/case/scedule.gif" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/case/search.gif" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nanobot/agent/loop.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/loop.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/agent/tools/cron.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/tools/cron.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/agent/subagent.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/subagent.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/agent/tools/web.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/agent/tools/web.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/nanobot/cli/commands.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/cli/commands.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/config/loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/config/loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/cron/service.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/cron/service.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/cron/types.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/cron/types.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot/utils/helpers.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/utils/helpers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/config/schema.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/config/schema.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot/server/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/nanobot/server/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/sessions/dingtalk_01531937510226598025.jsonl" beforeDir="false" afterPath="$PROJECT_DIR$/workspace/sessions/dingtalk_01531937510226598025.jsonl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

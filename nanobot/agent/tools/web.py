@@ -44,47 +44,72 @@ def _validate_url(url: str) -> tuple[bool, str]:
 
 
 class WebSearchTool(Tool):
-    """Search the web using Brave Search API."""
-    
+    """Search the web using Exa AI API."""
+
     name = "web_search"
-    description = "Search the web. Returns titles, URLs, and snippets."
+    description = "Search the web using Exa AI. Returns titles, URLs, and highlights."
     parameters = {
         "type": "object",
         "properties": {
             "query": {"type": "string", "description": "Search query"},
-            "count": {"type": "integer", "description": "Results (1-10)", "minimum": 1, "maximum": 10}
+            "count": {"type": "integer", "description": "Results (1-20)", "minimum": 1, "maximum": 20},
+            "search_type": {"type": "string", "description": "Search type: 'auto' (default), 'keyword', 'neural'", "default": "auto"},
+            "category": {"type": "string", "description": "Category filter: 'company', 'news', 'tweet', 'people', or omit for general"},
         },
         "required": ["query"]
     }
-    
+
     def __init__(self, api_key: str | None = None, max_results: int = 5):
-        self.api_key = api_key or os.environ.get("BRAVE_API_KEY", "")
+        self.api_key = api_key or os.environ.get("EXA_API_KEY", "")
         self.max_results = max_results
-    
-    async def execute(self, query: str, count: int | None = None, **kwargs: Any) -> str:
+
+    async def execute(self, query: str, count: int | None = None, search_type: str = "auto",
+                category: str | None = None, **kwargs: Any) -> str:
+        """Execute search using Exa AI API."""
         if not self.api_key:
-            return "Error: BRAVE_API_KEY not configured"
-        
+            return "Error: EXA_API_KEY not configured. Set the api_key in config.json or EXA_API_KEY env var."
+
         try:
-            n = min(max(count or self.max_results, 1), 10)
-            async with httpx.AsyncClient() as client:
-                r = await client.get(
-                    "https://api.search.brave.com/res/v1/web/search",
-                    params={"q": query, "count": n},
-                    headers={"Accept": "application/json", "X-Subscription-Token": self.api_key},
-                    timeout=10.0
-                )
-                r.raise_for_status()
-            
-            results = r.json().get("web", {}).get("results", [])
-            if not results:
+            from exa_py import Exa
+        except ImportError:
+            return "Error: exa_py not installed. Run: pip install exa_py"
+
+        try:
+            n = min(max(count or self.max_results, 1), 20)
+            exa = Exa(api_key=self.api_key)
+
+            # Build search arguments
+            search_args = {
+                "query": query,
+                "type": search_type,
+                "num_results": n,
+                "contents": {
+                    "highlights": {
+                        "max_characters": 4000
+                    }
+                }
+            }
+
+            # Add category if specified
+            if category:
+                search_args["category"] = category
+
+            result = exa.search(**search_args)
+
+            if not result.results:
                 return f"No results for: {query}"
-            
+
             lines = [f"Results for: {query}\n"]
-            for i, item in enumerate(results[:n], 1):
-                lines.append(f"{i}. {item.get('title', '')}\n   {item.get('url', '')}")
-                if desc := item.get("description"):
-                    lines.append(f"   {desc}")
+            for i, item in enumerate(result.results[:n], 1):
+                lines.append(f"{i}. {item.title}\n   {item.url}")
+                if hasattr(item, 'highlights') and item.highlights:
+                    highlights = " ".join(item.highlights[:2])  # First 2 highlights
+                    if len(highlights) > 300:
+                        highlights = highlights[:300] + "..."
+                    lines.append(f"   {highlights}")
+                elif hasattr(item, 'text') and item.text:
+                    text = item.text[:300] + "..." if len(item.text) > 300 else item.text
+                    lines.append(f"   {text}")
             return "\n".join(lines)
         except Exception as e:
             return f"Error: {e}"
