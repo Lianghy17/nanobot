@@ -1,15 +1,14 @@
-"""Nanobot FastAPI Application Entry Point."""
+"""ChatBI FastAPI Application Entry Point."""
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from nanobot.api.routes import router
+from nanobot.api.skill_loader import SkillLoader
 from nanobot.config.settings import get_settings
-from nanobot.agent.tools.registry import ToolRegistry
-from nanobot.agent.tools.rag_tool import RAGTool
-from nanobot.agent.tools.sql_tool import SQLTool
-from nanobot.agent.tools.time_series_tool import TimeSeriesForecastTool
 
 
 @asynccontextmanager
@@ -17,22 +16,13 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     settings = get_settings()
 
-    # Startup: Initialize tools
-    registry = ToolRegistry()
-    if settings.rag_enabled:
-        registry.register(RAGTool())
-    if settings.sql_enabled:
-        registry.register(SQLTool())
-    if settings.ts_enabled:
-        registry.register(TimeSeriesForecastTool())
-
-    app.state.tool_registry = registry
-    print(f"🚀 Nanobot started with {len(registry.list_tools())} tools")
+    # Initialize skills
+    SkillLoader.get_registry()
+    print(f"🚀 ChatBI started with skills: mysql_query, hive_query, knowledge_search, schema_search, qa_search, time_series_forecast")
 
     yield
 
-    # Shutdown
-    print("🛑 Nanobot shutting down...")
+    print("🛑 ChatBI shutting down...")
 
 
 def create_app() -> FastAPI:
@@ -40,9 +30,9 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     app = FastAPI(
-        title="Nanobot API",
-        description="Multi-user AI Agent Service with RAG, SQL, and Time Series tools",
-        version="0.1.0",
+        title="ChatBI API",
+        description="智能数据查询助手服务",
+        version="1.0.0",
         lifespan=lifespan,
     )
 
@@ -58,10 +48,15 @@ def create_app() -> FastAPI:
     # Include routers
     app.include_router(router, prefix="/api/v1")
 
+    # Mount static files for frontend
+    frontend_path = Path(__file__).parent / "nanobot" / "frontend"
+    if frontend_path.exists():
+        app.mount("/", StaticFiles(directory=str(frontend_path), html=True), name="frontend")
+
     # Health check endpoint
     @app.get("/health")
     async def health_check():
-        return {"status": "healthy", "service": "nanobot"}
+        return {"status": "healthy", "service": "chatbi"}
 
     return app
 

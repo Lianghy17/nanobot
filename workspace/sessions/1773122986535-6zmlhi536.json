@@ -1,0 +1,18 @@
+{
+  "key": "1773122986535-6zmlhi536",
+  "messages": [
+    {
+      "role": "user",
+      "content": "你好",
+      "timestamp": 1773122989.0396101
+    }
+  ],
+  "last_consolidated": 0,
+  "metadata": {
+    "user_id": "web-user",
+    "channel": null
+  },
+  "state": "active",
+  "created_at": 1773122989.0395992,
+  "updated_at": 1773122989.0396101
+}
