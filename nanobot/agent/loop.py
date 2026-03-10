@@ -312,7 +312,21 @@ class AgentLoop:
         logger.info(f"Processing message from {msg.channel}:{msg.sender_id}: {preview}")
         
         key = session_key or msg.session_key
-        session = self.sessions.get_or_create(key)
+        
+        # Extract user name from various possible fields
+        metadata = msg.metadata.copy() if msg.metadata else {}
+        if "sender_name" not in metadata:
+            # Try different field names based on channel conventions
+            user_name = None
+            if "username" in metadata:
+                user_name = metadata["username"]
+            elif "first_name" in metadata:
+                user_name = metadata["first_name"]
+            
+            if user_name:
+                metadata["sender_name"] = user_name
+        
+        session = self.sessions.get_or_create(key, metadata=metadata)
         
         # Handle slash commands
         cmd = msg.content.strip().lower()

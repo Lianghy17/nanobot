@@ -1,16 +1,18 @@
 {
-  "dingtalk:01531937510226598025": {
-    "channel": "dingtalk",
-    "chat_id": "01531937510226598025",
-    "created_at": "2026-02-28T15:29:07.357673",
-    "updated_at": "2026-02-28T17:50:23.772585",
-    "message_count": 12
-  },
   "dingtalk:02230414491237813542": {
     "channel": "dingtalk",
     "chat_id": "02230414491237813542",
+    "user_name": "陈文超",
     "created_at": "2026-02-28T15:50:35.739101",
-    "updated_at": "2026-02-28T15:51:06.674005",
+    "updated_at": "2026-03-09T19:34:06.762594",
+    "message_count": 4
+  },
+  "dingtalk:01531937510226598025": {
+    "channel": "dingtalk",
+    "chat_id": "01531937510226598025",
+    "user_name": "梁浩云",
+    "created_at": "2026-03-09T19:35:19.397936",
+    "updated_at": "2026-03-09T19:35:21.535549",
     "message_count": 2
   }
 }

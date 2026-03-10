@@ -44,6 +44,11 @@ class Session:
             return self.key.split(":", 1)[1]
         return self.key
     
+    @property
+    def user_name(self) -> str | None:
+        """Get user name from metadata."""
+        return self.metadata.get("user_name")
+    
     def add_message(self, role: str, content: str, **kwargs: Any) -> None:
         """Add a message to the session."""
         msg = {
@@ -95,8 +100,19 @@ class SessionManager:
         ├── _index.json           # Channel/user index
         ├── cli_direct.jsonl
         ├── telegram_123.jsonl
+        ├── telegram_123_username.jsonl  # With username if available
         ├── slack_456.jsonl
         └── ...
+
+    File naming convention:
+    - With username: {channel}_{chatid}_{username}.jsonl (e.g., dingtalk_01531937510226598025_张三.jsonl)
+    - Without username: {channel}_{chatid}.jsonl (e.g., telegram_123.jsonl)
+
+    User name sources (channel-specific):
+    - DingTalk: metadata["sender_name"]
+    - Mochat: metadata["sender_name"] or metadata["sender_username"]
+    - Telegram: metadata["username"] or metadata["first_name"]
+    - Other channels: not currently supported
     """
 
     def __init__(self, workspace: Path):
@@ -120,59 +136,168 @@ class SessionManager:
         """Save session index to disk."""
         self._index_path.write_text(json.dumps(self._index, indent=2, ensure_ascii=False))
 
-    def _get_session_path(self, key: str) -> Path:
-        """Get the file path for a session."""
-        safe_key = safe_filename(key.replace(":", "_"))
-        return self.sessions_dir / f"{safe_key}.jsonl"
+    def _get_session_path(self, key: str, user_name: str | None = None) -> Path:
+        """Get the file path for a session.
+        
+        Args:
+            key: Session key (channel:chat_id)
+            user_name: Optional user name to include in filename
+        
+        Returns:
+            Path to the session file
+        """
+        # Parse channel and chat_id from key
+        if ":" in key:
+            channel, chat_id = key.split(":", 1)
+        else:
+            channel, chat_id = "unknown", key
+        
+        # Build filename: channel_chatid_username.jsonl (if username exists)
+        safe_channel = safe_filename(channel)
+        safe_chatid = safe_filename(chat_id)
+        
+        if user_name:
+            safe_username = safe_filename(user_name)
+            filename = f"{safe_channel}_{safe_chatid}_{safe_username}.jsonl"
+        else:
+            filename = f"{safe_channel}_{safe_chatid}.jsonl"
+        
+        return self.sessions_dir / filename
+    
+    def _find_existing_session_path(self, key: str) -> Path | None:
+        """Find existing session file (with or without username).
+        
+        Args:
+            key: Session key (channel:chat_id)
+        
+        Returns:
+            Path to existing session file, or None if not found
+        """
+        # Parse channel and chat_id from key
+        if ":" in key:
+            channel, chat_id = key.split(":", 1)
+        else:
+            channel, chat_id = "unknown", key
+        
+        safe_channel = safe_filename(channel)
+        safe_chatid = safe_filename(chat_id)
+        
+        # Check for files with username: channel_chatid_*.jsonl
+        pattern = f"{safe_channel}_{safe_chatid}_*.jsonl"
+        matching_files = list(self.sessions_dir.glob(pattern))
+        if matching_files:
+            return matching_files[0]
+        
+        # Check for old format without username: channel_chatid.jsonl
+        old_path = self.sessions_dir / f"{safe_channel}_{safe_chatid}.jsonl"
+        if old_path.exists():
+            return old_path
+        
+        return None
+    
+    @staticmethod
+    def _extract_username_from_filename(filename: str, key: str) -> str | None:
+        """Extract user name from filename if present.
+        
+        Args:
+            filename: Filename stem (without .jsonl extension)
+            key: Session key (channel:chat_id)
+        
+        Returns:
+            User name if found, None otherwise
+        """
+        # Parse channel and chat_id from key
+        if ":" in key:
+            channel, chat_id = key.split(":", 1)
+        else:
+            channel, chat_id = "unknown", key
+        
+        safe_channel = safe_filename(channel)
+        safe_chatid = safe_filename(chat_id)
+        
+        # Check if filename matches pattern: channel_chatid_username
+        prefix = f"{safe_channel}_{safe_chatid}_"
+        if filename.startswith(prefix):
+            username = filename[len(prefix):]
+            return username if username else None
+        
+        return None
 
     def _get_legacy_session_path(self, key: str) -> Path:
         """Legacy global session path (~/.nanobot/sessions/)."""
-        safe_key = safe_filename(key.replace(":", "_"))
-        return self.legacy_sessions_dir / f"{safe_key}.jsonl"
+        # Legacy path uses old naming: channel_chatid.jsonl
+        if ":" in key:
+            channel, chat_id = key.split(":", 1)
+        else:
+            channel, chat_id = "unknown", key
+        
+        safe_channel = safe_filename(channel)
+        safe_chatid = safe_filename(chat_id)
+        return self.legacy_sessions_dir / f"{safe_channel}_{safe_chatid}.jsonl"
     
     def _update_index(self, session: Session) -> None:
         """Update index entry for a session."""
         self._index[session.key] = {
             "channel": session.channel,
             "chat_id": session.chat_id,
+            "user_name": session.user_name,
             "created_at": session.created_at.isoformat(),
             "updated_at": session.updated_at.isoformat(),
             "message_count": len(session.messages),
         }
         self._save_index()
     
-    def get_or_create(self, key: str) -> Session:
+    def get_or_create(self, key: str, metadata: dict[str, Any] | None = None) -> Session:
         """
         Get an existing session or create a new one.
         
         Args:
             key: Session key (usually channel:chat_id).
+            metadata: Optional metadata to update session with (e.g., user_name).
         
         Returns:
             The session.
         """
         if key in self._cache:
-            return self._cache[key]
+            session = self._cache[key]
+            # Update metadata if provided
+            if metadata:
+                user_name = metadata.get("sender_name")
+                if user_name and session.user_name != user_name:
+                    session.metadata["user_name"] = user_name
+                    session.updated_at = datetime.now()
+                    self._update_index(session)
+            return session
         
         session = self._load(key)
         if session is None:
             session = Session(key=key)
+        
+        # Update metadata if provided
+        if metadata:
+            user_name = metadata.get("sender_name")
+            if user_name and session.user_name != user_name:
+                session.metadata["user_name"] = user_name
+                session.updated_at = datetime.now()
         
         self._cache[key] = session
         return session
     
     def _load(self, key: str) -> Session | None:
         """Load a session from disk."""
-        path = self._get_session_path(key)
-        if not path.exists():
+        # Find existing session file (may be with or without username)
+        path = self._find_existing_session_path(key)
+        
+        if not path:
+            # Try legacy path
             legacy_path = self._get_legacy_session_path(key)
             if legacy_path.exists():
                 import shutil
+                path = self._get_session_path(key)
                 shutil.move(str(legacy_path), str(path))
-                logger.info(f"Migrated session {key} from legacy path")
-
-        if not path.exists():
-            return None
+                logger.info(f"Migrated session {key} from legacy path to {path.name}")
+            else:
+                return None
 
         try:
             messages = []
@@ -194,6 +319,12 @@ class SessionManager:
                         last_consolidated = data.get("last_consolidated", 0)
                     else:
                         messages.append(data)
+            
+            # Extract user_name from filename if not in metadata
+            if "user_name" not in metadata:
+                user_name = self._extract_username_from_filename(path.stem, key)
+                if user_name:
+                    metadata["user_name"] = user_name
 
             return Session(
                 key=key,
@@ -208,7 +339,18 @@ class SessionManager:
     
     def save(self, session: Session) -> None:
         """Save a session to disk."""
-        path = self._get_session_path(session.key)
+        path = self._get_session_path(session.key, session.user_name)
+        
+        # Check if old file exists with different name (user name changed)
+        old_path = self._find_existing_session_path(session.key)
+        if old_path and old_path != path and old_path.exists():
+            # Rename the file to new name
+            import shutil
+            try:
+                shutil.move(str(old_path), str(path))
+                logger.info(f"Renamed session file {old_path.name} -> {path.name}")
+            except Exception as e:
+                logger.warning(f"Failed to rename session file: {e}")
 
         with open(path, "w", encoding="utf-8") as f:
             metadata_line = {
@@ -231,10 +373,10 @@ class SessionManager:
     
     def delete(self, key: str) -> bool:
         """Delete a session from disk and cache."""
-        path = self._get_session_path(key)
+        path = self._find_existing_session_path(key)
         deleted = False
         
-        if path.exists():
+        if path and path.exists():
             path.unlink()
             deleted = True
         
@@ -341,18 +483,34 @@ class SessionManager:
                     if first_line:
                         data = json.loads(first_line)
                         if data.get("_type") == "metadata":
-                            # Reconstruct key from filename
-                            key = path.stem.replace("_", ":", 1)
+                            # Try to extract key from metadata or filename
+                            metadata = data.get("metadata", {})
+                            user_name = metadata.get("user_name")
                             
-                            # Parse channel/chat_id from key
-                            if ":" in key:
-                                channel, chat_id = key.split(":", 1)
+                            # Parse key from filename
+                            # Filename format: channel_chatid_username.jsonl or channel_chatid.jsonl
+                            filename_parts = path.stem.split("_", 2)
+                            if len(filename_parts) >= 2:
+                                channel = filename_parts[0]
+                                chat_id = filename_parts[1]
+                                key = f"{channel}:{chat_id}"
                             else:
-                                channel, chat_id = "unknown", key
+                                # Old format: filename was "key.jsonl" with key containing ":"
+                                # Convert back to key
+                                key = path.stem.replace("_", ":", 1)
+                                if ":" in key:
+                                    channel, chat_id = key.split(":", 1)
+                                else:
+                                    channel, chat_id = "unknown", key
+                            
+                            # Extract username from filename if not in metadata
+                            if not user_name and len(filename_parts) >= 3:
+                                user_name = filename_parts[2]
                             
                             self._index[key] = {
                                 "channel": channel,
                                 "chat_id": chat_id,
+                                "user_name": user_name,
                                 "created_at": data.get("created_at", ""),
                                 "updated_at": data.get("updated_at", ""),
                                 "message_count": 0,  # Will count messages
