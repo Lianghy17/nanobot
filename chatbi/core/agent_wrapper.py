@@ -60,10 +60,13 @@ class AgentWrapper:
         }
         logger.info(f"注册工具: {list(self._tools.keys())}")
 
-    def _set_tool_context(self, user_channel: str):
+    def _set_tool_context(self, user_channel: str, conversation_id: str = None):
         """设置所有工具的上下文"""
         for tool in self._tools.values():
             tool.set_context(user_channel)
+            # 如果工具支持设置会话ID，则设置
+            if hasattr(tool, 'set_conversation_id') and conversation_id:
+                tool.set_conversation_id(conversation_id)
 
     def _get_tool_definitions(self) -> List[Dict[str, Any]]:
         """获取所有工具的定义"""
@@ -331,7 +334,7 @@ class AgentWrapper:
         logger.info(f"[PID:{pid}] " + "=" * 80)
 
         # 设置工具上下文
-        self._set_tool_context(conversation.user_channel)
+        self._set_tool_context(conversation.user_channel, conversation.conversation_id)
 
         try:
             # 运行Agent Loop

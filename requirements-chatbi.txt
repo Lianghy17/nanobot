@@ -23,8 +23,5 @@ loguru>=0.7.0
 # 工具包
 python-multipart>=0.0.6
 
-# Python沙箱（可选）
-# opensandbox>=0.1.0
-
 # nanobot依赖
 # 注意：需要确保nanobot核心已安装

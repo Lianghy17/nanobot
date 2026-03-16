@@ -8,11 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class PythonTool(BaseTool):
-    """Python代码执行工具（沙箱环境）"""
-    
+    """Python代码执行工具（会话级本地沙箱）"""
+
     name = "execute_python"
-    description = "在安全沙箱中执行Python代码"
-    
+    description = "在会话专属的本地沙箱中执行Python代码"
+
     parameters = {
         "type": "object",
         "properties": {
@@ -28,49 +28,54 @@ class PythonTool(BaseTool):
         },
         "required": ["code"]
     }
-    
+
+    def __init__(self):
+        super().__init__()
+        self.conversation_id = None
+        self.sandbox_manager = None
+
+    def set_context(self, user_channel: str):
+        """设置上下文"""
+        self.user_channel = user_channel
+        # 延迟导入避免循环依赖
+        from ...core.sandbox_manager import SandboxManager
+        self.sandbox_manager = SandboxManager()
+
+    def set_conversation_id(self, conversation_id: str):
+        """设置当前会话ID"""
+        self.conversation_id = conversation_id
+
     async def execute(self, code: str, timeout: int = 60) -> Dict[str, Any]:
-        """执行Python代码"""
+        """在会话专属的本地沙箱中执行Python代码"""
+        if not self.conversation_id:
+            return tool_result("错误: 未设置会话ID，无法获取沙箱", success=False)
+
+        logger.info(f"[本地沙箱执行] conversation_id={self.conversation_id}, timeout={timeout}s, code_length={len(code)}")
+
+        # 获取会话专属沙箱
+        session = await self.sandbox_manager.get_sandbox(self.conversation_id)
+
+        if not session:
+            logger.error(f"无法获取沙箱: {self.conversation_id}")
+            return tool_result("错误: 无法创建沙箱", success=False)
+
         try:
-            logger.info(f"Python执行: timeout={timeout}s, code_length={len(code)}")
-            
-            # 注意: 需要安装opensandbox库
-            # pip install opensandbox
-            
-            # 临时方案：使用subprocess执行（非沙箱，仅用于演示）
-            import subprocess
-            import tempfile
-            
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-                f.write(code)
-                temp_file = f.name
-            
-            try:
-                import sys
-                result = subprocess.run(
-                    [sys.executable, temp_file],
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout
-                )
-                
-                if result.returncode == 0:
-                    logger.info("Python执行成功")
-                    return tool_result({
-                        "success": True,
-                        "output": result.stdout,
-                        "error": result.stderr if result.stderr else None
-                    })
-                else:
-                    logger.error(f"Python执行失败: {result.stderr}")
-                    return tool_result(f"Python执行失败: {result.stderr}", success=False)
-            
-            finally:
-                Path(temp_file).unlink(missing_ok=True)
-            
-        except subprocess.TimeoutExpired:
-            logger.error(f"Python执行超时: {timeout}s")
-            return tool_result(f"Python执行超时（{timeout}秒）", success=False)
+            # 在沙箱中执行代码
+            result = await session.execute_code(code, timeout)
+
+            if result["success"]:
+                logger.info(f"[本地沙箱执行] 执行成功: {self.conversation_id}")
+                return tool_result({
+                    "success": True,
+                    "output": result["output"],
+                    "error": result["error"],
+                    "sandbox_type": "local_process",
+                    "sandbox_id": session.sandbox.sandbox_id
+                })
+            else:
+                logger.error(f"[本地沙箱执行] 执行失败: {self.conversation_id}, error={result['error']}")
+                return tool_result(f"执行失败: {result['error']}", success=False)
+
         except Exception as e:
-            logger.error(f"Python执行失败: {e}")
-            return tool_result(f"Python执行失败: {str(e)}", success=False)
+            logger.error(f"[本地沙箱执行] 执行异常: {self.conversation_id}, error={e}")
+            return tool_result(f"执行异常: {str(e)}", success=False)

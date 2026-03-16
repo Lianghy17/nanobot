@@ -21,6 +21,7 @@ from chatbi.config import settings
 from chatbi.api import conversations_router, messages_router, scenes_router, files_router
 from chatbi.core.loop_queue import LoopQueue
 from chatbi.core.message_processor import MessageProcessor
+from chatbi.core.sandbox_manager import SandboxManager
 
 
 # 配置日志
@@ -127,6 +128,11 @@ async def startup_event():
     loop_queue.set_processor(message_processor)
     await loop_queue.start(num_workers=settings.loop_workers)
 
+    # 启动沙箱管理器
+    sandbox_manager = SandboxManager()
+    await sandbox_manager.start()
+    logging.info("沙箱管理器已启动")
+
     logging.info(f"{settings.app_name} 启动完成")
 
 
@@ -135,10 +141,15 @@ async def startup_event():
 async def shutdown_event():
     """应用关闭时的清理"""
     logging.info(f"{settings.app_name} 正在关闭...")
-    
+
     # 停止Loop队列
     loop_queue = LoopQueue.get_instance()
     await loop_queue.stop()
+
+    # 停止沙箱管理器
+    sandbox_manager = SandboxManager()
+    await sandbox_manager.stop()
+    logging.info("沙箱管理器已停止")
 
     logging.info(f"{settings.app_name} 已关闭")
 
@@ -148,12 +159,31 @@ async def shutdown_event():
 async def health_check():
     """健康检查端点"""
     loop_queue = LoopQueue.get_instance()
+    sandbox_manager = SandboxManager()
+    sandbox_stats = sandbox_manager.get_stats()
+
     return {
         "status": "healthy",
         "app": settings.app_name,
         "version": settings.app_version,
-        "queue_size": loop_queue.size()
+        "queue_size": loop_queue.size(),
+        "sandboxes": sandbox_stats
     }
+
+
+# 沙箱管理端点
+@app.get("/api/sandboxes/stats")
+async def sandbox_stats():
+    """沙箱统计信息"""
+    sandbox_manager = SandboxManager()
+    return sandbox_manager.get_stats()
+
+
+@app.get("/api/sandboxes/list")
+async def sandbox_list():
+    """列出所有活跃沙箱"""
+    sandbox_manager = SandboxManager()
+    return sandbox_manager.list_sandboxes()
 
 
 # 首页
@@ -191,13 +221,6 @@ if __name__ == "__main__":
 
     # 在运行前配置日志
     setup_logger()
-
-    # 强制将根 logger 的 handlers 应用到所有 logger（确保终端输出）
-    root_logger = logging.getLogger()
-    for name in list(logging.root.manager.loggerDict.keys()):
-        logger_obj = logging.getLogger(name)
-        if not logger_obj.handlers and not name.startswith(('uvicorn', 'fastapi', 'openai', 'httpcore', 'httpx')):
-            logger_obj.handlers = root_logger.handlers[:]
 
     uvicorn.run(
         app,

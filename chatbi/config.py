@@ -111,6 +111,21 @@ class ChatBIConfig:
         return int(os.getenv("LLM_TIMEOUT", str(self._config.get("llm", {}).get("timeout", 60))))
 
     @property
+    def sandbox_api_key(self) -> str:
+        """沙箱API密钥"""
+        return os.getenv("SANDBOX_API_KEY", self._config.get("sandbox", {}).get("api_key", ""))
+
+    @property
+    def sandbox_domain(self) -> str:
+        """沙箱API域名"""
+        return os.getenv("SANDBOX_DOMAIN", self._config.get("sandbox", {}).get("domain", "https://api.opensandbox.io"))
+
+    @property
+    def sandbox_image(self) -> str:
+        """沙箱镜像"""
+        return os.getenv("SANDBOX_IMAGE", self._config.get("sandbox", {}).get("image", "python:3.11"))
+
+    @property
     def agent_max_iterations(self) -> int:
         """Agent最大迭代次数"""
         return self._config.get("agent", {}).get("max_iterations", 10)
