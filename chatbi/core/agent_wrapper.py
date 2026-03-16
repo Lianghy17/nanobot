@@ -1,4 +1,5 @@
 """Agent包装器 - 封装nanobot的Agent核心"""
+import os
 import json
 import logging
 import re
@@ -14,9 +15,19 @@ logger = logging.getLogger(__name__)
 
 
 class AgentWrapper:
-    """Agent包装器 - 使用Agent Loop模式"""
+    """Agent包装器 - 使用Agent Loop模式（单例模式）"""
+
+    _instance: Optional["AgentWrapper"] = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
     def __init__(self):
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
         self._tools = {}
         self._initialized = False
         self.conversation_manager = ConversationManager()
@@ -305,12 +316,19 @@ class AgentWrapper:
         Returns:
             处理结果字典
         """
-        logger.info("=" * 80)
-        logger.info("[Agent 处理开始]")
-        logger.info(f"会话ID: {conversation.conversation_id}")
-        logger.info(f"场景: {conversation.scene_name} ({conversation.scene_code})")
-        logger.info(f"用户消息: {message.content}")
-        logger.info("=" * 80)
+        # 测试终端输出
+        pid = os.getpid()
+        print(f"\n{'='*80}")
+        print(f"[PID:{pid}] [终端输出] Agent处理开始: {conversation.conversation_id}")
+        print(f"[PID:{pid}] 用户消息: {message.content}")
+        print(f"{'='*80}\n")
+
+        logger.info(f"[PID:{pid}] " + "=" * 80)
+        logger.info(f"[PID:{pid}] [Agent 处理开始]")
+        logger.info(f"[PID:{pid}] 会话ID: {conversation.conversation_id}")
+        logger.info(f"[PID:{pid}] 场景: {conversation.scene_name} ({conversation.scene_code})")
+        logger.info(f"[PID:{pid}] 用户消息: {message.content}")
+        logger.info(f"[PID:{pid}] " + "=" * 80)
 
         # 设置工具上下文
         self._set_tool_context(conversation.user_channel)

@@ -111,7 +111,7 @@ async def get_conversation(
     user_id: str = "web_default_user",
     conv_manager: ConversationManager = Depends(get_conversation_manager)
 ):
-    """获取对话详情"""
+    """获取对话详情（包含消息列表）"""
     try:
         user_channel = f"web_{user_id}"
         conversation = conv_manager.get(conversation_id, user_channel)
@@ -141,6 +141,41 @@ async def get_conversation(
     except Exception as e:
         logger.error(f"获取对话详情失败: {e}")
         raise HTTPException(status_code=500, detail="获取对话详情失败")
+
+
+@router.get("/{conversation_id}/messages")
+async def get_conversation_messages(
+    conversation_id: str,
+    user_id: str = "web_default_user",
+    conv_manager: ConversationManager = Depends(get_conversation_manager)
+):
+    """获取对话的消息列表（兼容前端调用）"""
+    try:
+        user_channel = f"web_{user_id}"
+        conversation = conv_manager.get(conversation_id, user_channel)
+        
+        if not conversation:
+            raise HTTPException(status_code=404, detail="对话不存在")
+        
+        return {
+            "conversation_id": conversation_id,
+            "messages": [
+                {
+                    "role": msg.role,
+                    "content": msg.content,
+                    "timestamp": msg.timestamp.isoformat(),
+                    "tools_used": msg.tools_used,
+                    "metadata": msg.metadata
+                }
+                for msg in conversation.messages
+            ]
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取对话消息列表失败: {e}")
+        raise HTTPException(status_code=500, detail="获取对话消息列表失败")
 
 
 @router.delete("/{conversation_id}")

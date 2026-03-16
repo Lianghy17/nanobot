@@ -42,10 +42,9 @@ def setup_logger():
     logging.getLogger("uvicorn.access").setLevel(logging.INFO)
     logging.getLogger("fastapi").setLevel(logging.INFO)
 
-    # 创建控制台输出handler（强制输出到 stdout）
-    console_handler = logging.StreamHandler(sys.stdout)
+    # 创建控制台输出handler（使用 stderr 避免 uvicorn 干扰）
+    console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setLevel(logging.INFO)
-    console_handler.setStream(sys.stdout)  # 确保使用 stdout
     console_format = logging.Formatter(
         '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
@@ -67,13 +66,16 @@ def setup_logger():
     root_logger.addHandler(file_handler)
 
     # 测试终端输出
+    import os
+    pid = os.getpid()
     print(f"\n{'='*80}")
+    print(f"[终端输出测试] 进程ID: {pid}")
     print(f"[终端输出测试] 日志系统已配置，级别: INFO")
     print(f"[终端输出测试] 日志目录: {logs_dir}")
     print(f"{'='*80}\n")
 
-    logging.info(f"日志系统已配置，级别: INFO")
-    logging.info(f"日志目录: {logs_dir}")
+    logging.info(f"[PID:{pid}] 日志系统已配置，级别: INFO")
+    logging.info(f"[PID:{pid}] 日志目录: {logs_dir}")
 
 
 # 创建FastAPI应用
@@ -192,9 +194,9 @@ if __name__ == "__main__":
 
     # 强制将根 logger 的 handlers 应用到所有 logger（确保终端输出）
     root_logger = logging.getLogger()
-    for name in logging.root.manager.loggerDict.keys():
+    for name in list(logging.root.manager.loggerDict.keys()):
         logger_obj = logging.getLogger(name)
-        if not logger_obj.handlers and not name.startswith(('uvicorn', 'fastapi')):
+        if not logger_obj.handlers and not name.startswith(('uvicorn', 'fastapi', 'openai', 'httpcore', 'httpx')):
             logger_obj.handlers = root_logger.handlers[:]
 
     uvicorn.run(

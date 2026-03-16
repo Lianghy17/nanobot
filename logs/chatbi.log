@@ -1071,3 +1071,766 @@ rag_search, ex...
 2026-03-16 18:58:24 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
 2026-03-16 18:58:24 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
 2026-03-16 18:58:24 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:37 | INFO     | root:setup_logger:77 - [PID:95993] 日志系统已配置，级别: INFO
+2026-03-16 19:05:37 | INFO     | root:setup_logger:78 - [PID:95993] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:05:37 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:05:37 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:37 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:37 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:37 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:37 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:37 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:37 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:37 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:37 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:37 | INFO     | root:shutdown_event:137 - ChatBI 正在关闭...
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:37 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:37 | INFO     | root:shutdown_event:143 - ChatBI 已关闭
+2026-03-16 19:05:47 | INFO     | root:setup_logger:77 - [PID:95997] 日志系统已配置，级别: INFO
+2026-03-16 19:05:47 | INFO     | root:setup_logger:78 - [PID:95997] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:05:47 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:05:47 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:47 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:47 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:47 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:05:47 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:47 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:47 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:47 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:05:47 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:05:47 | INFO     | root:shutdown_event:137 - ChatBI 正在关闭...
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:47 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:05:47 | INFO     | root:shutdown_event:143 - ChatBI 已关闭
+2026-03-16 19:06:04 | INFO     | root:setup_logger:77 - [PID:96028] 日志系统已配置，级别: INFO
+2026-03-16 19:06:04 | INFO     | root:setup_logger:78 - [PID:96028] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:06:04 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:06:04 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:06:04 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:06:04 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:06:04 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:06:04 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:06:04 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:06:04 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:06:04 | INFO     | chatbi.core.agent_wrapper:_register_tools:51 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:06:04 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:06:04 | INFO     | root:shutdown_event:137 - ChatBI 正在关闭...
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:06:04 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:06:04 | INFO     | root:shutdown_event:143 - ChatBI 已关闭
+2026-03-16 19:08:18 | INFO     | root:setup_logger:77 - [PID:96167] 日志系统已配置，级别: INFO
+2026-03-16 19:08:18 | INFO     | root:setup_logger:78 - [PID:96167] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:08:18 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:08:18 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:18 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:18 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:18 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:18 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:18 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:18 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:18 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:18 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:18 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:32 | INFO     | root:setup_logger:77 - [PID:96187] 日志系统已配置，级别: INFO
+2026-03-16 19:08:32 | INFO     | root:setup_logger:78 - [PID:96187] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:08:32 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:08:32 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:32 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:32 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:32 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:32 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:32 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:32 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:32 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:32 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:32 | INFO     | root:shutdown_event:137 - ChatBI 正在关闭...
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:08:32 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:08:32 | INFO     | root:shutdown_event:143 - ChatBI 已关闭
+2026-03-16 19:08:59 | INFO     | root:setup_logger:77 - [PID:96214] 日志系统已配置，级别: INFO
+2026-03-16 19:08:59 | INFO     | root:setup_logger:78 - [PID:96214] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:08:59 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:08:59 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:59 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:59 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:59 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:08:59 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:59 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:59 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:59 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:08:59 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:08:59 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:09:07 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659347_b29ba483, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:09:07 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659347_b29ba483, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:09:07 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659347_b29ba483, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:09:07 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659347_b29ba483, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:09:07 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659347_b29ba483
+2026-03-16 19:09:07 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659347_b29ba483
+2026-03-16 19:09:07 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659347_b29ba483
+2026-03-16 19:09:07 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:12 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:12 | INFO     | chatbi.core.message_processor:process:36 - [PID:96214] 处理消息: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.message_processor:process:36 - [PID:96214] 处理消息: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.message_processor:process:36 - [PID:96214] 处理消息: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.message_processor:process:36 - [PID:96214] 处理消息: msg_eeb38934c0394140b63848000647c922, conv_id=conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96214] [Agent 处理开始]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96214] [Agent 处理开始]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96214] [Agent 处理开始]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96214] [Agent 处理开始]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96214] 会话ID: conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96214] 会话ID: conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96214] 会话ID: conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96214] 会话ID: conv_1773659347_b29ba483
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96214] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96214] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96214] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96214] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96214] 用户消息: 1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96214] 用户消息: 1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96214] 用户消息: 1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96214] 用户消息: 1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96214] ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=1+5
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 1+5...
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 1+5...
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 1+5...
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 1+5...
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:09:12 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:09:13 | INFO     | httpx:_send_single_request:1740 - HTTP Request: POST https://api.moonshot.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e4d94d727e35540bc3e3
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e4d94d727e35540bc3e3
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e4d94d727e35540bc3e3
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e4d94d727e35540bc3e3
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=407, completion=10, total=417
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=407, completion=10, total=417
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=407, completion=10, total=417
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=407, completion=10, total=417
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 1
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 1
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 1
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 1
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: []
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 11 字符
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 1 + 5 等于 6。
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:09:13 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:13 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:13 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:09:13 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_eeb38934c0394140b63848000647c922
+2026-03-16 19:11:24 | INFO     | root:shutdown_event:137 - ChatBI 正在关闭...
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:97 - worker-0 被取消
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:_worker:102 - worker-0 停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:11:24 | INFO     | chatbi.core.loop_queue:stop:65 - Loop队列已停止
+2026-03-16 19:11:24 | INFO     | root:shutdown_event:143 - ChatBI 已关闭
+2026-03-16 19:11:53 | INFO     | root:setup_logger:77 - [PID:96295] 日志系统已配置，级别: INFO
+2026-03-16 19:11:53 | INFO     | root:setup_logger:78 - [PID:96295] 日志目录: /Users/lianghaoyun/project/nanobot/logs
+2026-03-16 19:11:53 | INFO     | root:startup_event:122 - ChatBI v1.0.0 启动中...
+2026-03-16 19:11:53 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:11:53 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:11:53 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:11:53 | INFO     | chatbi.core.llm_client:__init__:49 - LLM客户端初始化: api_base=https://api.moonshot.cn/v1, model=moonshot-v1-8k
+2026-03-16 19:11:53 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:11:53 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:11:53 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:11:53 | INFO     | chatbi.core.agent_wrapper:_register_tools:61 - 注册工具: ['rag_search', 'execute_sql', 'execute_python', 'read_file', 'write_file']
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:start:52 - Loop队列已启动，1个worker
+2026-03-16 19:11:53 | INFO     | root:startup_event:130 - ChatBI 启动完成
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:11:53 | INFO     | chatbi.core.loop_queue:_worker:74 - worker-0 启动
+2026-03-16 19:11:59 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659519_4aa807b1, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:11:59 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659519_4aa807b1, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:11:59 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659519_4aa807b1, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:11:59 | INFO     | chatbi.core.conversation_manager:create:40 - 创建对话: conv_1773659519_4aa807b1, user=web_web_default_user, scene=sales_analysis
+2026-03-16 19:11:59 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659519_4aa807b1
+2026-03-16 19:11:59 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659519_4aa807b1
+2026-03-16 19:11:59 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659519_4aa807b1
+2026-03-16 19:11:59 | INFO     | chatbi.api.conversations:create_conversation:65 - 创建对话: conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:enqueue:70 - 消息入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.api.messages:send_message:68 - 消息已入队: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:03 | INFO     | chatbi.core.loop_queue:_worker:81 - worker-0 处理消息: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:03 | INFO     | chatbi.core.message_processor:process:36 - [PID:96295] 处理消息: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.message_processor:process:36 - [PID:96295] 处理消息: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.message_processor:process:36 - [PID:96295] 处理消息: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.message_processor:process:36 - [PID:96295] 处理消息: msg_c56f92a1259e49a5b8389a348572877a, conv_id=conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:326 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96295] [Agent 处理开始]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96295] [Agent 处理开始]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96295] [Agent 处理开始]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:327 - [PID:96295] [Agent 处理开始]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96295] 会话ID: conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96295] 会话ID: conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96295] 会话ID: conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:328 - [PID:96295] 会话ID: conv_1773659519_4aa807b1
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96295] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96295] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96295] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:329 - [PID:96295] 场景: 销售数据分析 (sales_analysis)
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96295] 用户消息: 21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96295] 用户消息: 21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96295] 用户消息: 21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:330 - [PID:96295] 用户消息: 21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:process:331 - [PID:96295] ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:217 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:218 - [Agent Loop 开始] 场景=销售数据分析, 用户消息=21345+1234/2134
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:219 - [Agent Loop 开始] 最大迭代=10
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:220 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 1/10]
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 3
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 21345+1234/2134...
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 21345+1234/2134...
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 21345+1234/2134...
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: 21345+1234/2134...
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:03 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:05 | INFO     | httpx:_send_single_request:1740 - HTTP Request: POST https://api.moonshot.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e584af5d623cc615ed5b
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e584af5d623cc615ed5b
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e584af5d623cc615ed5b
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e584af5d623cc615ed5b
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: tool_calls
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: tool_calls
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: tool_calls
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: tool_calls
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=419, completion=49, total=468
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=419, completion=49, total=468
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=419, completion=49, total=468
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=419, completion=49, total=468
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:178 - 响应内容: (空)
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:178 - 响应内容: (空)
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:178 - 响应内容: (空)
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:178 - 响应内容: (空)
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:186 - 工具调用数: 1
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:186 - 工具调用数: 1
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:186 - 工具调用数: 1
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:186 - 工具调用数: 1
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:188 -   [1] 工具: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:188 -   [1] 工具: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:188 -   [1] 工具: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:188 -   [1] 工具: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:189 -       ID: execute_python:0
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:189 -       ID: execute_python:0
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:189 -       ID: execute_python:0
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:189 -       ID: execute_python:0
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:190 -       参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:190 -       参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:190 -       参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:190 -       参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:248 - [Agent Loop] 检测到 1 个工具调用，开始执行
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:248 - [Agent Loop] 检测到 1 个工具调用，开始执行
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:248 - [Agent Loop] 检测到 1 个工具调用，开始执行
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:248 - [Agent Loop] 检测到 1 个工具调用，开始执行
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:138 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:138 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:138 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:138 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:139 - [工具执行] 开始执行: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:139 - [工具执行] 开始执行: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:139 - [工具执行] 开始执行: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:139 - [工具执行] 开始执行: execute_python
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:140 - [工具执行] 参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:140 - [工具执行] 参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:140 - [工具执行] 参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:140 - [工具执行] 参数: {"code": "# 计算表达式\nresult = 21345 + 1234 / 2134\nresult", "timeout": 100}
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:35 - Python执行: timeout=100s, code_length=43
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:35 - Python执行: timeout=100s, code_length=43
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:35 - Python执行: timeout=100s, code_length=43
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:35 - Python执行: timeout=100s, code_length=43
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:35 - Python执行: timeout=100s, code_length=43
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:58 - Python执行成功
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:58 - Python执行成功
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:58 - Python执行成功
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:58 - Python执行成功
+2026-03-16 19:12:05 | INFO     | chatbi.agent.tools.python_tool:execute:58 - Python执行成功
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:147 - [工具执行] 成功: {"success": true, "output": "", "error": null}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:147 - [工具执行] 成功: {"success": true, "output": "", "error": null}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:147 - [工具执行] 成功: {"success": true, "output": "", "error": null}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:147 - [工具执行] 成功: {"success": true, "output": "", "error": null}
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:148 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:148 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:148 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_execute_tool:148 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:291 - [Agent Loop] 工具执行完成，已使用工具: ['execute_python']
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:291 - [Agent Loop] 工具执行完成，已使用工具: ['execute_python']
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:291 - [Agent Loop] 工具执行完成，已使用工具: ['execute_python']
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:291 - [Agent Loop] 工具执行完成，已使用工具: ['execute_python']
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:292 - [Agent Loop] 准备进入下一轮迭代
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:292 - [Agent Loop] 准备进入下一轮迭代
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:292 - [Agent Loop] 准备进入下一轮迭代
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:292 - [Agent Loop] 准备进入下一轮迭代
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:227 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 2/10]
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 2/10]
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 2/10]
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:228 - [Agent Loop 迭代 2/10]
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:229 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:234 - [Agent Loop] 当前上下文消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:86 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:87 - [LLM 请求]
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:88 - 模型: moonshot-v1-8k
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:89 - 消息数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:90 - 工具数: 5
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:91 - 温度: 0.7
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:92 - 最大Token: 4096
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: {"success": true, "output": "", "error": null}...
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: {"success": true, "output": "", "error": null}...
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: {"success": true, "output": "", "error": null}...
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:93 - 最后一条消息: {"success": true, "output": "", "error": null}...
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:05 | INFO     | chatbi.core.llm_client:chat:99 - ================================================================================
+2026-03-16 19:12:07 | INFO     | httpx:_send_single_request:1740 - HTTP Request: POST https://api.moonshot.cn/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:162 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:163 - [LLM 响应]
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e586af5d623cc615ed6c
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e586af5d623cc615ed6c
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e586af5d623cc615ed6c
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:164 - 响应ID: chatcmpl-69b7e586af5d623cc615ed6c
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:165 - 模型: moonshot-v1-8k
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:166 - 完成原因: stop
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=519, completion=12, total=531
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=519, completion=12, total=531
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=519, completion=12, total=531
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:170 - Token使用: prompt=519, completion=12, total=531
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:176 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:192 - 工具调用: (无)
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.llm_client:_parse_response:194 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:296 - [Agent Loop] 没有工具调用，结束循环
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:300 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 2
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 2
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 2
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:301 - [Agent Loop 结束] 总迭代次数: 2
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:302 - [Agent Loop 结束] 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:303 - [Agent Loop 结束] 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:_run_agent_loop:304 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:343 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:344 - [Agent 处理完成]
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:345 - 使用工具: ['execute_python']
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:346 - 响应长度: 15 字符
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:347 - 响应内容: 计算结果为：21345.58。
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.agent_wrapper:process:348 - ================================================================================
+2026-03-16 19:12:07 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:07 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:07 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_c56f92a1259e49a5b8389a348572877a
+2026-03-16 19:12:07 | INFO     | chatbi.core.message_processor:process:76 - 消息处理完成: msg_c56f92a1259e49a5b8389a348572877a

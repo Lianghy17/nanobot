@@ -1,5 +1,6 @@
 """消息处理器"""
-from typing import Dict, Any
+import os
+from typing import Dict, Any, Optional
 import logging
 from ..models import Message
 from .agent_wrapper import AgentWrapper
@@ -9,18 +10,30 @@ logger = logging.getLogger(__name__)
 
 
 class MessageProcessor:
-    """消息处理器 - 处理用户消息并调用Agent"""
-    
+    """消息处理器 - 处理用户消息并调用Agent（单例模式）"""
+
+    _instance: Optional["MessageProcessor"] = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
     def __init__(self):
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
+
         self.agent_wrapper = AgentWrapper()
         self.conversation_manager = ConversationManager()
     
     async def process(self, message: Message):
         """处理消息"""
+        pid = os.getpid()
         print(f"\n{'='*80}")
-        print(f"[终端输出] 处理消息: {message.id}, conv_id={message.conversation_id}")
+        print(f"[PID:{pid}] [终端输出] 处理消息: {message.id}, conv_id={message.conversation_id}")
         print(f"{'='*80}\n")
-        logger.info(f"处理消息: {message.id}, conv_id={message.conversation_id}")
+        logger.info(f"[PID:{pid}] 处理消息: {message.id}, conv_id={message.conversation_id}")
         
         # 保存用户消息
         self.conversation_manager.add_message(
