@@ -1,0 +1,37 @@
+{
+  "llm": {
+    "api_base": "https://api.moonshot.cn/v1",
+    "api_key": "sk-HSOmrqHUbXiysyRHD5TkkAJKTy6UbNQieW42A2IE4aYIG7ht",
+    "model": "moonshot-v1-8k",
+    "temperature": 0.7,
+    "max_tokens": 4096,
+    "timeout": 60
+  },
+  "agent": {
+    "max_iterations": 10,
+    "max_history_messages": 20,
+    "system_prompt_template": "你是一个专业的数据分析助手。当前场景是{scene_name}（{scene_code}）。\n\n你可以使用以下所有工具来完成数据分析任务：\n{tool_names}\n\n请根据用户的问题，灵活选择和使用合适的工具进行数据查询、分析和可视化。不需要局限于当前场景，可以根据实际需求使用任何工具。"
+  },
+  "tools": {
+    "rag_search": {
+      "enabled": true,
+      "description": "搜索知识库获取相关信息"
+    },
+    "execute_sql": {
+      "enabled": true,
+      "description": "执行SQL查询数据库"
+    },
+    "execute_python": {
+      "enabled": true,
+      "description": "执行Python代码进行数据分析"
+    },
+    "read_file": {
+      "enabled": true,
+      "description": "读取文件内容"
+    },
+    "write_file": {
+      "enabled": true,
+      "description": "写入文件内容"
+    }
+  }
+}
