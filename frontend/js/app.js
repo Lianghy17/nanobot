@@ -177,22 +177,120 @@ async function loadConversation(conversationId) {
 // 渲染消息
 function renderMessages(messages) {
     const messageList = document.getElementById('messageList');
-    
+
     if (messages.length === 0) {
         messageList.innerHTML = '<div class="loading"><p>暂无消息，开始提问吧！</p></div>';
         return;
     }
-    
+
     messageList.innerHTML = messages.map(msg => {
         const time = new Date(msg.timestamp).toLocaleString('zh-CN');
-        
-        return `
-            <div class="message ${msg.role}">
-                <div class="bubble">${escapeHtml(msg.content)}</div>
-                <div class="time">${time}</div>
-            </div>
-        `;
+        const content = msg.content || '';
+
+        // 对于assistant的消息，渲染markdown
+        if (msg.role === 'assistant') {
+            const markdownHtml = marked.parse(content);
+            const filesHtml = renderFiles(msg.metadata?.files || []);
+
+            return `
+                <div class="message ${msg.role}">
+                    <div class="bubble">
+                        <div class="markdown-content">${markdownHtml}</div>
+                        ${filesHtml}
+                    </div>
+                    <div class="time">${time}</div>
+                </div>
+            `;
+        } else {
+            // user消息不渲染markdown
+            return `
+                <div class="message ${msg.role}">
+                    <div class="bubble">${escapeHtml(content)}</div>
+                    <div class="time">${time}</div>
+                </div>
+            `;
+        }
     }).join('');
+}
+
+// 渲染文件列表
+function renderFiles(files) {
+    if (!files || files.length === 0) {
+        return '';
+    }
+
+    const filesHtml = files.map(file => {
+        const isImage = ['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(file.type);
+        const filename = file.filename || file.name;
+        const downloadUrl = file.path ? `/api/files/download/web_default_user/${currentConversation.conversation_id}/${file.path}` :
+                                    file.download_url || '#';
+
+        if (isImage) {
+            return `
+                <div class="image-container">
+                    <img src="${downloadUrl}" alt="${filename}" onclick="openImage('${downloadUrl}')">
+                    <div class="image-caption">${filename} (${formatFileSize(file.size)})</div>
+                </div>
+            `;
+        } else {
+            const icon = getFileIcon(file.type);
+            return `
+                <div class="file-card" onclick="downloadFile('${downloadUrl}', '${filename}')">
+                    <span class="file-icon">${icon}</span>
+                    <span>${filename}</span>
+                    <span style="margin-left:8px;color:#95a5a6;">(${formatFileSize(file.size)})</span>
+                </div>
+            `;
+        }
+    }).join('');
+
+    return `
+        <div class="files-section">
+            <div class="files-section-title">📎 生成的文件 (${files.length})</div>
+            ${filesHtml}
+        </div>
+    `;
+}
+
+// 获取文件图标
+function getFileIcon(type) {
+    const icons = {
+        'csv': '📊',
+        'xlsx': '📊',
+        'xls': '📊',
+        'json': '📋',
+        'txt': '📄',
+        'md': '📝',
+        'png': '🖼️',
+        'jpg': '🖼️',
+        'jpeg': '🖼️',
+        'gif': '🖼️',
+        'svg': '🖼️'
+    };
+    return icons[type] || '📎';
+}
+
+// 格式化文件大小
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+    if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+}
+
+// 打开图片（新标签页）
+function openImage(url) {
+    window.open(url, '_blank');
+}
+
+// 下载文件
+function downloadFile(url, filename) {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename || 'download';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 // 发送消息
@@ -327,6 +425,9 @@ function startPolling(thinkingMessageId) {
                 // 重新加载对话以显示完整内容
                 await loadConversation(currentConversation.conversation_id);
 
+                // 加载文件列表
+                await loadFiles();
+
                 document.getElementById('sendBtn').disabled = false;
             }
 
@@ -345,24 +446,44 @@ function stopPolling() {
 }
 
 // 添加消息到列表
-function appendMessage(role, content) {
+function appendMessage(role, content, files = []) {
     const messageList = document.getElementById('messageList');
-    
+
     // 移除loading提示
     const loading = messageList.querySelector('.loading');
     if (loading) {
         loading.remove();
     }
-    
+
     const time = new Date().toLocaleString('zh-CN');
-    
+
+    // 对于assistant的消息，渲染markdown
+    let contentHtml;
+    if (role === 'assistant') {
+        contentHtml = marked.parse(content);
+        const filesHtml = renderFiles(files);
+
+        return `
+            <div class="message ${role}">
+                <div class="bubble">
+                    <div class="markdown-content">${contentHtml}</div>
+                    ${filesHtml}
+                </div>
+                <div class="time">${time}</div>
+            </div>
+        `;
+    } else {
+        // user消息不渲染markdown
+        contentHtml = escapeHtml(content);
+    }
+
     const messageHtml = `
         <div class="message ${role}">
-            <div class="bubble">${escapeHtml(content)}</div>
+            <div class="bubble">${contentHtml}</div>
             <div class="time">${time}</div>
         </div>
     `;
-    
+
     messageList.insertAdjacentHTML('beforeend', messageHtml);
     scrollToBottom();
 }
@@ -395,34 +516,64 @@ function setupInputListener() {
 async function uploadFile() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
-    
+
     if (!file) {
         return;
     }
-    
+
+    if (!currentConversation) {
+        alert('请先创建对话');
+        return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
-    
+
     try {
-        const response = await fetch(`${API_BASE}/files/upload`, {
+        const response = await fetch(`${API_BASE}/conversations/${currentConversation.conversation_id}/upload`, {
             method: 'POST',
             body: formData
         });
-        
+
         if (!response.ok) {
             throw new Error('上传失败');
         }
-        
+
         const result = await response.json();
-        alert(`文件上传成功：${result.file_path}`);
-        
+        appendMessage('assistant', `✅ 文件上传成功：${result.filename} (${formatFileSize(result.size)})\n\n文件已准备好，可以开始分析了！`);
+
+        // 加载文件列表
+        await loadFiles();
+
     } catch (error) {
         console.error('上传文件失败:', error);
-        alert('上传文件失败');
+        alert('上传文件失败: ' + error.message);
     }
-    
+
     // 清空文件选择
     fileInput.value = '';
+}
+
+// 加载文件列表
+async function loadFiles() {
+    if (!currentConversation) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/files/list/web_default_user/${currentConversation.conversation_id}`);
+
+        if (!response.ok) {
+            return;
+        }
+
+        const data = await response.json();
+        // 文件列表会在renderMessages中自动渲染
+        console.log('当前沙箱中的文件:', data.files);
+
+    } catch (error) {
+        console.error('加载文件列表失败:', error);
+    }
 }
 
 // HTML转义

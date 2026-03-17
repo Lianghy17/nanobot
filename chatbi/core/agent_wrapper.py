@@ -4,12 +4,15 @@ import json
 import logging
 import re
 from typing import Dict, Any, Optional, List, Callable, Awaitable
+from datetime import datetime
 from ..config import chatbi_config
 from ..models import Conversation, Message
 from ..models.llm import LLMResponse, ToolCallRequest
 from .conversation_manager import ConversationManager
 from ..agent.tools import RAGTool, SQLTool, PythonTool, ReadFileTool, WriteFileTool
 from .llm_client import LLMClient
+from .memory import MemoryStore
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +49,10 @@ class AgentWrapper:
         self.max_iterations = chatbi_config.agent_max_iterations
         self.max_history_messages = chatbi_config.agent_max_history_messages
 
+        # 初始化Memory Store
+        workspace = Path(chatbi_config.workspace_path)
+        self.memory_store = MemoryStore(workspace)
+
         # 初始化工具
         self._register_tools()
 
@@ -62,6 +69,10 @@ class AgentWrapper:
 
     def _set_tool_context(self, user_channel: str, conversation_id: str = None):
         """设置所有工具的上下文"""
+        # 更新memory的memory_key
+        memory_key = f"{user_channel}:web" if conversation_id else None
+        self.memory_store = MemoryStore(Path(chatbi_config.workspace_path), memory_key=memory_key)
+
         for tool in self._tools.values():
             tool.set_context(user_channel)
             # 如果工具支持设置会话ID，则设置
@@ -89,6 +100,9 @@ class AgentWrapper:
         Returns:
             消息列表
         """
+        # 获取memory上下文
+        memory_context = self.memory_store.get_memory_context()
+
         # 构建系统提示
         tool_names = ", ".join(self._tools.keys())
         system_prompt = chatbi_config.agent_system_prompt_template.format(
@@ -98,6 +112,10 @@ class AgentWrapper:
             current_time=chatbi_config.current_time,
             runtime_environment=chatbi_config.runtime_environment
         )
+
+        # 将memory上下文添加到系统提示中
+        if memory_context:
+            system_prompt = f"{system_prompt}\n\n{memory_context}"
 
         messages = [
             {
@@ -322,16 +340,53 @@ class AgentWrapper:
                     import json
                     result = json.loads(content)
 
-                    # 检查是否有文件信息
-                    if isinstance(result, dict) and "result" in result:
-                        result_data = result["result"]
-                        if isinstance(result_data, dict) and "files" in result_data:
-                            files.extend(result_data["files"])
+                    # 检查是否有文件信息 - 支持多种格式
+                    if isinstance(result, dict):
+                        # 格式1: result.files
+                        if "files" in result:
+                            files.extend(result["files"])
+                        # 格式2: result.result.files
+                        elif "result" in result and isinstance(result["result"], dict):
+                            result_data = result["result"]
+                            if "files" in result_data:
+                                files.extend(result_data["files"])
 
-                except (json.JSONDecodeError, TypeError):
-                    pass
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.debug(f"解析工具结果失败: {e}")
 
         return files
+
+    def _update_memory(
+        self,
+        conversation: Conversation,
+        message: Message,
+        response_content: str,
+        tools_used: List[str]
+    ) -> None:
+        """
+        更新memory信息
+
+        Args:
+            conversation: 会话对象
+            message: 用户消息
+            response_content: 响应内容
+            tools_used: 使用的工具列表
+        """
+        try:
+            # 构建history条目
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            history_entry = f"""## {timestamp}
+User: {message.content}
+Assistant: {response_content[:200]}{'...' if len(response_content) > 200 else ''}
+Tools: {', '.join(tools_used) if tools_used else 'None'}
+Scene: {conversation.scene_name}
+"""
+            # 更新history
+            self.memory_store.append_history(history_entry, level="user")
+            logger.debug(f"[Memory] 更新history成功")
+
+        except Exception as e:
+            logger.error(f"[Memory] 更新memory失败: {e}", exc_info=True)
 
     async def process(self, conversation: Conversation, message: Message) -> Optional[Dict[str, Any]]:
         """
@@ -382,6 +437,10 @@ class AgentWrapper:
             logger.info(f"生成文件: {len(generated_files)} 个")
             logger.info(f"响应内容: {final_content[:200]}{'...' if len(final_content) > 200 else ''}")
             logger.info("=" * 80)
+
+            # 如果启用了memory功能，更新memory
+            if chatbi_config.memory_enabled:
+                self._update_memory(conversation, message, final_content, tools_used)
 
             return {
                 "content": final_content,

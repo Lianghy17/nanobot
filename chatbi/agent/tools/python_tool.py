@@ -78,19 +78,18 @@ class PythonTool(BaseTool):
             if result["success"]:
                 logger.info(f"[本地沙箱执行] 执行成功: {self.conversation_id}")
 
-                # 处理生成的文件
+                # 处理生成的文件 - 文件保存在沙箱中，不需要额外保存
                 files = result.get("files", [])
                 file_info = []
                 for file_data in files:
-                    # 保存文件到会话目录
-                    saved_path = await self._save_file_to_conversation(file_data)
-                    if saved_path:
-                        file_info.append({
-                            "filename": file_data["filename"],
-                            "type": file_data["type"],
-                            "size": file_data["size"],
-                            "path": saved_path
-                        })
+                    # 文件已经在沙箱中，只返回元数据
+                    file_info.append({
+                        "filename": file_data["filename"],
+                        "type": file_data["type"],
+                        "size": file_data["size"],
+                        "path": file_data["filename"],  # 相对于沙箱workspace的路径
+                        "in_sandbox": True
+                    })
 
                 response_data = {
                     "success": True,
@@ -109,29 +108,3 @@ class PythonTool(BaseTool):
         except Exception as e:
             logger.error(f"[本地沙箱执行] 执行异常: {self.conversation_id}, error={e}")
             return tool_result(f"执行异常: {str(e)}", success=False)
-
-    async def _save_file_to_conversation(self, file_data: dict) -> Optional[str]:
-        """保存文件到会话目录"""
-        try:
-            from pathlib import Path
-            from ..config import settings
-
-            # 构建保存路径
-            conversation_dir = Path(self.user_channel) / self.conversation_id
-            full_path = Path(settings.sessions_path) / conversation_dir
-            full_path.mkdir(parents=True, exist_ok=True)
-
-            file_path = full_path / file_data["filename"]
-
-            # 保存文件
-            with open(file_path, 'wb') as f:
-                f.write(file_data["content"])
-
-            # 返回相对路径用于API访问
-            relative_path = str(conversation_dir / file_data["filename"])
-            logger.info(f"保存文件: {file_data['filename']} -> {relative_path}")
-            return relative_path
-
-        except Exception as e:
-            logger.error(f"保存文件失败: {file_data['filename']}, error={e}")
-            return None

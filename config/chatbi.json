@@ -24,6 +24,10 @@
     "timeout_minutes": 20,
     "cleanup_interval": 60
   },
+  "memory": {
+    "enabled": true,
+    "level": "both"
+  },
   "tools": {
     "rag_search": {
       "enabled": true,

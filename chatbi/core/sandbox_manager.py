@@ -53,8 +53,161 @@ class LocalSandbox:
             raise RuntimeError("沙箱未初始化")
 
         file_path = os.path.join(self.temp_dir, 'workspace', filename)
+        # 确保父目录存在
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
+        logger.debug(f"沙箱写入文件: {filename}")
+
+    async def read_file(self, filename: str, limit: int = 100) -> tuple[bool, str, str]:
+        """
+        从沙箱读取文件
+
+        Args:
+            filename: 文件名（相对于workspace目录）
+            limit: 读取行数限制
+
+        Returns:
+            (success, content, error_message)
+        """
+        if not self.temp_dir:
+            return False, "", "沙箱未初始化"
+
+        file_path = os.path.join(self.temp_dir, 'workspace', filename)
+
+        if not os.path.exists(file_path):
+            return False, "", f"文件不存在: {filename}"
+
+        if not os.path.isfile(file_path):
+            return False, "", f"路径不是文件: {filename}"
+
+        try:
+            lines = []
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                for i, line in enumerate(f):
+                    if i >= limit:
+                        break
+                    lines.append(line.rstrip('\n'))
+
+            content = '\n'.join(lines)
+            logger.debug(f"沙箱读取文件成功: {filename} ({len(lines)} 行)")
+            return True, content, ""
+
+        except Exception as e:
+            logger.error(f"沙箱读取文件失败: {filename}, error={e}")
+            return False, "", f"读取文件失败: {str(e)}"
+
+    async def list_files(self) -> list:
+        """
+        列出沙箱中的所有文件
+
+        Returns:
+            文件列表，每个文件包含 filename, size, type
+        """
+        if not self.temp_dir:
+            return []
+
+        files = []
+        workspace_dir = os.path.join(self.temp_dir, 'workspace')
+
+        if not os.path.exists(workspace_dir):
+            return files
+
+        # 支持的文件扩展名
+        supported_extensions = {
+            '.csv': 'text/csv',
+            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            '.xls': 'application/vnd.ms-excel',
+            '.json': 'application/json',
+            '.txt': 'text/plain',
+            '.md': 'text/markdown',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+        }
+
+        for root, dirs, filenames in os.walk(workspace_dir):
+            for filename in filenames:
+                file_path = os.path.join(root, filename)
+                if os.path.isfile(file_path):
+                    ext = os.path.splitext(filename)[1].lower()
+
+                    if ext in supported_extensions:
+                        # 计算相对路径
+                        rel_path = os.path.relpath(file_path, workspace_dir)
+
+                        files.append({
+                            'filename': rel_path.replace('\\', '/'),  # 统一使用正斜杠
+                            'size': os.path.getsize(file_path),
+                            'type': ext.replace('.', ''),
+                            'full_path': file_path
+                        })
+
+        return files
+
+    async def upload_file(self, filename: str, content: bytes) -> tuple[bool, str, str]:
+        """
+        上传文件到沙箱
+
+        Args:
+            filename: 文件名
+            content: 文件内容（二进制）
+
+        Returns:
+            (success, relative_path, error_message)
+        """
+        if not self.temp_dir:
+            return False, "", "沙箱未初始化"
+
+        try:
+            file_path = os.path.join(self.temp_dir, 'workspace', filename)
+            # 确保父目录存在
+            os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+            with open(file_path, 'wb') as f:
+                f.write(content)
+
+            # 返回相对路径
+            rel_path = filename.replace('\\', '/')
+            logger.info(f"沙箱上传文件成功: {filename} ({len(content)} 字节)")
+            return True, rel_path, ""
+
+        except Exception as e:
+            logger.error(f"沙箱上传文件失败: {filename}, error={e}")
+            return False, "", f"上传文件失败: {str(e)}"
+
+    async def get_file(self, filename: str) -> tuple[bool, bytes, str]:
+        """
+        从沙箱获取文件内容（二进制）
+
+        Args:
+            filename: 文件名
+
+        Returns:
+            (success, content, error_message)
+        """
+        if not self.temp_dir:
+            return False, b"", "沙箱未初始化"
+
+        file_path = os.path.join(self.temp_dir, 'workspace', filename)
+
+        if not os.path.exists(file_path):
+            return False, b"", f"文件不存在: {filename}"
+
+        if not os.path.isfile(file_path):
+            return False, b"", f"路径不是文件: {filename}"
+
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+
+            logger.debug(f"沙箱获取文件成功: {filename} ({len(content)} 字节)")
+            return True, content, ""
+
+        except Exception as e:
+            logger.error(f"沙箱获取文件失败: {filename}, error={e}")
+            return False, b"", f"获取文件失败: {str(e)}"
 
     async def execute_code(self, code: str, timeout: int = 60) -> dict:
         """执行代码"""

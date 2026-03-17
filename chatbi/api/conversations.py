@@ -2,7 +2,7 @@
 import json
 import uuid
 import logging
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, File
 from typing import List
 from pathlib import Path
 from pydantic import BaseModel
@@ -12,6 +12,7 @@ from ..core.conversation_manager import ConversationManager
 logger = logging.getLogger(__name__)
 from ..core.loop_queue import LoopQueue
 from ..channels.web_channel import WebChannel
+from ..core.sandbox_manager import SandboxManager
 
 router = APIRouter()
 
@@ -209,20 +210,71 @@ def _load_scene_config(scene_code: str) -> dict:
         if not config_path.exists():
             # 使用相对路径
             config_path = Path(__file__).parent.parent.parent / "config" / "scenes.json"
-        
+
         if not config_path.exists():
             logger.warning(f"场景配置文件不存在: {config_path}")
             return None
-        
+
         with open(config_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-        
+
         for scene in data.get("scenes", []):
             if scene.get("scene_code") == scene_code:
                 return scene
-        
+
         return None
-    
+
     except Exception as e:
         logger.error(f"加载场景配置失败: {e}")
         return None
+
+
+@router.post("/{conversation_id}/upload")
+async def upload_file(
+    conversation_id: str,
+    file: UploadFile = File(...),
+    user_id: str = "web_default_user"
+):
+    """
+    上传文件到对话的沙箱中
+
+    注意：文件会直接上传到沙箱的workspace目录，供Python代码使用
+    """
+    try:
+        # 获取沙箱管理器
+        sandbox_manager = SandboxManager()
+        session = await sandbox_manager.get_sandbox(conversation_id)
+
+        if not session:
+            raise HTTPException(
+                status_code=404,
+                detail=f"对话不存在或沙箱已过期: {conversation_id}"
+            )
+
+        # 读取文件内容
+        content = await file.read()
+
+        # 上传文件到沙箱
+        success, file_path, error_msg = await session.sandbox.upload_file(file.filename, content)
+
+        if not success:
+            raise HTTPException(status_code=400, detail=error_msg or "上传文件失败")
+
+        logger.info(
+            f"上传文件到沙箱成功: user={user_id}, conv={conversation_id}, "
+            f"file={file.filename}, size={len(content)}"
+        )
+
+        return {
+            "success": True,
+            "filename": file.filename,
+            "file_path": file_path,
+            "size": len(content),
+            "message": "文件已上传到沙箱，可以在Python代码中直接使用"
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"上传文件失败: {conversation_id}, {file.filename}, error={e}")
+        raise HTTPException(status_code=500, detail=f"上传文件失败: {str(e)}")

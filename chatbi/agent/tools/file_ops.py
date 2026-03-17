@@ -8,17 +8,17 @@ logger = logging.getLogger(__name__)
 
 
 class ReadFileTool(BaseTool):
-    """文件读取工具"""
-    
+    """文件读取工具 - 在沙箱中读取文件"""
+
     name = "read_file"
-    description = "读取用户上传的文件内容"
-    
+    description = "读取沙箱中的文件内容"
+
     parameters = {
         "type": "object",
         "properties": {
             "file_path": {
                 "type": "string",
-                "description": "文件路径（相对于用户目录）"
+                "description": "文件路径（相对于沙箱workspace目录）"
             },
             "limit": {
                 "type": "integer",
@@ -28,57 +28,65 @@ class ReadFileTool(BaseTool):
         },
         "required": ["file_path"]
     }
-    
+
+    def __init__(self):
+        super().__init__()
+        self.conversation_id = None
+        self.sandbox_manager = None
+
+    def set_context(self, user_channel: str):
+        """设置上下文"""
+        self.user_channel = user_channel
+        from ...core.sandbox_manager import SandboxManager
+        self.sandbox_manager = SandboxManager()
+
+    def set_conversation_id(self, conversation_id: str):
+        """设置当前会话ID"""
+        self.conversation_id = conversation_id
+
     async def execute(self, file_path: str, limit: int = 100) -> Dict[str, Any]:
-        """读取文件"""
+        """从沙箱中读取文件"""
         try:
-            # 构建完整路径
-            user_dir = Path(f"/workspace/files/{self.user_channel}")
-            full_path = user_dir / file_path
-            
-            if not full_path.exists():
-                return tool_result(f"文件不存在: {file_path}", success=False)
-            
-            # 安全检查：确保在用户目录内
-            try:
-                full_path.resolve().relative_to(user_dir.resolve())
-            except ValueError:
-                return tool_result("拒绝访问：路径超出用户目录", success=False)
-            
-            # 读取文件
-            lines = []
-            with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
-                for i, line in enumerate(f):
-                    if i >= limit:
-                        break
-                    lines.append(line.rstrip('\n'))
-            
-            content = '\n'.join(lines)
-            logger.info(f"读取文件成功: {file_path} ({len(lines)} 行)")
+            if not self.conversation_id:
+                return tool_result("错误: 未设置会话ID，无法获取沙箱", success=False)
+
+            # 获取会话专属沙箱
+            session = await self.sandbox_manager.get_sandbox(self.conversation_id)
+            if not session:
+                return tool_result("错误: 无法获取沙箱", success=False)
+
+            # 在沙箱中读取文件
+            success, content, error_msg = await session.sandbox.read_file(file_path, limit)
+
+            if not success:
+                logger.error(f"从沙箱读取文件失败: {file_path}, error={error_msg}")
+                return tool_result(error_msg, success=False)
+
+            logger.info(f"从沙箱读取文件成功: {file_path}")
             return tool_result({
                 "success": True,
                 "content": content,
-                "lines_read": len(lines),
-                "file_path": file_path
+                "file_path": file_path,
+                "sandbox_type": "local"
             })
-            
+
         except Exception as e:
-            logger.error(f"读取文件失败: {e}")
-            return tool_result(f"读取文件失败: {str(e)}", success=False)
+            logger.error(f"从沙箱读取文件异常: {file_path}, error={e}")
+            return tool_result(f"读取文件异常: {str(e)}", success=False)
 
 
 class WriteFileTool(BaseTool):
-    """文件写入工具"""
-    
+    """文件写入工具 - 在沙箱中写入文件"""
+
     name = "write_file"
-    description = "写入文件到用户目录（用于保存Python代码、分析结果等）"
-    
+    description = "写入文件到沙箱（用于保存Python代码、分析结果等）"
+
     parameters = {
         "type": "object",
         "properties": {
             "file_path": {
                 "type": "string",
-                "description": "文件路径（相对于用户目录）"
+                "description": "文件路径（相对于沙箱workspace目录）"
             },
             "content": {
                 "type": "string",
@@ -91,35 +99,45 @@ class WriteFileTool(BaseTool):
         },
         "required": ["file_path", "content"]
     }
-    
+
+    def __init__(self):
+        super().__init__()
+        self.conversation_id = None
+        self.sandbox_manager = None
+
+    def set_context(self, user_channel: str):
+        """设置上下文"""
+        self.user_channel = user_channel
+        from ...core.sandbox_manager import SandboxManager
+        self.sandbox_manager = SandboxManager()
+
+    def set_conversation_id(self, conversation_id: str):
+        """设置当前会话ID"""
+        self.conversation_id = conversation_id
+
     async def execute(self, file_path: str, content: str, description: str = "") -> Dict[str, Any]:
-        """写入文件"""
+        """写入文件到沙箱"""
         try:
-            # 构建完整路径
-            user_dir = Path(f"/workspace/files/{self.user_channel}")
-            full_path = user_dir / file_path
-            
-            # 安全检查：确保在用户目录内
-            try:
-                full_path.resolve().relative_to(user_dir.resolve())
-            except ValueError:
-                return tool_result("拒绝访问：路径超出用户目录", success=False)
-            
-            # 创建父目录
-            full_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            # 写入文件
-            with open(full_path, 'w', encoding='utf-8') as f:
-                f.write(content)
-            
-            logger.info(f"写入文件成功: {file_path} ({len(content)} 字节)")
+            if not self.conversation_id:
+                return tool_result("错误: 未设置会话ID，无法获取沙箱", success=False)
+
+            # 获取会话专属沙箱
+            session = await self.sandbox_manager.get_sandbox(self.conversation_id)
+            if not session:
+                return tool_result("错误: 无法获取沙箱", success=False)
+
+            # 在沙箱中写入文件
+            await session.sandbox.write_file(file_path, content)
+
+            logger.info(f"写入文件到沙箱成功: {file_path} ({len(content)} 字节)")
             return tool_result({
                 "success": True,
-                "file_path": str(full_path.relative_to(user_dir)),
+                "file_path": file_path,
                 "size": len(content),
-                "description": description
+                "description": description,
+                "sandbox_type": "local"
             })
-            
+
         except Exception as e:
-            logger.error(f"写入文件失败: {e}")
+            logger.error(f"写入文件到沙箱失败: {file_path}, error={e}")
             return tool_result(f"写入文件失败: {str(e)}", success=False)

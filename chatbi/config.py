@@ -67,6 +67,11 @@ class Settings(BaseSettings):
         """会话路径"""
         return str(Path(self.workspace_path) / "sessions")
 
+    @property
+    def memory_path(self) -> str:
+        """内存路径"""
+        return str(Path(self.workspace_path) / "memory")
+
     # 外部服务
     rag_api_url: str = Field(default="http://my_rag_v1", env="RAG_API_URL")
     sql_api_url: str = Field(default="http://my_hive_sql_exec", env="SQL_API_URL")
@@ -174,6 +179,21 @@ class ChatBIConfig:
         """工具配置"""
         return self._config.get("tools", {})
 
+    @property
+    def workspace_path(self) -> str:
+        """工作空间路径"""
+        return settings.workspace_path
+
+    @property
+    def memory_enabled(self) -> bool:
+        """是否启用memory功能"""
+        return self._config.get("memory", {}).get("enabled", True)
+
+    @property
+    def memory_level(self) -> str:
+        """Memory级别: 'global', 'user', 或 'both'"""
+        return self._config.get("memory", {}).get("level", "both")
+
     def get_tool_config(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """获取特定工具的配置"""
         return self.tools_config.get(tool_name)
@@ -201,6 +221,7 @@ def ensure_directories():
     """确保工作目录存在"""
     Path(settings.upload_path).mkdir(parents=True, exist_ok=True)
     Path(settings.sessions_path).mkdir(parents=True, exist_ok=True)
+    Path(settings.memory_path).mkdir(parents=True, exist_ok=True)
     Path(settings.workspace_path).mkdir(parents=True, exist_ok=True)
 
 # 初始化时调用
