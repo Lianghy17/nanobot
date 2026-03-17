@@ -94,7 +94,9 @@ class AgentWrapper:
         system_prompt = chatbi_config.agent_system_prompt_template.format(
             scene_name=conversation.scene_name,
             scene_code=conversation.scene_code,
-            tool_names=tool_names
+            tool_names=tool_names,
+            current_time=chatbi_config.current_time,
+            runtime_environment=chatbi_config.runtime_environment
         )
 
         messages = [
@@ -199,7 +201,7 @@ class AgentWrapper:
         conversation: Conversation,
         message: Message,
         on_progress: Optional[Callable[[str], Awaitable[None]]] = None,
-    ) -> tuple[Optional[str], List[str]]:
+    ) -> tuple[Optional[str], List[str], List[Dict[str, Any]]]:
         """
         运行Agent迭代循环
 
@@ -209,7 +211,7 @@ class AgentWrapper:
             on_progress: 可选的进度回调函数
 
         Returns:
-            Tuple of (final_content, list_of_tools_used)
+            Tuple of (final_content, list_of_tools_used, tool_messages)
         """
         # 初始化
         iteration = 0
@@ -306,7 +308,30 @@ class AgentWrapper:
         logger.info(f"[Agent Loop 结束] 响应长度: {len(final_content) if final_content else 0} 字符")
         logger.info("=" * 80)
 
-        return final_content, tools_used
+        return final_content, tools_used, tool_messages
+
+    def _extract_files_from_tool_results(self, tool_messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """从工具结果中提取文件信息"""
+        files = []
+
+        for msg in tool_messages:
+            if msg.get("role") == "tool":
+                content = msg.get("content", "")
+                try:
+                    # 解析工具结果（JSON格式）
+                    import json
+                    result = json.loads(content)
+
+                    # 检查是否有文件信息
+                    if isinstance(result, dict) and "result" in result:
+                        result_data = result["result"]
+                        if isinstance(result_data, dict) and "files" in result_data:
+                            files.extend(result_data["files"])
+
+                except (json.JSONDecodeError, TypeError):
+                    pass
+
+        return files
 
     async def process(self, conversation: Conversation, message: Message) -> Optional[Dict[str, Any]]:
         """
@@ -338,15 +363,23 @@ class AgentWrapper:
 
         try:
             # 运行Agent Loop
-            final_content, tools_used = await self._run_agent_loop(conversation, message)
+            final_content, tools_used, tool_messages = await self._run_agent_loop(conversation, message)
+
+            # 提取文件信息
+            generated_files = self._extract_files_from_tool_results(tool_messages)
 
             if final_content is None:
                 final_content = "处理完成，但没有可用的响应内容。"
+
+            # 如果有生成的文件，添加到响应中
+            if generated_files:
+                logger.info(f"生成的文件: {len(generated_files)} 个")
 
             logger.info("=" * 80)
             logger.info("[Agent 处理完成]")
             logger.info(f"使用工具: {tools_used}")
             logger.info(f"响应长度: {len(final_content)} 字符")
+            logger.info(f"生成文件: {len(generated_files)} 个")
             logger.info(f"响应内容: {final_content[:200]}{'...' if len(final_content) > 200 else ''}")
             logger.info("=" * 80)
 
@@ -354,7 +387,10 @@ class AgentWrapper:
                 "content": final_content,
                 "tools_used": tools_used,
                 "tool_calls": [],
-                "metadata": {}
+                "metadata": {
+                    "files": generated_files,
+                    "format": "markdown"
+                }
             }
 
         except Exception as e:

@@ -1,126 +1,114 @@
-"""文件API"""
-import uuid
+"""文件API - 提供文件下载和访问"""
 import logging
-from datetime import datetime
 from pathlib import Path
-from fastapi import APIRouter, HTTPException, UploadFile, File
-from typing import List, Dict
+from fastapi import APIRouter, HTTPException, Response
+from fastapi.responses import FileResponse
+from typing import Optional
 
 from ..config import settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter()
+router = APIRouter(prefix="/api/files", tags=["files"])
 
 
-@router.post("/upload")
-async def upload_file(
-    file: UploadFile = File(...),
-    user_id: str = "web_default_user"
+@router.get("/download/{user_channel}/{conversation_id}/{filename}")
+async def download_file(
+    user_channel: str,
+    conversation_id: str,
+    filename: str
 ):
-    """上传文件"""
+    """下载会话中的文件"""
     try:
-        # 验证文件大小
-        content = await file.read()
-        if len(content) > settings.max_file_size:
-            raise HTTPException(
-                status_code=400,
-                detail=f"文件大小超过限制（最大{settings.max_file_size / 1024 / 1024}MB）"
-            )
-        
-        # 生成文件路径
-        user_channel = f"web_{user_id}"
-        user_dir = Path(settings.upload_path) / user_channel
-        user_dir.mkdir(parents=True, exist_ok=True)
-        
-        # 生成唯一文件名
-        file_ext = Path(file.filename).suffix
-        unique_name = f"{int(time.time())}_{uuid.uuid4().hex[:8]}{file_ext}"
-        file_path = user_dir / unique_name
-        
-        # 保存文件
-        with open(file_path, 'wb') as f:
-            f.write(content)
-        
-        logger.info(f"文件上传成功: {file.filename} -> {file_path} ({len(content)} bytes)")
-        
+        # 构建文件路径
+        file_path = Path(settings.sessions_path) / user_channel / conversation_id / filename
+
+        # 检查文件是否存在
+        if not file_path.exists():
+            raise HTTPException(status_code=404, detail=f"文件不存在: {filename}")
+
+        # 检查是否是文件（不是目录）
+        if not file_path.is_file():
+            raise HTTPException(status_code=400, detail="路径不是文件")
+
+        # 根据文件扩展名确定 MIME 类型
+        mime_types = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.csv': 'text/csv',
+            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            '.xls': 'application/vnd.ms-excel',
+            '.json': 'application/json',
+            '.txt': 'text/plain',
+            '.md': 'text/markdown',
+            '.pdf': 'application/pdf',
+        }
+
+        ext = file_path.suffix.lower()
+        media_type = mime_types.get(ext, 'application/octet-stream')
+
+        # 返回文件
+        return FileResponse(
+            path=str(file_path),
+            media_type=media_type,
+            filename=filename
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"下载文件失败: {user_channel}/{conversation_id}/{filename}, error={e}")
+        raise HTTPException(status_code=500, detail=f"下载文件失败: {str(e)}")
+
+
+@router.get("/list/{user_channel}/{conversation_id}")
+async def list_files(
+    user_channel: str,
+    conversation_id: str,
+    file_type: Optional[str] = None
+):
+    """列出会话中的所有文件"""
+    try:
+        # 构建会话目录路径
+        conversation_dir = Path(settings.sessions_path) / user_channel / conversation_id
+
+        # 检查目录是否存在
+        if not conversation_dir.exists():
+            return {
+                "success": True,
+                "files": [],
+                "count": 0
+            }
+
+        # 收集文件信息
+        files = []
+        for file_path in conversation_dir.iterdir():
+            if file_path.is_file():
+                # 如果指定了文件类型，进行过滤
+                if file_type:
+                    if file_path.suffix.lower().replace('.', '') != file_type:
+                        continue
+
+                file_info = {
+                    "filename": file_path.name,
+                    "size": file_path.stat().st_size,
+                    "type": file_path.suffix.lower().replace('.', ''),
+                    "download_url": f"/api/files/download/{user_channel}/{conversation_id}/{file_path.name}"
+                }
+                files.append(file_info)
+
+        # 按文件名排序
+        files.sort(key=lambda x: x["filename"])
+
         return {
             "success": True,
-            "file_path": unique_name,
-            "original_name": file.filename,
-            "file_size": len(content),
-            "upload_time": datetime.utcnow().isoformat()
+            "files": files,
+            "count": len(files)
         }
-    
-    except HTTPException:
-        raise
+
     except Exception as e:
-        logger.error(f"文件上传失败: {e}")
-        raise HTTPException(status_code=500, detail="文件上传失败")
-
-
-@router.get("/")
-async def list_files(
-    user_id: str = "web_default_user"
-):
-    """获取用户文件列表"""
-    try:
-        user_channel = f"web_{user_id}"
-        user_dir = Path(settings.upload_path) / user_channel
-        
-        if not user_dir.exists():
-            return {"files": []}
-        
-        files = []
-        for file_path in user_dir.glob("*"):
-            if file_path.is_file():
-                stat = file_path.stat()
-                files.append({
-                    "file_path": file_path.name,
-                    "file_size": stat.st_size,
-                    "created_at": datetime.fromtimestamp(stat.st_ctime).isoformat(),
-                    "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat()
-                })
-        
-        # 按修改时间倒序
-        files.sort(key=lambda x: x["modified_at"], reverse=True)
-        
-        return {"files": files}
-    
-    except Exception as e:
-        logger.error(f"获取文件列表失败: {e}")
-        raise HTTPException(status_code=500, detail="获取文件列表失败")
-
-
-@router.delete("/{file_path:path}")
-async def delete_file(
-    file_path: str,
-    user_id: str = "web_default_user"
-):
-    """删除文件"""
-    try:
-        user_channel = f"web_{user_id}"
-        full_path = Path(settings.upload_path) / user_channel / file_path
-        
-        # 安全检查
-        if not full_path.exists():
-            raise HTTPException(status_code=404, detail="文件不存在")
-        
-        # 检查是否在用户目录内
-        user_dir = Path(settings.upload_path) / user_channel
-        try:
-            full_path.resolve().relative_to(user_dir.resolve())
-        except ValueError:
-            raise HTTPException(status_code=403, detail="拒绝访问")
-        
-        # 删除文件
-        full_path.unlink()
-        
-        logger.info(f"文件删除成功: {file_path}")
-        return {"success": True, "message": "文件已删除"}
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"删除文件失败: {e}")
-        raise HTTPException(status_code=500, detail="删除文件失败")
+        logger.error(f"列出文件失败: {user_channel}/{conversation_id}, error={e}")
+        raise HTTPException(status_code=500, detail=f"列出文件失败: {str(e)}")

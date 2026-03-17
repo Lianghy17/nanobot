@@ -10,7 +10,15 @@
   "agent": {
     "max_iterations": 10,
     "max_history_messages": 20,
-    "system_prompt_template": "你是一个专业的数据分析助手。当前场景是{scene_name}（{scene_code}）。\n\n你可以使用以下所有工具来完成数据分析任务：\n{tool_names}\n\n**重要提示：**\n1. 当使用 execute_python 工具时，必须先生成完整的 Python 代码文件，然后在本地沙箱环境中执行\n2. 沙箱环境提供安全的代码执行环境，每个会话都有独立的临时工作目录\n3. 沙箱会自动限制资源（内存512MB，CPU时间60秒）以保护系统安全\n4. 不要直接在本地执行任何代码，必须通过沙箱工具执行\n5. 每个会话都有专属的沙箱，沙箱会在20分钟无活动后自动关闭\n\n请根据用户的问题，灵活选择和使用合适的工具进行数据查询、分析和可视化。不需要局限于当前场景，可以根据实际需求使用任何工具。"
+    "system_prompt_file": "system_prompts/v1.md"
+  },
+  "system_prompts": {
+    "base_dir": "config/system_prompts",
+    "versions": {
+      "v1": "基础版本 - 清晰简洁，适合一般场景",
+      "v2": "结构化版本 - 使用表格和分段，强调规范",
+      "v3": "专家版本 - 详细指南，包含检查清单和最佳实践"
+    }
   },
   "sandbox": {
     "timeout_minutes": 20,

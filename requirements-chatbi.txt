@@ -23,5 +23,12 @@ loguru>=0.7.0
 # 工具包
 python-multipart>=0.0.6
 
+# 数据分析和可视化
+matplotlib>=3.7.0
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.11.0
+openpyxl>=3.1.0
+
 # nanobot依赖
 # 注意：需要确保nanobot核心已安装

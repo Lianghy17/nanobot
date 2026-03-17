@@ -1,10 +1,15 @@
 """ChatBI配置管理"""
 import os
 import json
+import logging
+import platform
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 from pydantic_settings import BaseSettings
 from pydantic import Field
+
+logger = logging.getLogger(__name__)
 
 
 def get_project_root() -> Path:
@@ -138,6 +143,27 @@ class ChatBIConfig:
     @property
     def agent_system_prompt_template(self) -> str:
         """Agent系统提示模板"""
+        # 优先从文件加载
+        prompt_file = self._config.get("agent", {}).get("system_prompt_file")
+        if prompt_file:
+            try:
+                # 尝试从 config/system_prompts 目录加载
+                base_dir = Path(get_project_root()) / self._config.get("system_prompts", {}).get("base_dir", "config/system_prompts")
+                file_path = base_dir / prompt_file
+
+                if file_path.exists():
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        return f.read()
+                else:
+                    # 尝试直接使用相对路径
+                    file_path = get_project_root() / prompt_file
+                    if file_path.exists():
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            return f.read()
+            except Exception as e:
+                logger.warning(f"加载系统提示词文件失败: {prompt_file}, error={e}")
+
+        # 回退到配置中的模板
         return self._config.get("agent", {}).get(
             "system_prompt_template",
             "你是一个数据分析助手，当前场景是{scene_name}（{scene_code}）。可以使用以下工具：{tool_names}。请根据用户的问题，选择合适的工具进行数据查询和分析。优先使用python代码编写能力，并执行获得结果。"
@@ -151,6 +177,19 @@ class ChatBIConfig:
     def get_tool_config(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """获取特定工具的配置"""
         return self.tools_config.get(tool_name)
+
+    @property
+    def current_time(self) -> str:
+        """获取格式化的当前时间"""
+        now = datetime.now()
+        return now.strftime("%Y-%m-%d %H:%M:%S")
+
+    @property
+    def runtime_environment(self) -> str:
+        """获取运行环境信息"""
+        python_version = platform.python_version()
+        system = platform.system()
+        return f"Python {python_version} on {system}"
 
 
 # 全局配置实例

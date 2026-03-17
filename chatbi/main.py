@@ -99,7 +99,7 @@ app.add_middleware(
 app.include_router(conversations_router, prefix="/api/conversations", tags=["conversations"])
 app.include_router(messages_router, prefix="/api/messages", tags=["messages"])
 app.include_router(scenes_router, prefix="/api/scenes", tags=["scenes"])
-app.include_router(files_router, prefix="/api/files", tags=["files"])
+app.include_router(files_router, tags=["files"])
 
 # 挂载静态文件服务（前端文件）
 frontend_path = Path(__file__).parent.parent / "frontend"

@@ -7,8 +7,10 @@
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/api/files.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
@@ -212,7 +214,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>222</line>
+          <line>224</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>

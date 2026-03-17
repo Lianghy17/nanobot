@@ -94,11 +94,15 @@ class LocalSandbox:
             success = result.returncode == 0
             output = result.stdout if result.stdout else ""
 
+            # 收集生成的文件
+            generated_files = self._collect_generated_files()
+
             return {
                 "success": success,
                 "output": output,
                 "error": result.stderr if result.stderr else None,
-                "exit_code": result.returncode
+                "exit_code": result.returncode,
+                "files": generated_files
             }
 
         except subprocess.TimeoutExpired:
@@ -106,15 +110,70 @@ class LocalSandbox:
                 "success": False,
                 "output": "",
                 "error": f"执行超时（{timeout}秒）",
-                "exit_code": -1
+                "exit_code": -1,
+                "files": []
             }
         except Exception as e:
             return {
                 "success": False,
                 "output": "",
                 "error": f"执行失败: {str(e)}",
-                "exit_code": -1
+                "exit_code": -1,
+                "files": []
             }
+
+    def _collect_generated_files(self) -> list:
+        """收集生成的文件（图片、CSV、Excel等）"""
+        if not self.temp_dir:
+            return []
+
+        generated_files = []
+        workspace_dir = os.path.join(self.temp_dir, 'workspace')
+
+        # 支持的文件扩展名
+        supported_extensions = {
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.csv': 'text/csv',
+            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            '.xls': 'application/vnd.ms-excel',
+            '.json': 'application/json',
+            '.txt': 'text/plain',
+            '.md': 'text/markdown',
+        }
+
+        if not os.path.exists(workspace_dir):
+            return generated_files
+
+        # 遍历工作目录，收集生成的文件
+        for filename in os.listdir(workspace_dir):
+            if filename == 'analysis.py':
+                continue  # 跳过代码文件
+
+            file_path = os.path.join(workspace_dir, filename)
+            if os.path.isfile(file_path):
+                ext = os.path.splitext(filename)[1].lower()
+
+                if ext in supported_extensions:
+                    # 读取文件内容（小文件）
+                    file_size = os.path.getsize(file_path)
+                    content = None
+
+                    if file_size < 10 * 1024 * 1024:  # 小于10MB
+                        with open(file_path, 'rb') as f:
+                            content = f.read()
+
+                    generated_files.append({
+                        'filename': filename,
+                        'type': supported_extensions[ext],
+                        'size': file_size,
+                        'content': content  # base64编码会在API层处理
+                    })
+
+        return generated_files
 
     def _limit_resources(self):
         """设置资源限制（仅在 Unix 系统有效）"""
