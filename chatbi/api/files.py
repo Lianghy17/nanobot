@@ -31,7 +31,12 @@ async def download_file(
         success, content, error_msg = await session.sandbox.get_file(filename)
 
         if not success:
+            sandbox_info = f"[沙箱: 无|workspace: 无|会话: {conversation_id}]"
+            logger.error(f"{sandbox_info} 获取文件失败: {filename}, error={error_msg}")
             raise HTTPException(status_code=404, detail=error_msg or f"文件不存在: {filename}")
+
+        sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {conversation_id}]"
+        logger.info(f"{sandbox_info} 下载文件: {filename}, size={len(content)}")
 
         # 根据文件扩展名确定 MIME 类型
         mime_types = {
@@ -103,6 +108,9 @@ async def list_files(
         # 按文件名排序
         files.sort(key=lambda x: x["filename"])
 
+        sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {conversation_id}]"
+        logger.info(f"{sandbox_info} 列出文件成功: {len(files)} 个文件")
+
         return {
             "success": True,
             "files": files,
@@ -110,5 +118,5 @@ async def list_files(
         }
 
     except Exception as e:
-        logger.error(f"列出文件失败: {user_channel}/{conversation_id}, error={e}")
+        logger.error(f"[沙箱: 无|workspace: 无|会话: {conversation_id}] 列出文件失败, error={e}")
         raise HTTPException(status_code=500, detail=f"列出文件失败: {str(e)}")

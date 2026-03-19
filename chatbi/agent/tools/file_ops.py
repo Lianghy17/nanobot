@@ -55,14 +55,17 @@ class ReadFileTool(BaseTool):
             if not session:
                 return tool_result("错误: 无法获取沙箱", success=False)
 
+            # 构造沙箱信息前缀
+            sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {self.conversation_id}]"
+
             # 在沙箱中读取文件
             success, content, error_msg = await session.sandbox.read_file(file_path, limit)
 
             if not success:
-                logger.error(f"从沙箱读取文件失败: {file_path}, error={error_msg}")
+                logger.error(f"{sandbox_info} 读取文件失败: {file_path}, error={error_msg}")
                 return tool_result(error_msg, success=False)
 
-            logger.info(f"从沙箱读取文件成功: {file_path}")
+            logger.info(f"{sandbox_info} 读取文件成功: {file_path}")
             return tool_result({
                 "success": True,
                 "content": content,
@@ -71,7 +74,7 @@ class ReadFileTool(BaseTool):
             })
 
         except Exception as e:
-            logger.error(f"从沙箱读取文件异常: {file_path}, error={e}")
+            logger.error(f"[沙箱: 无|workspace: 无|会话: {self.conversation_id}] 读取文件异常: {file_path}, error={e}")
             return tool_result(f"读取文件异常: {str(e)}", success=False)
 
 
@@ -126,10 +129,13 @@ class WriteFileTool(BaseTool):
             if not session:
                 return tool_result("错误: 无法获取沙箱", success=False)
 
+            # 构造沙箱信息前缀
+            sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {self.conversation_id}]"
+
             # 在沙箱中写入文件
             await session.sandbox.write_file(file_path, content)
 
-            logger.info(f"写入文件到沙箱成功: {file_path} ({len(content)} 字节)")
+            logger.info(f"{sandbox_info} 写入文件成功: {file_path} ({len(content)} 字节)")
             return tool_result({
                 "success": True,
                 "file_path": file_path,
@@ -139,5 +145,5 @@ class WriteFileTool(BaseTool):
             })
 
         except Exception as e:
-            logger.error(f"写入文件到沙箱失败: {file_path}, error={e}")
+            logger.error(f"[沙箱: 无|workspace: 无|会话: {self.conversation_id}] 写入文件失败: {file_path}, error={e}")
             return tool_result(f"写入文件失败: {str(e)}", success=False)

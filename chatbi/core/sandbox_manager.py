@@ -45,7 +45,8 @@ class LocalSandbox:
         os.makedirs(os.path.join(self.temp_dir, 'workspace'), exist_ok=True)
         os.makedirs(os.path.join(self.temp_dir, 'tmp'), exist_ok=True)
 
-        logger.info(f"初始化本地沙箱: {self.sandbox_id}, dir={self.temp_dir}")
+        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+        logger.info(f"{sandbox_info} 初始化沙箱")
 
     async def write_file(self, filename: str, content: str):
         """写入文件到沙箱"""
@@ -57,7 +58,8 @@ class LocalSandbox:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(content)
-        logger.debug(f"沙箱写入文件: {filename}")
+        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+        logger.debug(f"{sandbox_info} 写入文件: {filename}")
 
     async def read_file(self, filename: str, limit: int = 100) -> tuple[bool, str, str]:
         """
@@ -90,11 +92,13 @@ class LocalSandbox:
                     lines.append(line.rstrip('\n'))
 
             content = '\n'.join(lines)
-            logger.debug(f"沙箱读取文件成功: {filename} ({len(lines)} 行)")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.debug(f"{sandbox_info} 读取文件成功: {filename} ({len(lines)} 行)")
             return True, content, ""
 
         except Exception as e:
-            logger.error(f"沙箱读取文件失败: {filename}, error={e}")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.error(f"{sandbox_info} 读取文件失败: {filename}, error={e}")
             return False, "", f"读取文件失败: {str(e)}"
 
     async def list_files(self) -> list:
@@ -170,11 +174,13 @@ class LocalSandbox:
 
             # 返回相对路径
             rel_path = filename.replace('\\', '/')
-            logger.info(f"沙箱上传文件成功: {filename} ({len(content)} 字节)")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.info(f"{sandbox_info} 上传文件成功: {filename} ({len(content)} 字节)")
             return True, rel_path, ""
 
         except Exception as e:
-            logger.error(f"沙箱上传文件失败: {filename}, error={e}")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.error(f"{sandbox_info} 上传文件失败: {filename}, error={e}")
             return False, "", f"上传文件失败: {str(e)}"
 
     async def get_file(self, filename: str) -> tuple[bool, bytes, str]:
@@ -202,11 +208,13 @@ class LocalSandbox:
             with open(file_path, 'rb') as f:
                 content = f.read()
 
-            logger.debug(f"沙箱获取文件成功: {filename} ({len(content)} 字节)")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.debug(f"{sandbox_info} 获取文件成功: {filename} ({len(content)} 字节)")
             return True, content, ""
 
         except Exception as e:
-            logger.error(f"沙箱获取文件失败: {filename}, error={e}")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.error(f"{sandbox_info} 获取文件失败: {filename}, error={e}")
             return False, b"", f"获取文件失败: {str(e)}"
 
     async def execute_code(self, code: str, timeout: int = 60) -> dict:
@@ -219,6 +227,8 @@ class LocalSandbox:
 
         # 执行代码
         code_path = os.path.join(self.temp_dir, 'workspace', filename)
+
+        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
 
         try:
             # 使用 subprocess 执行，添加资源限制
@@ -259,6 +269,7 @@ class LocalSandbox:
             }
 
         except subprocess.TimeoutExpired:
+            logger.warning(f"{sandbox_info} 执行超时（{timeout}秒）")
             return {
                 "success": False,
                 "output": "",
@@ -267,6 +278,7 @@ class LocalSandbox:
                 "files": []
             }
         except Exception as e:
+            logger.error(f"{sandbox_info} 执行失败: {str(e)}")
             return {
                 "success": False,
                 "output": "",
@@ -350,9 +362,11 @@ class LocalSandbox:
             if self.temp_dir and os.path.exists(self.temp_dir):
                 # 清理临时目录
                 shutil.rmtree(self.temp_dir, ignore_errors=True)
-                logger.info(f"关闭本地沙箱: {self.sandbox_id}, 清理目录: {self.temp_dir}")
+                sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+                logger.info(f"{sandbox_info} 关闭沙箱, 清理目录")
         except Exception as e:
-            logger.error(f"关闭沙箱失败: {self.sandbox_id}, error={e}")
+            sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+            logger.error(f"{sandbox_info} 关闭沙箱失败, error={e}")
 
 
 class SandboxSession:
@@ -443,7 +457,9 @@ class SandboxManager:
         # 如果已存在，更新使用时间
         if conversation_id in self._sandboxes:
             self._sandboxes[conversation_id].last_used = datetime.now()
-            logger.debug(f"复用沙箱: {conversation_id}")
+            session = self._sandboxes[conversation_id]
+            sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {conversation_id}]"
+            logger.debug(f"{sandbox_info} 复用沙箱")
             return self._sandboxes[conversation_id]
 
         # 创建新沙箱
@@ -459,12 +475,13 @@ class SandboxManager:
             )
 
             self._sandboxes[conversation_id] = session
-            logger.info(f"创建新本地沙箱: {conversation_id}, 当前活跃沙箱数: {len(self._sandboxes)}")
+            sandbox_info = f"[沙箱: {sandbox_id}|workspace: {local_sandbox.temp_dir}/workspace|会话: {conversation_id}]"
+            logger.info(f"{sandbox_info} 创建新沙箱, 当前活跃沙箱数: {len(self._sandboxes)}")
 
             return session
 
         except Exception as e:
-            logger.error(f"创建沙箱失败: {conversation_id}, error={e}")
+            logger.error(f"[沙箱: 无|workspace: 无|会话: {conversation_id}] 创建沙箱失败, error={e}")
             return None
 
     async def close_sandbox(self, conversation_id: str):
@@ -473,8 +490,9 @@ class SandboxManager:
             return
 
         session = self._sandboxes.pop(conversation_id)
+        sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {conversation_id}]"
         await session.close()
-        logger.info(f"主动关闭沙箱: {conversation_id}, 剩余沙箱数: {len(self._sandboxes)}")
+        logger.info(f"{sandbox_info} 主动关闭沙箱, 剩余沙箱数: {len(self._sandboxes)}")
 
     async def close_all(self):
         """关闭所有沙箱"""

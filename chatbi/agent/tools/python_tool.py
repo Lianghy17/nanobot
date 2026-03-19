@@ -59,8 +59,6 @@ class PythonTool(BaseTool):
         if not self.conversation_id:
             return tool_result("错误: 未设置会话ID，无法获取沙箱", success=False)
 
-        logger.info(f"[本地沙箱执行] conversation_id={self.conversation_id}, timeout={timeout}s, code_length={len(code)}")
-
         # 预处理代码：移除 matplotlib 的过时参数
         code = self._preprocess_code(code)
 
@@ -68,16 +66,19 @@ class PythonTool(BaseTool):
         session = await self.sandbox_manager.get_sandbox(self.conversation_id)
 
         if not session:
-            logger.error(f"无法获取沙箱: {self.conversation_id}")
+            logger.error(f"[沙箱: 无|workspace: 无|会话: {self.conversation_id}] 无法获取沙箱")
             return tool_result("错误: 无法创建沙箱", success=False)
+
+        # 构造沙箱信息前缀
+        sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {self.conversation_id}]"
+        logger.info(f"{sandbox_info} 开始执行代码, timeout={timeout}s, code_length={len(code)}")
 
         try:
             # 在沙箱中执行代码
             result = await session.execute_code(code, timeout)
 
             if result["success"]:
-                logger.info(f"[本地沙箱执行] 执行成功: {self.conversation_id}")
-
+                logger.info(f"{sandbox_info} 执行成功")
                 # 处理生成的文件 - 文件保存在沙箱中，不需要额外保存
                 files = result.get("files", [])
                 file_info = []
@@ -102,9 +103,9 @@ class PythonTool(BaseTool):
 
                 return tool_result(response_data)
             else:
-                logger.error(f"[本地沙箱执行] 执行失败: {self.conversation_id}, error={result['error']}")
+                logger.error(f"{sandbox_info} 执行失败, error={result['error']}")
                 return tool_result(f"执行失败: {result['error']}", success=False)
 
         except Exception as e:
-            logger.error(f"[本地沙箱执行] 执行异常: {self.conversation_id}, error={e}")
+            logger.error(f"{sandbox_info} 执行异常, error={e}")
             return tool_result(f"执行异常: {str(e)}", success=False)

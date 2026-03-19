@@ -260,8 +260,9 @@ async def upload_file(
         if not success:
             raise HTTPException(status_code=400, detail=error_msg or "上传文件失败")
 
+        sandbox_info = f"[沙箱: {session.sandbox.sandbox_id}|workspace: {session.sandbox.temp_dir}/workspace|会话: {conversation_id}]"
         logger.info(
-            f"上传文件到沙箱成功: user={user_id}, conv={conversation_id}, "
+            f"{sandbox_info} 上传文件成功: user={user_id}, "
             f"file={file.filename}, size={len(content)}"
         )
 
