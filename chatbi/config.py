@@ -31,6 +31,15 @@ def load_chatbi_config() -> Dict[str, Any]:
     return {}
 
 
+def load_scenes_config() -> Dict[str, Any]:
+    """加载场景配置文件"""
+    scenes_path = get_project_root() / "config" / "scenes.json"
+    if scenes_path.exists():
+        with open(scenes_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+
 class Settings(BaseSettings):
     """应用配置"""
 
@@ -89,6 +98,21 @@ class ChatBIConfig:
 
     def __init__(self):
         self._config = load_chatbi_config()
+        self._scenes_config = load_scenes_config()
+
+    @property
+    def scenes_config(self) -> Dict[str, Any]:
+        """获取场景配置"""
+        return self._scenes_config
+
+    def get_scene_supported_skills(self, scene_code: str) -> List[str]:
+        """获取指定场景支持的工具列表"""
+        scenes = self._scenes_config.get("scenes", [])
+        for scene in scenes:
+            if scene.get("scene_code") == scene_code:
+                return scene.get("supported_skills", [])
+        # 如果找不到场景，返回空列表（不限制工具）
+        return []
 
     @property
     def llm_api_base(self) -> str:
@@ -119,6 +143,11 @@ class ChatBIConfig:
     def llm_timeout(self) -> int:
         """LLM超时时间"""
         return int(os.getenv("LLM_TIMEOUT", str(self._config.get("llm", {}).get("timeout", 60))))
+
+    @property
+    def llm_thinking_disabled(self) -> bool:
+        """是否禁用LLM思考能力（kimi-k2.5专用）"""
+        return self._config.get("llm", {}).get("thinking_disabled", False)
 
     @property
     def sandbox_api_key(self) -> str:

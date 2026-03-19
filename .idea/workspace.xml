@@ -6,18 +6,15 @@
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/agent/tools/file_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/agent/tools/file_ops.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/conversations.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/conversations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/files.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/files.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/llm_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/llm_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/scenes.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/scenes.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/system_prompts/v1.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v1.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/memory/_global/MEMORY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/memory/users/web_web_default_user_web/HISTORY.md" beforeDir="false" afterPath="$PROJECT_DIR$/workspace/memory/users/web_web_default_user_web/HISTORY.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -217,7 +214,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>242</line>
+          <line>370</line>
           <option name="timeStamp" value="19" />
         </line-breakpoint>
       </breakpoints>

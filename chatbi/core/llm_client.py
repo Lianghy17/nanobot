@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional
 import json
 import logging
 import json_repair
+import asyncio
 from openai import AsyncOpenAI
 from ..models.llm import LLMResponse, ToolCallRequest, UsageInfo
 
@@ -19,7 +20,8 @@ class LLMClient:
         model: str = "gpt-4",
         temperature: float = 0.7,
         max_tokens: int = 4096,
-        timeout: int = 60
+        timeout: int = 60,
+        thinking_disabled: bool = False
     ):
         """
         初始化LLM客户端
@@ -31,6 +33,7 @@ class LLMClient:
             temperature: 温度参数
             max_tokens: 最大token数
             timeout: 超时时间（秒）
+            thinking_disabled: 是否禁用思考能力（kimi-k2.5专用）
         """
         self.api_base = api_base
         self.api_key = api_key
@@ -38,6 +41,7 @@ class LLMClient:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.timeout = timeout
+        self.thinking_disabled = thinking_disabled
 
         # 创建OpenAI客户端
         self._client = AsyncOpenAI(
@@ -46,7 +50,7 @@ class LLMClient:
             timeout=timeout
         )
 
-        logger.info(f"LLM客户端初始化: api_base={api_base}, model={model}")
+        logger.info(f"LLM客户端初始化: api_base={api_base}, model={model}, thinking_disabled={thinking_disabled}")
 
     async def chat(
         self,
@@ -57,7 +61,7 @@ class LLMClient:
         model: Optional[str] = None
     ) -> LLMResponse:
         """
-        调用LLM聊天接口
+        调用LLM聊天接口（带重试机制）
 
         Args:
             messages: 消息列表
@@ -69,48 +73,100 @@ class LLMClient:
         Returns:
             LLMResponse: LLM响应对象
         """
-        try:
-            # 构建请求参数
-            kwargs: Dict[str, Any] = {
-                "model": model or self.model,
-                "messages": messages,
-                "max_tokens": max(1, max_tokens or self.max_tokens),
-                "temperature": temperature if temperature is not None else self.temperature,
-            }
+        # 确定使用的模型和参数
+        current_model = model or self.model
+        current_temp = temperature if temperature is not None else self.temperature
+        current_max_tokens = max(1, max_tokens or self.max_tokens)
 
-            # 如果有工具定义，添加到请求中
-            if tools:
-                kwargs["tools"] = tools
-                kwargs["tool_choice"] = "auto"
+        logger.info("=" * 80)
+        logger.info("[LLM 请求]")
+        logger.info(f"模型: {current_model}")
+        logger.info(f"消息数: {len(messages)}")
+        logger.info(f"工具数: {len(tools) if tools else 0}")
+        logger.info(f"温度: {current_temp}")
+        logger.info(f"最大Token: {current_max_tokens}")
+        logger.info(f"最后一条消息: {messages[-1]['content'][:100]}...")
 
-            logger.info("=" * 80)
-            logger.info("[LLM 请求]")
-            logger.info(f"模型: {kwargs['model']}")
-            logger.info(f"消息数: {len(messages)}")
-            logger.info(f"工具数: {len(tools) if tools else 0}")
-            logger.info(f"温度: {kwargs['temperature']}")
-            logger.info(f"最大Token: {kwargs['max_tokens']}")
-            logger.info(f"最后一条消息: {messages[-1]['content'][:100]}...")
+        # 打印完整消息列表（用于调试）
+        for i, msg in enumerate(messages):
+            logger.debug(f"  [{i}] role={msg['role']}, content={msg['content'][:80]}...")
 
-            # 打印完整消息列表（用于调试）
-            for i, msg in enumerate(messages):
-                logger.debug(f"  [{i}] role={msg['role']}, content={msg['content'][:80]}...")
+        logger.info("=" * 80)
 
-            logger.info("=" * 80)
+        # 构建OpenAI API参数
+        kwargs: Dict[str, Any] = {
+            "model": current_model,
+            "messages": messages,
+            "max_tokens": current_max_tokens,
+            "temperature": current_temp,
+        }
 
-            # 调用OpenAI API
-            response = await self._client.chat.completions.create(**kwargs)
+        # 如果有工具定义，添加到请求中
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = "auto"
 
-            # 解析响应
-            return self._parse_response(response)
+        # 对于kimi-k2.5，如果需要禁用思考能力，使用extra_body参数
+        extra_body = {}
+        if self.thinking_disabled and "kimi-k2.5" in current_model:
+            extra_body["thinking"] = {"type": "disabled"}
+            logger.info("[LLM 请求] 添加 thinking={disabled} 参数")
 
-        except Exception as e:
-            logger.error(f"LLM调用失败: {e}", exc_info=True)
-            return LLMResponse(
-                content=f"LLM调用失败: {str(e)}",
-                finish_reason="error",
-                metadata={"error": str(e)}
-            )
+        # 如果有extra_body参数，添加到请求中
+        if extra_body:
+            kwargs["extra_body"] = extra_body
+
+        # 重试机制
+        max_retries = 3
+        base_delay = 2  # 初始延迟2秒
+        last_error = None
+
+        for attempt in range(max_retries + 1):
+            try:
+                # 调用OpenAI API
+                response = await self._client.chat.completions.create(**kwargs)
+
+                # 解析响应
+                return self._parse_response(response)
+
+            except Exception as e:
+                last_error = e
+                error_str = str(e)
+
+                # 判断是否需要重试的错误（429、5xx等）
+                should_retry = False
+                if "429" in error_str or "RateLimitError" in str(type(e)):
+                    should_retry = True
+                    logger.warning(f"[LLM 重试] 速率限制错误 (429)，第 {attempt + 1}/{max_retries + 1} 次尝试")
+                elif "5" in error_str and "Error code:" in error_str:
+                    # 5xx服务器错误
+                    should_retry = True
+                    logger.warning(f"[LLM 重试] 服务器错误 (5xx)，第 {attempt + 1}/{max_retries + 1} 次尝试")
+                elif "overloaded" in error_str.lower() or "engine" in error_str.lower():
+                    should_retry = True
+                    logger.warning(f"[LLM 重试] 服务过载，第 {attempt + 1}/{max_retries + 1} 次尝试")
+
+                # 如果不需要重试或已达最大重试次数，返回错误
+                if not should_retry or attempt >= max_retries:
+                    logger.error(f"LLM调用失败: {e}", exc_info=True)
+                    return LLMResponse(
+                        content=f"LLM调用失败: {str(e)}",
+                        finish_reason="error",
+                        metadata={"error": str(e), "retries": attempt}
+                    )
+
+                # 指数退避等待
+                delay = base_delay * (2 ** attempt)
+                logger.info(f"[LLM 重试] 等待 {delay} 秒后重试...")
+                await asyncio.sleep(delay)
+
+        # 如果所有重试都失败，返回最后一个错误
+        logger.error(f"LLM调用失败（已重试 {max_retries} 次）: {last_error}", exc_info=True)
+        return LLMResponse(
+            content=f"LLM调用失败（已重试 {max_retries} 次）: {str(last_error)}",
+            finish_reason="error",
+            metadata={"error": str(last_error), "retries": max_retries}
+        )
 
     def _parse_response(self, response: Any) -> LLMResponse:
         """

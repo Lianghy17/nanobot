@@ -189,13 +189,18 @@ function renderMessages(messages) {
 
         // 对于assistant的消息，渲染markdown
         if (msg.role === 'assistant') {
+            console.log('[renderMessages] Assistant消息metadata:', msg.metadata);
             const markdownHtml = marked.parse(content);
+
+            // 修复markdown中的图片路径
+            const fixedHtml = fixMarkdownImagePaths(markdownHtml, msg.metadata?.files || []);
+
             const filesHtml = renderFiles(msg.metadata?.files || []);
 
             return `
                 <div class="message ${msg.role}">
                     <div class="bubble">
-                        <div class="markdown-content">${markdownHtml}</div>
+                        <div class="markdown-content">${fixedHtml}</div>
                         ${filesHtml}
                     </div>
                     <div class="time">${time}</div>
@@ -213,17 +218,54 @@ function renderMessages(messages) {
     }).join('');
 }
 
+// 修复markdown中的图片路径
+function fixMarkdownImagePaths(html, files) {
+    // 创建临时DOM来解析HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+
+    // 获取所有图片标签
+    const images = tempDiv.querySelectorAll('img');
+
+    images.forEach(img => {
+        const src = img.getAttribute('src');
+        if (!src) return;
+
+        // 如果src已经是完整URL，跳过
+        if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('/api/')) {
+            return;
+        }
+
+        // src是文件名，查找对应的文件信息
+        const fileInfo = files?.find(f => f.filename === src || f.path === src);
+        if (fileInfo) {
+            // 构建下载URL
+            const downloadUrl = `/api/files/download/web_default_user/${currentConversation.conversation_id}/${fileInfo.path || fileInfo.filename}`;
+            img.setAttribute('src', downloadUrl);
+            console.log('[fixMarkdownImagePaths] 转换图片路径:', src, '->', downloadUrl);
+        } else {
+            console.warn('[fixMarkdownImagePaths] 未找到文件信息:', src);
+        }
+    });
+
+    return tempDiv.innerHTML;
+}
+
 // 渲染文件列表
 function renderFiles(files) {
+    console.log('[renderFiles] 接收到的文件数据:', files);
+
     if (!files || files.length === 0) {
         return '';
     }
 
     const filesHtml = files.map(file => {
-        const isImage = ['png', 'jpg', 'jpeg', 'gif', 'svg'].includes(file.type);
+        const isImage = file.type && file.type.startsWith('image/');
         const filename = file.filename || file.name;
         const downloadUrl = file.path ? `/api/files/download/web_default_user/${currentConversation.conversation_id}/${file.path}` :
                                     file.download_url || '#';
+
+        console.log('[renderFiles] 处理文件:', { filename, type: file.type, isImage, downloadUrl });
 
         if (isImage) {
             return `
@@ -233,7 +275,7 @@ function renderFiles(files) {
                 </div>
             `;
         } else {
-            const icon = getFileIcon(file.type);
+            const icon = getFileIcon(file.type, filename);
             return `
                 <div class="file-card" onclick="downloadFile('${downloadUrl}', '${filename}')">
                     <span class="file-icon">${icon}</span>
@@ -253,21 +295,52 @@ function renderFiles(files) {
 }
 
 // 获取文件图标
-function getFileIcon(type) {
-    const icons = {
-        'csv': '📊',
-        'xlsx': '📊',
-        'xls': '📊',
-        'json': '📋',
-        'txt': '📄',
-        'md': '📝',
-        'png': '🖼️',
-        'jpg': '🖼️',
-        'jpeg': '🖼️',
-        'gif': '🖼️',
-        'svg': '🖼️'
+function getFileIcon(mimeType, filename) {
+    // 根据MIME类型映射图标
+    const mimeIcons = {
+        'text/csv': '📊',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '📊',
+        'application/vnd.ms-excel': '📊',
+        'application/json': '📋',
+        'text/plain': '📄',
+        'text/markdown': '📝',
+        'application/pdf': '📕',
+        'image/png': '🖼️',
+        'image/jpeg': '🖼️',
+        'image/gif': '🖼️',
+        'image/svg+xml': '🖼️'
     };
-    return icons[type] || '📎';
+
+    // 如果MIME类型匹配，直接返回
+    if (mimeType && mimeIcons[mimeType]) {
+        return mimeIcons[mimeType];
+    }
+
+    // 如果MIME类型不匹配，尝试从文件名提取扩展名
+    if (filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        const extIcons = {
+            'csv': '📊',
+            'xlsx': '📊',
+            'xls': '📊',
+            'json': '📋',
+            'txt': '📄',
+            'md': '📝',
+            'pdf': '📕',
+            'png': '🖼️',
+            'jpg': '🖼️',
+            'jpeg': '🖼️',
+            'gif': '🖼️',
+            'svg': '🖼️'
+        };
+
+        if (extIcons[ext]) {
+            return extIcons[ext];
+        }
+    }
+
+    // 默认图标
+    return '📎';
 }
 
 // 格式化文件大小
@@ -456,14 +529,16 @@ function appendMessage(role, content, files = []) {
     }
 
     const time = new Date().toLocaleString('zh-CN');
+    let messageHtml;
 
     // 对于assistant的消息，渲染markdown
-    let contentHtml;
     if (role === 'assistant') {
-        contentHtml = marked.parse(content);
+        const markdownHtml = marked.parse(content);
+        // 修复markdown中的图片路径
+        const contentHtml = fixMarkdownImagePaths(markdownHtml, files);
         const filesHtml = renderFiles(files);
 
-        return `
+        messageHtml = `
             <div class="message ${role}">
                 <div class="bubble">
                     <div class="markdown-content">${contentHtml}</div>
@@ -474,15 +549,14 @@ function appendMessage(role, content, files = []) {
         `;
     } else {
         // user消息不渲染markdown
-        contentHtml = escapeHtml(content);
+        const contentHtml = escapeHtml(content);
+        messageHtml = `
+            <div class="message ${role}">
+                <div class="bubble">${contentHtml}</div>
+                <div class="time">${time}</div>
+            </div>
+        `;
     }
-
-    const messageHtml = `
-        <div class="message ${role}">
-            <div class="bubble">${contentHtml}</div>
-            <div class="time">${time}</div>
-        </div>
-    `;
 
     messageList.insertAdjacentHTML('beforeend', messageHtml);
     scrollToBottom();

@@ -42,7 +42,8 @@ class AgentWrapper:
             model=chatbi_config.llm_model,
             temperature=chatbi_config.llm_temperature,
             max_tokens=chatbi_config.llm_max_tokens,
-            timeout=chatbi_config.llm_timeout
+            timeout=chatbi_config.llm_timeout,
+            thinking_disabled=chatbi_config.llm_thinking_disabled
         )
 
         # Agent配置
@@ -79,9 +80,91 @@ class AgentWrapper:
             if hasattr(tool, 'set_conversation_id') and conversation_id:
                 tool.set_conversation_id(conversation_id)
 
-    def _get_tool_definitions(self) -> List[Dict[str, Any]]:
-        """获取所有工具的定义"""
+    def _get_tool_definitions(self, scene_code: Optional[str] = None) -> List[Dict[str, Any]]:
+        """
+        获取工具的定义
+
+        Args:
+            scene_code: 场景代码，如果提供则只返回该场景支持的工具
+
+        Returns:
+            工具定义列表
+        """
+        if scene_code:
+            # 获取场景支持的工具列表
+            supported_skills = chatbi_config.get_scene_supported_skills(scene_code)
+            if supported_skills:
+                # 只返回场景支持的工具
+                logger.info(f"[场景工具过滤] 场景={scene_code}, 支持的工具={supported_skills}")
+                return [
+                    self._tools[skill].get_definition()
+                    for skill in supported_skills
+                    if skill in self._tools
+                ]
+
+        # 返回所有工具定义
         return [tool.get_definition() for tool in self._tools.values()]
+
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        """
+        估算文本的token数量（粗略估计）
+        - 中文：1字符 ≈ 1.5 tokens
+        - 英文：1字符 ≈ 0.3 tokens
+        - 平均：1字符 ≈ 0.5 tokens
+        """
+        # 统计中文字符
+        chinese_chars = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+        # 统计非中文字符
+        other_chars = len(text) - chinese_chars
+
+        # 估算tokens
+        estimated_tokens = int(chinese_chars * 1.5 + other_chars * 0.3)
+
+        # 最小至少返回1
+        return max(1, estimated_tokens)
+
+    def _trim_history_by_tokens(
+        self,
+        messages: List[Dict[str, Any]],
+        max_tokens: int,
+        system_prompt_tokens: int,
+        current_user_tokens: int,
+        tool_messages_tokens: int
+    ) -> List[Dict[str, Any]]:
+        """
+        根据token限制裁剪历史消息
+
+        Args:
+            messages: 历史消息列表
+            max_tokens: 最大token限制
+            system_prompt_tokens: 系统提示的token数
+            current_user_tokens: 当前用户消息的token数
+            tool_messages_tokens: 工具消息的token数
+
+        Returns:
+            裁剪后的消息列表
+        """
+        # 计算可用给历史消息的token数
+        available_for_history = max_tokens - system_prompt_tokens - current_user_tokens - tool_messages_tokens
+
+        # 保留最近的消息
+        trimmed_messages = []
+        current_tokens = 0
+
+        # 从最新的消息开始倒序处理
+        for msg in reversed(messages):
+            msg_tokens = self._estimate_tokens(msg.get("content", ""))
+
+            if current_tokens + msg_tokens > available_for_history:
+                logger.warning(f"[Token管理] 跳过历史消息以避免超出限制: {msg_tokens} tokens")
+                break
+
+            trimmed_messages.insert(0, msg)
+            current_tokens += msg_tokens
+
+        logger.info(f"[Token管理] 历史消息裁剪: 原始{len(messages)}条 -> 保留{len(trimmed_messages)}条, 总tokens: {current_tokens}")
+        return trimmed_messages
 
     def _build_messages(
         self,
@@ -103,8 +186,19 @@ class AgentWrapper:
         # 获取memory上下文
         memory_context = self.memory_store.get_memory_context()
 
+        # 获取场景支持的工具
+        supported_skills = chatbi_config.get_scene_supported_skills(conversation.scene_code)
+
         # 构建系统提示
-        tool_names = ", ".join(self._tools.keys())
+        if supported_skills:
+            # 只使用场景支持的工具
+            tool_names = ", ".join(supported_skills)
+            logger.info(f"[场景工具过滤] 场景={conversation.scene_code}, 工具列表={tool_names}")
+        else:
+            # 使用所有工具（如果场景未指定或未找到）
+            tool_names = ", ".join(self._tools.keys())
+            logger.info(f"[场景工具过滤] 场景={conversation.scene_code}, 使用所有工具")
+
         system_prompt = chatbi_config.agent_system_prompt_template.format(
             scene_name=conversation.scene_name,
             scene_code=conversation.scene_code,
@@ -117,6 +211,33 @@ class AgentWrapper:
         if memory_context:
             system_prompt = f"{system_prompt}\n\n{memory_context}"
 
+        # 估算各部分的token数
+        system_prompt_tokens = self._estimate_tokens(system_prompt)
+        current_user_tokens = self._estimate_tokens(message.content)
+
+        # 计算工具消息的token数
+        tool_messages_tokens = 0
+        if tool_messages:
+            tool_messages_tokens = sum(
+                self._estimate_tokens(json.dumps(msg, ensure_ascii=False))
+                for msg in tool_messages
+            )
+
+        # 估算最大token限制（根据模型类型设置）
+        model = chatbi_config.llm_model
+
+        # kimi-k2.5模型（禁用思考能力）
+        if "kimi-k2.5" in model:
+            max_input_tokens = 100000  # kimi-k2.5最大128k，预留28k给输出
+        elif "128k" in model:
+            max_input_tokens = 128000 - 4096  # moonshot-v1-128k: 128k tokens, 预留4k给输出
+        elif "32k" in model:
+            max_input_tokens = 32000 - 2048   # moonshot-v1-32k: 32k tokens, 预留2k给输出
+        else:
+            max_input_tokens = 8192 - 2048    # moonshot-v1-8k: 8192 tokens, 预留2k给输出
+
+        logger.info(f"[Token管理] 系统提示: {system_prompt_tokens} tokens, 用户消息: {current_user_tokens} tokens, 工具消息: {tool_messages_tokens} tokens")
+
         messages = [
             {
                 "role": "system",
@@ -124,9 +245,16 @@ class AgentWrapper:
             }
         ]
 
-        # 添加历史消息
+        # 添加历史消息（带token裁剪）
         history = conversation.get_history(max_messages=self.max_history_messages)
-        messages.extend(history)
+        trimmed_history = self._trim_history_by_tokens(
+            history,
+            max_input_tokens,
+            system_prompt_tokens,
+            current_user_tokens,
+            tool_messages_tokens
+        )
+        messages.extend(trimmed_history)
 
         # 添加当前用户消息
         messages.append({
@@ -257,10 +385,10 @@ class AgentWrapper:
             logger.info(f"[Agent Loop] 当前上下文消息数: {len(messages)}")
 
             try:
-                # 调用LLM
+                # 调用LLM（传递场景代码以过滤工具）
                 response: LLMResponse = await self.llm_client.chat(
                     messages=messages,
-                    tools=self._get_tool_definitions()
+                    tools=self._get_tool_definitions(conversation.scene_code)
                 )
             except Exception as e:
                 logger.error(f"[Agent Loop] LLM调用失败: {type(e).__name__}: {e}")
@@ -332,28 +460,40 @@ class AgentWrapper:
         """从工具结果中提取文件信息"""
         files = []
 
-        for msg in tool_messages:
+        logger.info(f"[_extract_files_from_tool_results] 开始提取文件，tool_messages数量: {len(tool_messages)}")
+
+        for idx, msg in enumerate(tool_messages):
             if msg.get("role") == "tool":
                 content = msg.get("content", "")
+                logger.info(f"[_extract_files_from_tool_results] 处理tool消息[{idx}]: {content[:200]}...")
+
                 try:
                     # 解析工具结果（JSON格式）
                     import json
                     result = json.loads(content)
+                    logger.info(f"[_extract_files_from_tool_results] 解析结果类型: {type(result)}, keys: {result.keys() if isinstance(result, dict) else 'N/A'}")
 
                     # 检查是否有文件信息 - 支持多种格式
                     if isinstance(result, dict):
                         # 格式1: result.files
                         if "files" in result:
-                            files.extend(result["files"])
+                            extracted_files = result["files"]
+                            logger.info(f"[_extract_files_from_tool_results] 找到文件（格式1）: {len(extracted_files)} 个")
+                            files.extend(extracted_files)
                         # 格式2: result.result.files
                         elif "result" in result and isinstance(result["result"], dict):
                             result_data = result["result"]
                             if "files" in result_data:
+                                extracted_files = result_data["files"]
+                                logger.info(f"[_extract_files_from_tool_results] 找到文件（格式2）: {len(extracted_files)} 个")
                                 files.extend(result_data["files"])
+                        else:
+                            logger.info(f"[_extract_files_from_tool_results] 结果中未找到files字段")
 
                 except (json.JSONDecodeError, TypeError) as e:
                     logger.debug(f"解析工具结果失败: {e}")
 
+        logger.info(f"[_extract_files_from_tool_results] 提取完成，共找到 {len(files)} 个文件")
         return files
 
     def _update_memory(

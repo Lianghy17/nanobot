@@ -2,14 +2,15 @@
   "llm": {
     "api_base": "https://api.moonshot.cn/v1",
     "api_key": "sk-HSOmrqHUbXiysyRHD5TkkAJKTy6UbNQieW42A2IE4aYIG7ht",
-    "model": "moonshot-v1-8k",
-    "temperature": 0.7,
-    "max_tokens": 4096,
-    "timeout": 60
+    "model": "kimi-k2.5",
+    "temperature": 0.6,
+    "max_tokens": 81920,
+    "timeout": 60,
+    "thinking_disabled": true
   },
   "agent": {
-    "max_iterations": 10,
-    "max_history_messages": 20,
+    "max_iterations": 30,
+    "max_history_messages": 10,
     "system_prompt_file": "system_prompts/v1.md"
   },
   "system_prompts": {

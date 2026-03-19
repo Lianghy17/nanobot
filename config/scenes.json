@@ -4,7 +4,7 @@
       "scene_code": "sales_analysis",
       "scene_name": "销售数据分析",
       "description": "用于分析销售业绩、趋势、产品表现等",
-      "supported_skills": ["sql_query", "file_read", "python_execute", "rag_search"],
+      "supported_skills": ["read_file", "execute_python", "write_file"],
       "default_model": "gpt-4",
       "max_iterations": 15
     },
@@ -12,7 +12,7 @@
       "scene_code": "user_behavior",
       "scene_name": "用户行为分析",
       "description": "分析用户留存、活跃、转化等行为数据",
-      "supported_skills": ["sql_query", "rag_search", "python_execute"],
+      "supported_skills": ["execute_sql", "rag_search", "execute_python"],
       "default_model": "gpt-4",
       "max_iterations": 20
     },
@@ -20,7 +20,7 @@
       "scene_code": "general_bi",
       "scene_name": "通用BI分析",
       "description": "通用商业智能分析，支持多种数据查询和分析场景",
-      "supported_skills": ["sql_query", "file_read", "python_execute", "rag_search"],
+      "supported_skills": ["execute_sql", "read_file", "execute_python", "rag_search"],
       "default_model": "gpt-4",
       "max_iterations": 20
     }
