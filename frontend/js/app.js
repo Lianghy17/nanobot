@@ -201,10 +201,11 @@ function renderMessages(messages) {
             console.log('[renderMessages] Assistant消息metadata:', msg.metadata);
             const markdownHtml = marked.parse(content);
 
-            // 修复markdown中的图片路径
-            const fixedHtml = fixMarkdownImagePaths(markdownHtml, msg.metadata?.files || []);
+            // 修复markdown中的图片路径，获取已渲染的图片列表
+            const { html: fixedHtml, renderedImages } = fixMarkdownImagePaths(markdownHtml, msg.metadata?.files || []);
 
-            const filesHtml = renderFiles(msg.metadata?.files || []);
+            // 渲染文件列表，跳过已在markdown中渲染的图片
+            const filesHtml = renderFiles(msg.metadata?.files || [], renderedImages);
 
             return `
                 <div class="message ${msg.role}">
@@ -227,11 +228,14 @@ function renderMessages(messages) {
     }).join('');
 }
 
-// 修复markdown中的图片路径
+// 修复markdown中的图片路径，返回 { html, renderedImages }
 function fixMarkdownImagePaths(html, files) {
     // 创建临时DOM来解析HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = html;
+
+    // 记录已在markdown中渲染的图片文件名
+    const renderedImages = [];
 
     // 获取所有图片标签
     const images = tempDiv.querySelectorAll('img');
@@ -286,6 +290,9 @@ function fixMarkdownImagePaths(html, files) {
         }
 
         if (matchedFile) {
+            // 记录已渲染的图片文件名
+            renderedImages.push(matchedFile.filename);
+            
             // 优先使用 base64 数据
             if (matchedFile.base64) {
                 img.setAttribute('src', matchedFile.base64);
@@ -307,12 +314,12 @@ function fixMarkdownImagePaths(html, files) {
         }
     });
 
-    return tempDiv.innerHTML;
+    return { html: tempDiv.innerHTML, renderedImages };
 }
 
-// 渲染文件列表
-function renderFiles(files) {
-    console.log('[renderFiles] 接收到的文件数据:', files);
+// 渲染文件列表（排除已在markdown中渲染的图片）
+function renderFiles(files, skipImageFilenames = []) {
+    console.log('[renderFiles] 接收到的文件数据:', files, '跳过的图片:', skipImageFilenames);
 
     if (!files || files.length === 0) {
         return '';
@@ -321,6 +328,12 @@ function renderFiles(files) {
     const filesHtml = files.map(file => {
         const isImage = file.type && file.type.startsWith('image/');
         const filename = file.filename || file.name;
+        
+        // 如果是图片且已在markdown中渲染，跳过
+        if (isImage && skipImageFilenames.includes(filename)) {
+            console.log('[renderFiles] 跳过已渲染的图片:', filename);
+            return '';
+        }
 
         // 优先使用 base64 数据，否则使用 URL
         let displayUrl;
@@ -354,11 +367,16 @@ function renderFiles(files) {
                 </div>
             `;
         }
-    }).join('');
+    }).filter(html => html !== '').join('');  // 过滤空字符串
+
+    // 如果没有文件需要显示，返回空
+    if (!filesHtml) {
+        return '';
+    }
 
     return `
         <div class="files-section">
-            <div class="files-section-title">📎 生成的文件 (${files.length})</div>
+            <div class="files-section-title">📎 生成的文件</div>
             ${filesHtml}
         </div>
     `;
@@ -631,9 +649,10 @@ function appendMessage(role, content, files = []) {
     // 对于assistant的消息，渲染markdown
     if (role === 'assistant') {
         const markdownHtml = marked.parse(content);
-        // 修复markdown中的图片路径
-        const contentHtml = fixMarkdownImagePaths(markdownHtml, files);
-        const filesHtml = renderFiles(files);
+        // 修复markdown中的图片路径，获取已渲染的图片列表
+        const { html: contentHtml, renderedImages } = fixMarkdownImagePaths(markdownHtml, files);
+        // 渲染文件列表，跳过已在markdown中渲染的图片
+        const filesHtml = renderFiles(files, renderedImages);
 
         messageHtml = `
             <div class="message ${role}">

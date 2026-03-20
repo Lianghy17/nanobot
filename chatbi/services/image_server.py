@@ -87,7 +87,8 @@ async def upload_image(
         image_id = f"img_{uuid.uuid4().hex[:12]}"
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         
-        if file:
+        # 检查是否有有效的文件上传（file 不为 None 且有内容）
+        if file is not None and hasattr(file, 'filename') and file.filename:
             # 文件上传方式
             ext = Path(file.filename).suffix or '.png'
             stored_filename = f"{image_id}_{timestamp}{ext}"

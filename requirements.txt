@@ -29,3 +29,4 @@ mcp>=1.0.0
 msgpack>=1.0.8
 json-repair>=0.30.0
 exa_py>=0.1.0
+jupyter_client>=8.0.0

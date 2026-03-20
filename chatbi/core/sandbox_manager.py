@@ -7,7 +7,10 @@ import subprocess
 import sys
 import tempfile
 import shutil
-from typing import Dict, Optional, Tuple
+import threading
+import queue
+import json
+from typing import Dict, Optional, Tuple, List
 from datetime import datetime, timedelta
 from pathlib import Path
 from ..config import chatbi_config
@@ -15,8 +18,288 @@ from ..config import chatbi_config
 logger = logging.getLogger(__name__)
 
 
+class PersistentPythonKernel:
+    """
+    持久化 Python 内核 - 使用 jupyter_client 保持会话状态
+    
+    特性：
+    - 变量跨执行保持
+    - 导入自动持久化
+    - 自动注入常用库
+    """
+    
+    # 自动注入的常用库
+    AUTO_IMPORTS = """
+import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+plt.rcParams['font.sans-serif'] = ['SimHei', 'Arial Unicode MS', 'DejaVu Sans']
+plt.rcParams['axes.unicode_minus'] = False
+import warnings
+warnings.filterwarnings('ignore')
+print("✅ 常用库已导入: pd, np, plt")
+"""
+    
+    def __init__(self, conversation_id: str, working_dir: str):
+        self.conversation_id = conversation_id
+        self.working_dir = working_dir
+        self._kernel_manager = None
+        self._kernel_client = None
+        self._execution_count = 0
+        self._created_at = datetime.now()
+        
+    def start(self):
+        """启动持久化 Jupyter 内核"""
+        try:
+            from jupyter_client import KernelManager
+            
+            # 创建内核管理器
+            self._kernel_manager = KernelManager(kernel_name='python3')
+            self._kernel_manager.start_kernel(cwd=self.working_dir)
+            
+            # 获取内核客户端
+            self._kernel_client = self._kernel_manager.client()
+            self._kernel_client.start_channels()
+            
+            # 注入常用导入
+            self._execute_silent(self.AUTO_IMPORTS)
+            
+            logger.info(f"[Kernel:{self.conversation_id}] 持久化内核已启动")
+            
+        except ImportError as e:
+            logger.error(f"[Kernel:{self.conversation_id}] jupyter_client 未安装: {e}")
+            raise RuntimeError("请安装 jupyter_client: pip install jupyter_client ipykernel")
+        except Exception as e:
+            logger.error(f"[Kernel:{self.conversation_id}] 启动内核失败: {e}")
+            raise
+    
+    def _execute_silent(self, code: str) -> bool:
+        """静默执行代码（不返回结果）"""
+        try:
+            self._kernel_client.execute(code, silent=True)
+            # 等待执行完成
+            while True:
+                msg = self._kernel_client.get_shell_msg(timeout=5)
+                if msg['content']['status'] == 'ok':
+                    return True
+                elif msg['content']['status'] == 'error':
+                    logger.warning(f"[Kernel:{self.conversation_id}] 静默执行失败: {msg['content'].get('evalue')}")
+                    return False
+        except Exception as e:
+            logger.error(f"[Kernel:{self.conversation_id}] 静默执行异常: {e}")
+            return False
+    
+    def execute(self, code: str, timeout: int = 60) -> dict:
+        """
+        执行代码并返回结果
+        
+        Returns:
+            {
+                'success': bool,
+                'output': str,
+                'error': str or None,
+                'execution_count': int,
+                'variables': dict
+            }
+        """
+        if not self._kernel_client:
+            logger.warning(f"[Kernel:{self.conversation_id}] 内核未启动，重新启动")
+            self.start()
+            
+        self._execution_count += 1
+        exec_id = self._execution_count
+        
+        try:
+            # 执行代码
+            self._kernel_client.execute(code)
+            
+            # 收集输出
+            output_lines = []
+            error_msg = None
+            start_time = datetime.now()
+            outputs = []
+            
+            while True:
+                # 检查超时
+                elapsed = (datetime.now() - start_time).total_seconds()
+                if elapsed > timeout:
+                    logger.warning(f"[Kernel:{self.conversation_id}] 执行超时({timeout}s)，重启内核")
+                    self.restart()
+                    return {
+                        'success': False,
+                        'output': '',
+                        'error': f'执行超时（{timeout}秒），内核已重启',
+                        'execution_count': exec_id,
+                        'variables': {}
+                    }
+                
+                # 获取 IOPub 消息（输出）
+                try:
+                    msg = self._kernel_client.get_iopub_msg(timeout=0.1)
+                except Exception:
+                    continue
+                
+                msg_type = msg['header']['msg_type']
+                
+                # 执行完成
+                if msg_type == 'status' and msg['content']['execution_state'] == 'idle':
+                    break
+                    
+                # 执行错误
+                if msg_type == 'error':
+                    error_data = msg['content']
+                    error_msg = '\n'.join(error_data.get('traceback', error_data.get('evalue', '')))
+                    logger.warning(f"[Kernel:{self.conversation_id}] 执行错误: {error_msg[:200]}")
+                    
+                # 流式输出
+                if msg_type == 'stream':
+                    content = msg['content'].get('text', '')
+                    output_lines.append(content)
+                    
+                # 输出结果（print/表达式的值）
+                if msg_type == 'execute_result':
+                    content = msg['content'].get('data', {}).get('text/plain', '')
+                    output_lines.append(content)
+                    
+                # 显示数据（dataframe 等）
+                if msg_type == 'display_data':
+                    content = msg['content'].get('data', {})
+                    if 'text/plain' in content:
+                        output_lines.append(content['text/plain'])
+            
+            # 获取当前变量
+            variables = self._get_variables()
+            
+            success = error_msg is None
+            output = '\n'.join(output_lines)
+            
+            if success:
+                logger.debug(f"[Kernel:{self.conversation_id}] 执行成功: exec_count={exec_id}, output_len={len(output)}")
+            else:
+                logger.warning(f"[Kernel:{self.conversation_id}] 执行失败: exec_count={exec_id}")
+            
+            return {
+                'success': success,
+                'output': output,
+                'error': error_msg,
+                'execution_count': exec_id,
+                'variables': variables
+            }
+            
+        except Exception as e:
+            logger.error(f"[Kernel:{self.conversation_id}] 执行异常: {e}", exc_info=True)
+            # 重启内核
+            self.restart()
+            return {
+                'success': False,
+                'output': '',
+                'error': f'执行异常: {str(e)}',
+                'execution_count': exec_id,
+                'variables': {}
+            }
+    
+    def _get_variables(self) -> dict:
+        """获取当前内核中的变量列表（静默方式）"""
+        try:
+            # 使用 IPython 的内核命令获取变量
+            code = """
+# 静默获取变量列表
+import sys
+from IPython import get_ipython
+
+if get_ipython() is None:
+    # 非 IPython 环境
+    variables = {}
+else:
+    # 使用 IPython 的 namespace 获取变量
+    shell = get_ipython()
+    user_ns = shell.user_ns
+    variables = {}
+
+    # 使用 list() 创建副本，避免迭代时修改字典导致的 RuntimeError
+    for name, value in list(user_ns.items()):
+        # 过滤 IPython 内置变量和特殊变量
+        if name.startswith('_'):
+            continue
+        if name in ['In', 'Out', 'exit', 'quit', 'get_ipython', 'sys', 'json', 'shell', 'user_ns', 'variables']:
+            continue
+
+        try:
+            var_type = type(value).__name__
+            # 过滤掉一些不需要的类型
+            if var_type in ['module', 'function', 'type', 'builtin_function_or_method']:
+                continue
+            variables[name] = var_type
+        except:
+            pass
+
+variables
+"""
+            self._kernel_client.execute(code, silent=False)
+
+            # 收集输出
+            import json
+            variable_json = None
+            while True:
+                try:
+                    msg = self._kernel_client.get_iopub_msg(timeout=5)
+                    msg_type = msg['header']['msg_type']
+                    
+                    if msg_type == 'execute_result':
+                        # 获取表达式的返回值
+                        content = msg['content'].get('data', {}).get('text/plain', '')
+                        # 解析变量字典
+                        try:
+                            variables = eval(content)
+                            return variables if isinstance(variables, dict) else {}
+                        except:
+                            pass
+                    
+                    if msg_type == 'status' and msg['content']['execution_state'] == 'idle':
+                        break
+                except Exception:
+                    pass
+                    
+            return {}
+
+        except Exception as e:
+            logger.debug(f"[Kernel:{self.conversation_id}] 获取变量列表失败: {e}")
+            return {}
+    
+    def restart(self):
+        """重启内核"""
+        self.close()
+        self._execution_count = 0
+        self.start()
+        logger.info(f"[Kernel:{self.conversation_id}] 内核已重启")
+    
+    def close(self):
+        """关闭内核"""
+        try:
+            if self._kernel_client:
+                self._kernel_client.stop_channels()
+                self._kernel_client = None
+                
+            if self._kernel_manager:
+                self._kernel_manager.shutdown_kernel()
+                self._kernel_manager = None
+                
+            logger.info(f"[Kernel:{self.conversation_id}] 内核已关闭")
+            
+        except Exception as e:
+            logger.error(f"[Kernel:{self.conversation_id}] 关闭内核失败: {e}")
+    
+    def is_alive(self) -> bool:
+        """检查内核是否存活"""
+        if not self._kernel_manager:
+            return False
+        return self._kernel_manager.is_alive()
+
+
 class LocalSandbox:
-    """本地进程沙箱（最小开销方案）"""
+    """本地进程沙箱（使用持久化内核）"""
 
     def __init__(self, sandbox_id: str, conversation_id: str):
         self.sandbox_id = sandbox_id
@@ -25,6 +308,8 @@ class LocalSandbox:
         self.last_used = datetime.now()
         self.temp_dir = None
         self.env = None
+        self._kernel: Optional[PersistentPythonKernel] = None  # 持久化内核
+        self._copied_files = set()  # 已复制的文件集合（避免重复复制）
 
     async def init(self):
         """初始化沙箱环境"""
@@ -42,11 +327,17 @@ class LocalSandbox:
         }
 
         # 创建必要的目录结构
-        os.makedirs(os.path.join(self.temp_dir, 'workspace'), exist_ok=True)
+        workspace_dir = os.path.join(self.temp_dir, 'workspace')
+        os.makedirs(workspace_dir, exist_ok=True)
         os.makedirs(os.path.join(self.temp_dir, 'tmp'), exist_ok=True)
 
-        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {workspace_dir}|会话: {self.conversation_id}]"
         logger.info(f"{sandbox_info} 初始化沙箱")
+
+        # 启动持久化内核
+        self._kernel = PersistentPythonKernel(self.conversation_id, workspace_dir)
+        self._kernel.start()
+        logger.info(f"{sandbox_info} 持久化内核已启动")
 
     async def write_file(self, filename: str, content: str):
         """写入文件到沙箱"""
@@ -221,44 +512,26 @@ class LocalSandbox:
             return False, b"", f"获取文件失败: {str(e)}"
 
     async def execute_code(self, code: str, timeout: int = 60) -> dict:
-        """执行代码"""
+        """执行代码（使用持久化内核）"""
         self.last_used = datetime.now()
-
-        # 写入代码文件
-        filename = 'analysis.py'
-        await self.write_file(filename, code)
-
-        # 执行代码
-        code_path = os.path.join(self.temp_dir, 'workspace', filename)
 
         sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
 
-        try:
-            # 使用 subprocess 执行，添加资源限制
-            if sys.platform != 'win32':
-                # Unix 系统：设置资源限制
-                result = subprocess.run(
-                    [sys.executable, '-u', code_path],
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    cwd=os.path.join(self.temp_dir, 'workspace'),
-                    env=self.env,
-                    preexec_fn=self._limit_resources
-                )
-            else:
-                # Windows 系统：无法设置资源限制
-                result = subprocess.run(
-                    [sys.executable, '-u', code_path],
-                    capture_output=True,
-                    text=True,
-                    timeout=timeout,
-                    cwd=os.path.join(self.temp_dir, 'workspace'),
-                    env=self.env
-                )
+        # 检查内核是否存活
+        if not self._kernel or not self._kernel.is_alive():
+            logger.warning(f"{sandbox_info} 内核未启动，重新初始化")
+            self._kernel = PersistentPythonKernel(self.conversation_id, os.path.join(self.temp_dir, 'workspace'))
+            self._kernel.start()
 
-            success = result.returncode == 0
-            output = result.stdout if result.stdout else ""
+        try:
+            # 使用持久化内核执行代码
+            result = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: self._kernel.execute(code, timeout)
+            )
+
+            success = result['success']
+            output = result['output'] or ""
 
             # 收集生成的文件
             generated_files = self._collect_generated_files()
@@ -266,20 +539,13 @@ class LocalSandbox:
             return {
                 "success": success,
                 "output": output,
-                "error": result.stderr if result.stderr else None,
-                "exit_code": result.returncode,
-                "files": generated_files
+                "error": result.get('error'),
+                "exit_code": 0 if success else 1,
+                "files": generated_files,
+                "execution_count": result.get('execution_count', 0),
+                "variables": result.get('variables', {})
             }
 
-        except subprocess.TimeoutExpired:
-            logger.warning(f"{sandbox_info} 执行超时（{timeout}秒）")
-            return {
-                "success": False,
-                "output": "",
-                "error": f"执行超时（{timeout}秒）",
-                "exit_code": -1,
-                "files": []
-            }
         except Exception as e:
             logger.error(f"{sandbox_info} 执行失败: {str(e)}")
             return {
@@ -291,7 +557,10 @@ class LocalSandbox:
             }
 
     def _collect_generated_files(self) -> list:
-        """收集生成的文件（图片、CSV、Excel等），并复制到workspace/files"""
+        """收集生成的文件（图片、CSV、Excel等），并复制到workspace/files
+        
+        注意：只复制新生成的文件，避免重复复制原始数据文件
+        """
         if not self.temp_dir:
             return []
 
@@ -319,6 +588,15 @@ class LocalSandbox:
         if not os.path.exists(workspace_dir):
             return generated_files
 
+        # 获取 workspace/files 目录路径
+        from pathlib import Path
+        project_root = Path(__file__).parent.parent.parent
+        files_dir = project_root / "workspace" / "files"
+        files_dir.mkdir(parents=True, exist_ok=True)
+        files_dir = str(files_dir)
+        
+        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+
         # 遍历工作目录，收集生成的文件
         for filename in os.listdir(workspace_dir):
             if filename == 'analysis.py':
@@ -329,6 +607,11 @@ class LocalSandbox:
                 ext = os.path.splitext(filename)[1].lower()
 
                 if ext in supported_extensions:
+                    # 检查文件是否已复制过（避免重复复制原始数据文件）
+                    if filename in self._copied_files:
+                        logger.debug(f"{sandbox_info} 文件已复制过，跳过: {filename}")
+                        continue
+                    
                     # 读取文件内容（小文件）
                     file_size = os.path.getsize(file_path)
                     content = None
@@ -337,15 +620,6 @@ class LocalSandbox:
                         with open(file_path, 'rb') as f:
                             content = f.read()
 
-                    # 复制文件到 workspace/files（保留备份）
-                    # 使用项目根目录下的 workspace/files
-                    from pathlib import Path
-                    project_root = Path(__file__).parent.parent.parent  # chatbi/core -> chatbi -> nanobot
-                    files_dir = project_root / "workspace" / "files"
-                    files_dir.mkdir(parents=True, exist_ok=True)
-                    files_dir = str(files_dir)
-                    
-                    sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
                     logger.info(f"{sandbox_info} 准备复制文件: {filename}, 目标目录: {files_dir}")
 
                     # 生成唯一的文件名（避免冲突）
@@ -361,6 +635,9 @@ class LocalSandbox:
 
                         sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
                         logger.info(f"{sandbox_info} 复制文件到workspace/files: {filename} -> {unique_filename}")
+
+                        # 标记该文件已复制
+                        self._copied_files.add(filename)
 
                         file_info = {
                             'filename': filename,  # 原始文件名
@@ -451,6 +728,11 @@ class LocalSandbox:
     async def close(self):
         """关闭沙箱"""
         try:
+            # 关闭持久化内核
+            if self._kernel:
+                self._kernel.close()
+                self._kernel = None
+                
             if self.temp_dir and os.path.exists(self.temp_dir):
                 # 清理临时目录
                 shutil.rmtree(self.temp_dir, ignore_errors=True)

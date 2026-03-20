@@ -110,6 +110,54 @@ class AgentWrapper:
         # 返回所有工具定义
         return [tool.get_definition() for tool in self._tools.values()]
 
+    async def _get_files_context(self, conversation_id: str) -> str:
+        """
+        获取沙箱中的可用文件列表，构建为上下文字符串
+
+        Args:
+            conversation_id: 会话ID
+
+        Returns:
+            文件上下文字符串
+        """
+        try:
+            from .sandbox_manager import SandboxManager
+            sandbox_manager = SandboxManager()
+            session = sandbox_manager._sandboxes.get(conversation_id)
+
+            if not session or not session.sandbox:
+                return ""
+
+            # 获取沙箱中的文件列表（异步方法）
+            files = await session.sandbox.list_files()
+
+            if not files:
+                return ""
+
+            # 构建文件上下文
+            files_info = []
+            for file in files:
+                files_info.append(f"- {file['filename']} ({file['size']} bytes, {file['type']})")
+
+            files_context = f"""## 可用文件
+
+沙箱工作目录中有以下文件可用（位于当前工作目录）：
+
+{chr(10).join(files_info)}
+
+**注意**：
+- 使用 `read_file` 工具读取文件内容时，只需提供文件名（如 "daily_sales.csv"）
+- 使用 `execute_python` 时，可以直接读取文件（如 `pd.read_csv('daily_sales.csv')`）
+- 所有文件都位于当前工作目录中，无需使用路径前缀
+"""
+
+            logger.info(f"[文件上下文] 会话 {conversation_id} 有 {len(files)} 个可用文件")
+            return files_context
+
+        except Exception as e:
+            logger.warning(f"[文件上下文] 获取文件列表失败: {e}")
+            return ""
+
     @staticmethod
     def _estimate_tokens(text: str) -> int:
         """
@@ -171,7 +219,7 @@ class AgentWrapper:
         logger.info(f"[Token管理] 历史消息裁剪: 原始{len(messages)}条 -> 保留{len(trimmed_messages)}条, 总tokens: {current_tokens}")
         return trimmed_messages
 
-    def _build_messages(
+    async def _build_messages(
         self,
         conversation: Conversation,
         message: Message,
@@ -204,6 +252,9 @@ class AgentWrapper:
             tool_names = ", ".join(self._tools.keys())
             logger.info(f"[场景工具过滤] 场景={conversation.scene_code}, 使用所有工具")
 
+        # 获取沙箱中的可用文件列表
+        files_context = await self._get_files_context(conversation.conversation_id)
+
         system_prompt = chatbi_config.agent_system_prompt_template.format(
             scene_name=conversation.scene_name,
             scene_code=conversation.scene_code,
@@ -211,6 +262,10 @@ class AgentWrapper:
             current_time=chatbi_config.current_time,
             runtime_environment=chatbi_config.runtime_environment
         )
+
+        # 将文件上下文添加到系统提示中
+        if files_context:
+            system_prompt = f"{system_prompt}\n\n{files_context}"
 
         # 将memory上下文添加到系统提示中
         if memory_context:
@@ -434,7 +489,7 @@ class AgentWrapper:
             logger.info("=" * 80)
 
             # 构建消息列表
-            messages = self._build_messages(conversation, message, tool_messages if tool_messages else None)
+            messages = await self._build_messages(conversation, message, tool_messages if tool_messages else None)
 
             logger.info(f"[Agent Loop] 当前上下文消息数: {len(messages)}")
 
