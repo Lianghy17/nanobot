@@ -65,12 +65,24 @@ class ReadFileTool(BaseTool):
                 logger.error(f"{sandbox_info} 读取文件失败: {file_path}, error={error_msg}")
                 return tool_result(error_msg, success=False)
 
+            # 限制内容大小，防止token爆炸
+            max_chars = 5000  # 最多5000字符
+            content_truncated = False
+            original_length = len(content)
+            
+            if len(content) > max_chars:
+                content = content[:max_chars] + f"\n\n... [内容已截断，原长度: {original_length} 字符，请使用更小的limit参数或直接访问文件]"
+                content_truncated = True
+                logger.warning(f"{sandbox_info} 文件内容过大，已截断: {file_path} ({original_length} -> {max_chars} 字符)")
+
             logger.info(f"{sandbox_info} 读取文件成功: {file_path}")
             return tool_result({
                 "success": True,
                 "content": content,
                 "file_path": file_path,
-                "sandbox_type": "local"
+                "sandbox_type": "local",
+                "content_truncated": content_truncated,
+                "original_length": original_length if content_truncated else len(content)
             })
 
         except Exception as e:

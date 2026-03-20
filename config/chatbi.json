@@ -4,13 +4,19 @@
     "api_key": "sk-HSOmrqHUbXiysyRHD5TkkAJKTy6UbNQieW42A2IE4aYIG7ht",
     "model": "kimi-k2.5",
     "temperature": 0.6,
-    "max_tokens": 81920,
-    "timeout": 60,
-    "thinking_disabled": true
+    "max_tokens": 30000,
+    "timeout": 120,
+    "thinking_disabled": true,
+    "context_window": 262144,
+    "max_context_tokens": 200000,
+    "reserved_tokens": 10000
   },
   "agent": {
     "max_iterations": 30,
     "max_history_messages": 10,
+    "memory_window": 30,
+    "consolidation_enabled": true,
+    "max_tool_result_length": 5000,
     "system_prompt_file": "system_prompts/v1.md"
   },
   "system_prompts": {
@@ -28,6 +34,12 @@
   "memory": {
     "enabled": true,
     "level": "both"
+  },
+  "image_server": {
+    "enabled": true,
+    "host": "localhost",
+    "port": 8081,
+    "upload_timeout": 30
   },
   "tools": {
     "rag_search": {

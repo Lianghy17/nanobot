@@ -150,6 +150,21 @@ class ChatBIConfig:
         return self._config.get("llm", {}).get("thinking_disabled", False)
 
     @property
+    def llm_context_window(self) -> int:
+        """LLM上下文窗口大小"""
+        return int(self._config.get("llm", {}).get("context_window", 128000))
+
+    @property
+    def llm_max_context_tokens(self) -> int:
+        """LLM最大上下文token数（预留一些buffer）"""
+        return int(self._config.get("llm", {}).get("max_context_tokens", 100000))
+
+    @property
+    def llm_reserved_tokens(self) -> int:
+        """预留token数（用于系统提示和响应）"""
+        return int(self._config.get("llm", {}).get("reserved_tokens", 10000))
+
+    @property
     def sandbox_api_key(self) -> str:
         """沙箱API密钥"""
         return os.getenv("SANDBOX_API_KEY", self._config.get("sandbox", {}).get("api_key", ""))
@@ -173,6 +188,21 @@ class ChatBIConfig:
     def agent_max_history_messages(self) -> int:
         """Agent最大历史消息数"""
         return self._config.get("agent", {}).get("max_history_messages", 20)
+
+    @property
+    def agent_memory_window(self) -> int:
+        """触发记忆整合的消息阈值"""
+        return self._config.get("agent", {}).get("memory_window", 30)
+
+    @property
+    def agent_consolidation_enabled(self) -> bool:
+        """是否启用记忆整合"""
+        return self._config.get("agent", {}).get("consolidation_enabled", True)
+
+    @property
+    def agent_max_tool_result_length(self) -> int:
+        """工具结果最大长度（字符数）"""
+        return self._config.get("agent", {}).get("max_tool_result_length", 5000)
 
     @property
     def agent_system_prompt_template(self) -> str:
@@ -222,6 +252,31 @@ class ChatBIConfig:
     def memory_level(self) -> str:
         """Memory级别: 'global', 'user', 或 'both'"""
         return self._config.get("memory", {}).get("level", "both")
+
+    @property
+    def image_server_enabled(self) -> bool:
+        """是否启用图片服务器"""
+        return self._config.get("image_server", {}).get("enabled", True)
+
+    @property
+    def image_server_host(self) -> str:
+        """图片服务器主机"""
+        return self._config.get("image_server", {}).get("host", "localhost")
+
+    @property
+    def image_server_port(self) -> int:
+        """图片服务器端口"""
+        return int(self._config.get("image_server", {}).get("port", 8081))
+
+    @property
+    def image_server_url(self) -> str:
+        """图片服务器完整URL"""
+        return f"http://{self.image_server_host}:{self.image_server_port}"
+
+    @property
+    def image_server_upload_timeout(self) -> int:
+        """图片上传超时时间"""
+        return int(self._config.get("image_server", {}).get("upload_timeout", 30))
 
     def get_tool_config(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """获取特定工具的配置"""

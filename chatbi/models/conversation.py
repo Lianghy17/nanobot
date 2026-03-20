@@ -37,6 +37,7 @@ class Conversation(BaseModel):
     updated_at: datetime = Field(default_factory=datetime.utcnow, description="更新时间")
     status: ConversationStatus = Field(default=ConversationStatus.ACTIVE, description="状态")
     messages: List[Message] = Field(default_factory=list, description="消息列表")
+    last_consolidated: int = Field(default=0, description="已整合到memory的消息数量")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="会话元数据")
     
     def add_message(self, role: str, content: str, **kwargs):

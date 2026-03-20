@@ -9,18 +9,18 @@ from ..config import settings
 
 class MemoryStore:
     """
-    Two-level memory system: global + user.
+    Two-level memory system: global + session.
 
     Directory structure:
     workspace/
     └── memory/
         ├── _global/
-        │   ├── MEMORY.md      # Shared across all users
+        │   ├── MEMORY.md      # Shared across all conversations
         │   └── HISTORY.md
-        └── users/
-            └── {user_id}_{channel}/
-                ├── MEMORY.md  # User-specific memory
-                └── HISTORY.md
+        └── conversations/
+            └── {conversation_id}/
+                ├── MEMORY.md  # Session-specific memory
+                └── HISTORY.md # Session-specific history
     """
 
     def __init__(
@@ -33,7 +33,7 @@ class MemoryStore:
 
         Args:
             workspace: Workspace root path.
-            memory_key: Memory key in format "user_id:channel" for user-level isolation.
+            memory_key: Memory key in format "conv:{conversation_id}" for session-level isolation.
         """
         self.workspace = workspace
         self.memory_key = memory_key
@@ -44,17 +44,20 @@ class MemoryStore:
         self._global_memory = self._global_dir / "MEMORY.md"
         self._global_history = self._global_dir / "HISTORY.md"
 
-        # User-level paths (lazy init)
-        self._user_dir: Path | None = None
-        self._user_memory: Path | None = None
-        self._user_history: Path | None = None
+        # Session-level paths (lazy init)
+        self._session_dir: Path | None = None
+        self._session_memory: Path | None = None
+        self._session_history: Path | None = None
         if memory_key:
-            # memory_key format: "user_id:channel"
-            # Convert to directory name: "user_id_channel"
-            safe_key = memory_key.replace(":", "_")
-            self._user_dir = self._ensure_dir(self.memory_root / "users" / safe_key)
-            self._user_memory = self._user_dir / "MEMORY.md"
-            self._user_history = self._user_dir / "HISTORY.md"
+            # memory_key format: "conv:{conversation_id}"
+            # Extract conversation_id and create path
+            if memory_key.startswith("conv:"):
+                conv_id = memory_key[5:]  # Remove "conv:" prefix
+            else:
+                conv_id = memory_key
+            self._session_dir = self._ensure_dir(self.memory_root / "conversations" / conv_id)
+            self._session_memory = self._session_dir / "MEMORY.md"
+            self._session_history = self._session_dir / "HISTORY.md"
 
     def _ensure_dir(self, path: Path) -> Path:
         """Ensure directory exists."""
@@ -64,7 +67,7 @@ class MemoryStore:
     # ==================== Long-term Memory ====================
 
     def read_long_term(self) -> str:
-        """Read combined memory from global + user levels."""
+        """Read combined memory from global + session levels."""
         parts = []
 
         # Global memory
@@ -73,11 +76,11 @@ class MemoryStore:
             if global_content:
                 parts.append(("Global", global_content))
 
-        # User memory
-        if self._user_memory and self._user_memory.exists():
-            user_content = self._user_memory.read_text(encoding="utf-8").strip()
-            if user_content:
-                parts.append(("Personal", user_content))
+        # Session memory
+        if self._session_memory and self._session_memory.exists():
+            session_content = self._session_memory.read_text(encoding="utf-8").strip()
+            if session_content:
+                parts.append(("Session", session_content))
 
         if not parts:
             return ""
@@ -91,24 +94,24 @@ class MemoryStore:
     def write_long_term(
         self,
         content: str,
-        level: Literal["global", "user"] = "user"
+        level: Literal["global", "session"] = "session"
     ) -> None:
         """
         Write memory to specific level.
 
         Args:
             content: Memory content to write.
-            level: Target level - "global" or "user".
+            level: Target level - "global" or "session".
         """
         if level == "global":
             self._global_memory.write_text(content, encoding="utf-8")
-        elif level == "user" and self._user_memory:
-            self._user_memory.write_text(content, encoding="utf-8")
+        elif level == "session" and self._session_memory:
+            self._session_memory.write_text(content, encoding="utf-8")
 
     def append_long_term(
         self,
         content: str,
-        level: Literal["global", "user"] = "user"
+        level: Literal["global", "session"] = "session"
     ) -> None:
         """Append content to existing memory at specific level."""
         target_file = self._get_memory_file(level)
@@ -117,42 +120,42 @@ class MemoryStore:
             new_content = f"{existing}\n\n{content}".strip()
             target_file.write_text(new_content, encoding="utf-8")
 
-    def _get_memory_file(self, level: Literal["global", "user"]) -> Path | None:
+    def _get_memory_file(self, level: Literal["global", "session"]) -> Path | None:
         """Get memory file path for specific level."""
         if level == "global":
             return self._global_memory
-        elif level == "user":
-            return self._user_memory
+        elif level == "session":
+            return self._session_memory
         return None
 
     # ==================== History ====================
 
-    def append_history(self, entry: str, level: Literal["global", "user"] = "user") -> None:
+    def append_history(self, entry: str, level: Literal["global", "session"] = "session") -> None:
         """
         Append entry to history log.
 
         Args:
             entry: History entry to append.
-            level: Target level - defaults to "user".
+            level: Target level - defaults to "session".
         """
         target_file = self._get_history_file(level)
         if target_file:
             with open(target_file, "a", encoding="utf-8") as f:
                 f.write(entry.rstrip() + "\n\n")
 
-    def read_history(self, level: Literal["global", "user"] = "user") -> str:
+    def read_history(self, level: Literal["global", "session"] = "session") -> str:
         """Read history from specific level."""
         target_file = self._get_history_file(level)
         if target_file and target_file.exists():
             return target_file.read_text(encoding="utf-8")
         return ""
 
-    def _get_history_file(self, level: Literal["global", "user"]) -> Path | None:
+    def _get_history_file(self, level: Literal["global", "session"]) -> Path | None:
         """Get history file path for specific level."""
         if level == "global":
             return self._global_history
-        elif level == "user":
-            return self._user_history
+        elif level == "session":
+            return self._session_history
         return None
 
     # ==================== Context ====================
@@ -169,8 +172,8 @@ class MemoryStore:
         return {
             "global_memory": self._global_memory,
             "global_history": self._global_history,
-            "user_memory": self._user_memory,
-            "user_history": self._user_history,
+            "session_memory": self._session_memory,
+            "session_history": self._session_history,
         }
 
 
@@ -180,14 +183,14 @@ class MemoryManager:
     """
     Manager for two-level memory with CRUD operations.
 
-    Used by API endpoints to manage memories across users.
+    Used by API endpoints to manage memories across conversations.
     """
 
     def __init__(self, workspace: Path):
         self.workspace = workspace
         self.memory_root = workspace / "memory"
         self._global_dir = self._ensure_dir(self.memory_root / "_global")
-        self._users_dir = self._ensure_dir(self.memory_root / "users")
+        self._conversations_dir = self._ensure_dir(self.memory_root / "conversations")
 
     def _ensure_dir(self, path: Path) -> Path:
         """Ensure directory exists."""
@@ -207,26 +210,22 @@ class MemoryManager:
             "history": history_file.read_text(encoding="utf-8") if history_file.exists() else "",
         }
 
-    def get_user_memory(self, user_id: str, channel: str) -> dict[str, Any]:
-        """Get user-level memory content."""
-        memory_key = f"{user_id}:{channel}"
-        safe_key = memory_key.replace(":", "_")
-        user_dir = self._users_dir / safe_key
-        memory_file = user_dir / "MEMORY.md"
-        history_file = user_dir / "HISTORY.md"
+    def get_session_memory(self, conversation_id: str) -> dict[str, Any]:
+        """Get session-level memory content."""
+        conv_dir = self._conversations_dir / conversation_id
+        memory_file = conv_dir / "MEMORY.md"
+        history_file = conv_dir / "HISTORY.md"
 
         return {
-            "level": "user",
-            "user_id": user_id,
-            "channel": channel,
-            "memory_key": memory_key,
+            "level": "session",
+            "conversation_id": conversation_id,
             "memory": memory_file.read_text(encoding="utf-8") if memory_file.exists() else "",
             "history": history_file.read_text(encoding="utf-8") if history_file.exists() else "",
         }
 
-    def get_combined_memory(self, user_id: str | None = None, channel: str | None = None) -> str:
+    def get_combined_memory(self, conversation_id: str | None = None) -> str:
         """Get combined memory for a specific context."""
-        memory_key = f"{user_id}:{channel}" if user_id and channel else None
+        memory_key = f"conv:{conversation_id}" if conversation_id else None
         store = MemoryStore(self.workspace, memory_key=memory_key)
         return store.read_long_term()
 
@@ -237,64 +236,48 @@ class MemoryManager:
         memory_file = self._global_dir / "MEMORY.md"
         memory_file.write_text(content, encoding="utf-8")
 
-    def set_user_memory(self, user_id: str, channel: str, content: str) -> None:
-        """Set user-level memory content."""
-        memory_key = f"{user_id}:{channel}"
-        safe_key = memory_key.replace(":", "_")
-        user_dir = self._ensure_dir(self._users_dir / safe_key)
-        memory_file = user_dir / "MEMORY.md"
+    def set_session_memory(self, conversation_id: str, content: str) -> None:
+        """Set session-level memory content."""
+        conv_dir = self._ensure_dir(self._conversations_dir / conversation_id)
+        memory_file = conv_dir / "MEMORY.md"
         memory_file.write_text(content, encoding="utf-8")
 
     # ==================== Delete Operations ====================
 
-    def delete_user_memory(self, user_id: str, channel: str) -> bool:
-        """Delete user-level memory."""
-        memory_key = f"{user_id}:{channel}"
-        safe_key = memory_key.replace(":", "_")
-        user_dir = self._users_dir / safe_key
-        if user_dir.exists():
-            shutil.rmtree(user_dir)
+    def delete_session_memory(self, conversation_id: str) -> bool:
+        """Delete session-level memory."""
+        conv_dir = self._conversations_dir / conversation_id
+        if conv_dir.exists():
+            shutil.rmtree(conv_dir)
             return True
         return False
 
     # ==================== List Operations ====================
 
-    def list_users(self) -> list[dict[str, Any]]:
-        """List all users with memory."""
-        users = []
+    def list_conversations(self) -> list[dict[str, Any]]:
+        """List all conversations with memory."""
+        conversations = []
 
-        if self._users_dir.exists():
-            for user_dir in self._users_dir.iterdir():
-                if not user_dir.is_dir():
+        if self._conversations_dir.exists():
+            for conv_dir in self._conversations_dir.iterdir():
+                if not conv_dir.is_dir():
                     continue
 
-                # Parse user_id_channel from directory name
-                name = user_dir.name
-                if "_" in name:
-                    # Find the last underscore to split user_id and channel
-                    # Format: {user_id}_{channel}
-                    last_underscore = name.rfind("_")
-                    user_id = name[:last_underscore]
-                    channel = name[last_underscore + 1:]
-                else:
-                    user_id, channel = name, "unknown"
+                conversation_id = conv_dir.name
+                memory_file = conv_dir / "MEMORY.md"
+                history_file = conv_dir / "HISTORY.md"
 
-                memory_file = user_dir / "MEMORY.md"
-                history_file = user_dir / "HISTORY.md"
-
-                users.append({
-                    "user_id": user_id,
-                    "channel": channel,
-                    "memory_key": f"{user_id}:{channel}",
+                conversations.append({
+                    "conversation_id": conversation_id,
                     "has_memory": memory_file.exists(),
                     "has_history": history_file.exists(),
                 })
 
-        return users
+        return conversations
 
     def get_stats(self) -> dict[str, Any]:
         """Get memory statistics."""
-        users = self.list_users()
+        conversations = self.list_conversations()
 
         global_memory = self._global_dir / "MEMORY.md"
         global_history = self._global_dir / "HISTORY.md"
@@ -304,8 +287,8 @@ class MemoryManager:
                 "has_memory": global_memory.exists(),
                 "has_history": global_history.exists(),
             },
-            "users": {
-                "count": len(users),
-                "list": users,
+            "conversations": {
+                "count": len(conversations),
+                "list": conversations,
             },
         }

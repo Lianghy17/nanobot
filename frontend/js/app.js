@@ -5,7 +5,7 @@ let currentConversation = null;
 let selectedScene = null;
 let scenes = [];
 let conversations = [];
-let pollingInterval = null;  // 轮询定时器
+let eventSource = null;  // SSE连接
 
 // API基础URL
 const API_BASE = '/api';
@@ -78,7 +78,7 @@ async function createConversation() {
         alert('请选择场景');
         return;
     }
-    
+
     try {
         const response = await fetch(`${API_BASE}/conversations`, {
             method: 'POST',
@@ -89,25 +89,28 @@ async function createConversation() {
                 scene_code: selectedScene.scene_code
             })
         });
-        
+
         if (!response.ok) {
             throw new Error('创建对话失败');
         }
-        
+
         const conversation = await response.json();
         currentConversation = conversation;
-        
+
         // 更新UI
         document.getElementById('convTitle').textContent = conversation.scene_name;
         document.getElementById('messageList').innerHTML = '<div class="loading"><p>新对话已创建，开始提问吧！</p></div>';
         document.getElementById('sendBtn').disabled = false;
-        
+
         hideSceneDialog();
         loadHistory();
-        
+
         // 聚焦输入框
         document.getElementById('messageInput').focus();
-        
+
+        // 建立SSE连接
+        establishSSEConnection(conversation.conversation_id);
+
     } catch (error) {
         console.error('创建对话失败:', error);
         alert('创建对话失败');
@@ -151,23 +154,29 @@ function renderHistory() {
 // 加载指定对话
 async function loadConversation(conversationId) {
     try {
+        // 关闭旧的SSE连接
+        closeSSEConnection();
+
         const response = await fetch(`${API_BASE}/conversations/${conversationId}`);
-        
+
         if (!response.ok) {
             throw new Error('加载对话失败');
         }
-        
+
         const conversation = await response.json();
         currentConversation = conversation;
-        
+
         // 更新UI
         document.getElementById('convTitle').textContent = conversation.scene_name;
         renderMessages(conversation.messages);
         document.getElementById('sendBtn').disabled = false;
-        
+
         renderHistory();
         scrollToBottom();
-        
+
+        // 建立SSE连接
+        establishSSEConnection(conversationId);
+
     } catch (error) {
         console.error('加载对话失败:', error);
         alert('加载对话失败');
@@ -231,18 +240,68 @@ function fixMarkdownImagePaths(html, files) {
         const src = img.getAttribute('src');
         if (!src) return;
 
-        // 如果src已经是完整URL，跳过
-        if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('/api/')) {
+        // 如果src已经是 data: URL (base64)，跳过
+        if (src.startsWith('data:')) {
             return;
         }
 
-        // src是文件名，查找对应的文件信息
-        const fileInfo = files?.find(f => f.filename === src || f.path === src);
-        if (fileInfo) {
-            // 构建下载URL
-            const downloadUrl = `/api/files/download/web_default_user/${currentConversation.conversation_id}/${fileInfo.path || fileInfo.filename}`;
-            img.setAttribute('src', downloadUrl);
-            console.log('[fixMarkdownImagePaths] 转换图片路径:', src, '->', downloadUrl);
+        // 如果src已经是完整HTTP URL，跳过
+        if (src.startsWith('http://') || src.startsWith('https://')) {
+            return;
+        }
+
+        // 尝试匹配文件信息
+        let matchedFile = null;
+        
+        // 从 src 中提取文件名（去掉路径前缀）
+        const srcFilename = src.split('/').pop();
+        
+        for (const f of (files || [])) {
+            // 优先匹配：有 base64 数据且文件名匹配
+            if (f.base64 || f.url?.startsWith('data:')) {
+                // 匹配原始文件名
+                if (f.filename === src || f.filename === srcFilename) {
+                    matchedFile = f;
+                    break;
+                }
+                // 匹配 unique_filename 中的文件名部分
+                if (f.unique_filename) {
+                    const uniqueParts = f.unique_filename.split('_');
+                    const actualName = uniqueParts.slice(3).join('_'); // 去掉 conv_id, timestamp 前缀
+                    if (src === actualName || srcFilename === actualName) {
+                        matchedFile = f;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // 如果没找到 base64 匹配，尝试其他匹配方式
+        if (!matchedFile) {
+            matchedFile = files?.find(f => {
+                if (f.filename === src || f.filename === srcFilename) return true;
+                if (f.url === src) return true;
+                return false;
+            });
+        }
+
+        if (matchedFile) {
+            // 优先使用 base64 数据
+            if (matchedFile.base64) {
+                img.setAttribute('src', matchedFile.base64);
+                console.log('[fixMarkdownImagePaths] 使用base64:', src, '-> base64数据');
+            } else if (matchedFile.url?.startsWith('data:')) {
+                img.setAttribute('src', matchedFile.url);
+                console.log('[fixMarkdownImagePaths] 使用base64 URL:', src);
+            } else if (matchedFile.url?.startsWith('/files/')) {
+                // 静态文件URL，需要转换
+                const downloadUrl = `/api/files/download/web_default_user/${currentConversation.conversation_id}/${matchedFile.filename}`;
+                img.setAttribute('src', downloadUrl);
+                console.log('[fixMarkdownImagePaths] 使用下载API:', src, '->', downloadUrl);
+            } else if (matchedFile.url) {
+                img.setAttribute('src', matchedFile.url);
+                console.log('[fixMarkdownImagePaths] 使用URL:', src, '->', matchedFile.url);
+            }
         } else {
             console.warn('[fixMarkdownImagePaths] 未找到文件信息:', src);
         }
@@ -262,20 +321,31 @@ function renderFiles(files) {
     const filesHtml = files.map(file => {
         const isImage = file.type && file.type.startsWith('image/');
         const filename = file.filename || file.name;
-        const downloadUrl = file.path ? `/api/files/download/web_default_user/${currentConversation.conversation_id}/${file.path}` :
-                                    file.download_url || '#';
 
-        console.log('[renderFiles] 处理文件:', { filename, type: file.type, isImage, downloadUrl });
+        // 优先使用 base64 数据，否则使用 URL
+        let displayUrl;
+        if (file.base64) {
+            displayUrl = file.base64;
+        } else if (file.url?.startsWith('data:')) {
+            displayUrl = file.url;
+        } else if (file.url) {
+            displayUrl = file.url;
+        } else {
+            displayUrl = `/api/files/download/web_default_user/${currentConversation.conversation_id}/${filename}`;
+        }
+
+        console.log('[renderFiles] 处理文件:', { filename, type: file.type, isImage, hasBase64: !!file.base64 });
 
         if (isImage) {
             return `
                 <div class="image-container">
-                    <img src="${downloadUrl}" alt="${filename}" onclick="openImage('${downloadUrl}')">
+                    <img src="${displayUrl}" alt="${filename}" onclick="openImage('${displayUrl}')">
                     <div class="image-caption">${filename} (${formatFileSize(file.size)})</div>
                 </div>
             `;
         } else {
             const icon = getFileIcon(file.type, filename);
+            const downloadUrl = `/api/files/download/web_default_user/${currentConversation.conversation_id}/${filename}`;
             return `
                 <div class="file-card" onclick="downloadFile('${downloadUrl}', '${filename}')">
                     <span class="file-icon">${icon}</span>
@@ -408,9 +478,9 @@ async function sendMessage() {
         }
 
         const result = await response.json();
+        console.log('消息已发送:', result);
 
-        // 开始轮询获取AI回复
-        startPolling(thinkingMessageId);
+        // 等待SSE推送结果，不再使用轮询
 
     } catch (error) {
         console.error('发送消息失败:', error);
@@ -455,66 +525,93 @@ function removeThinkingMessage(thinkingId) {
     }
 }
 
-// 开始轮询获取AI回复
-function startPolling(thinkingMessageId) {
-    // 清除之前的轮询
-    if (pollingInterval) {
-        clearInterval(pollingInterval);
-    }
+// 建立SSE连接
+function establishSSEConnection(conversationId) {
+    // 如果已有连接，先关闭
+    closeSSEConnection();
 
-    let pollCount = 0;
-    const maxPolls = 30;  // 最多轮询30次（30秒）
+    console.log(`[SSE] 建立连接: conversation_id=${conversationId}`);
 
-    pollingInterval = setInterval(async () => {
-        pollCount++;
+    // 创建EventSource连接
+    eventSource = new EventSource(`${API_BASE}/sse/stream/${conversationId}`);
 
-        if (pollCount > maxPolls) {
-            clearInterval(pollingInterval);
-            removeThinkingMessage(thinkingMessageId);
-            appendMessage('assistant', '抱歉，处理时间过长，请稍后刷新查看结果。');
-            document.getElementById('sendBtn').disabled = false;
-            return;
-        }
+    // 连接打开
+    eventSource.onopen = (event) => {
+        console.log('[SSE] 连接已打开');
+    };
 
+    // 连接打开事件
+    eventSource.addEventListener('connected', (event) => {
+        console.log('[SSE] 连接已建立:', JSON.parse(event.data));
+    });
+
+    // 消息处理开始
+    eventSource.addEventListener('processing_started', (event) => {
+        console.log('[SSE] 处理开始:', JSON.parse(event.data));
+    });
+
+    // 用户消息已保存
+    eventSource.addEventListener('user_message_saved', (event) => {
+        console.log('[SSE] 用户消息已保存:', JSON.parse(event.data));
+    });
+
+    // 处理完成
+    eventSource.addEventListener('processing_completed', (event) => {
+        console.log('[SSE] 收到处理完成事件:', event.data);
         try {
-            // 获取对话的最新消息
-            const response = await fetch(`${API_BASE}/conversations/${currentConversation.conversation_id}/messages`);
+            const data = JSON.parse(event.data);
+            console.log('[SSE] 解析后数据:', data);
 
-            if (!response.ok) {
-                return;
-            }
+            // 移除思考中的消息
+            const thinkingElements = document.querySelectorAll('.message.assistant[id^="thinking_"]');
+            thinkingElements.forEach(el => el.remove());
 
-            const data = await response.json();
+            // 显示AI回复
+            console.log('[SSE] 准备显示消息, content长度:', data.content?.length, 'files数量:', data.files?.length);
+            appendMessage('assistant', data.content || '处理完成', data.files || []);
 
-            // 检查是否有新的AI回复
-            const messages = data.messages || [];
-            const lastMessage = messages[messages.length - 1];
+            // 启用发送按钮
+            document.getElementById('sendBtn').disabled = false;
 
-            // 如果最后一条消息是assistant，说明AI已回复
-            if (lastMessage && lastMessage.role === 'assistant') {
-                clearInterval(pollingInterval);
-                removeThinkingMessage(thinkingMessageId);
-
-                // 重新加载对话以显示完整内容
-                await loadConversation(currentConversation.conversation_id);
-
-                // 加载文件列表
-                await loadFiles();
-
-                document.getElementById('sendBtn').disabled = false;
-            }
-
-        } catch (error) {
-            console.error('轮询失败:', error);
+            // 只更新历史列表，不重新加载整个对话（避免覆盖刚添加的消息）
+            loadHistory();
+        } catch (e) {
+            console.error('[SSE] 解析processing_completed事件失败:', e, event.data);
         }
-    }, 1000);  // 每秒轮询一次
+    });
+
+    // 错误事件
+    eventSource.addEventListener('error', (event) => {
+        console.error('[SSE] 错误:', JSON.parse(event.data));
+        const data = JSON.parse(event.data);
+
+        // 移除思考中的消息
+        const thinkingElements = document.querySelectorAll('.message.assistant[id^="thinking_"]');
+        thinkingElements.forEach(el => el.remove());
+
+        // 显示错误消息
+        appendMessage('assistant', data.message || '抱歉，处理请求时发生错误。');
+        document.getElementById('sendBtn').disabled = false;
+    });
+
+    // 心跳事件
+    eventSource.addEventListener('heartbeat', (event) => {
+        console.debug('[SSE] 心跳:', JSON.parse(event.data));
+    });
+
+    // 连接错误
+    eventSource.onerror = (error) => {
+        console.error('[SSE] 连接错误:', error);
+        closeSSEConnection();
+    };
 }
 
-// 停止轮询
-function stopPolling() {
-    if (pollingInterval) {
-        clearInterval(pollingInterval);
-        pollingInterval = null;
+// 关闭SSE连接
+function closeSSEConnection() {
+    if (eventSource) {
+        console.log('[SSE] 关闭连接');
+        eventSource.close();
+        eventSource = null;
     }
 }
 
@@ -628,26 +725,10 @@ async function uploadFile() {
     fileInput.value = '';
 }
 
-// 加载文件列表
+// 加载文件列表（已废弃，SSE自动推送文件信息）
 async function loadFiles() {
-    if (!currentConversation) {
-        return;
-    }
-
-    try {
-        const response = await fetch(`${API_BASE}/files/list/web_default_user/${currentConversation.conversation_id}`);
-
-        if (!response.ok) {
-            return;
-        }
-
-        const data = await response.json();
-        // 文件列表会在renderMessages中自动渲染
-        console.log('当前沙箱中的文件:', data.files);
-
-    } catch (error) {
-        console.error('加载文件列表失败:', error);
-    }
+    // SSE自动推送文件信息，不再需要手动加载
+    // 保留此函数以兼容现有代码
 }
 
 // HTML转义

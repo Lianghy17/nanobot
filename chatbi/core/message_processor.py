@@ -5,6 +5,7 @@ import logging
 from ..models import Message
 from .agent_wrapper import AgentWrapper
 from .conversation_manager import ConversationManager
+from .sse_manager import sse_manager
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +35,17 @@ class MessageProcessor:
         print(f"[PID:{pid}] [终端输出] 处理消息: {message.id}, conv_id={message.conversation_id}")
         print(f"{'='*80}\n")
         logger.info(f"[PID:{pid}] 处理消息: {message.id}, conv_id={message.conversation_id}")
-        
+
+        # 发送处理开始事件
+        await sse_manager.send_event(
+            message.conversation_id,
+            "processing_started",
+            {
+                "message_id": message.id,
+                "content": message.content
+            }
+        )
+
         # 保存用户消息
         self.conversation_manager.add_message(
             conversation_id=message.conversation_id,
@@ -43,24 +54,43 @@ class MessageProcessor:
             content=message.content,
             metadata=message.metadata or {}
         )
-        
+
+        # 发送用户消息已保存事件
+        await sse_manager.send_event(
+            message.conversation_id,
+            "user_message_saved",
+            {
+                "message_id": message.id,
+                "content": message.content
+            }
+        )
+
         # 获取对话信息
         conversation = self.conversation_manager.get(
             message.conversation_id,
             message.user_channel
         )
-        
+
         if not conversation:
             logger.error(f"对话不存在: {message.conversation_id}")
+            # 发送错误事件
+            await sse_manager.send_event(
+                message.conversation_id,
+                "error",
+                {
+                    "message": "对话不存在",
+                    "conversation_id": message.conversation_id
+                }
+            )
             return
-        
+
         # 调用Agent处理
         try:
             response = await self.agent_wrapper.process(
                 conversation=conversation,
                 message=message
             )
-            
+
             if response:
                 # 保存助手回复
                 self.conversation_manager.add_message(
@@ -72,14 +102,38 @@ class MessageProcessor:
                     tool_calls=response.get("tool_calls"),
                     metadata=response.get("metadata", {})
                 )
+
+                # 发送处理完成事件
+                files_data = response.get("metadata", {}).get("files", [])
+                logger.info(f"[SSE] 发送处理完成事件, files数量: {len(files_data)}, files: {files_data}")
                 
+                await sse_manager.send_event(
+                    message.conversation_id,
+                    "processing_completed",
+                    {
+                        "message_id": message.id,
+                        "content": response.get("content", ""),
+                        "tools_used": response.get("tools_used", []),
+                        "files": files_data
+                    }
+                )
+
                 logger.info(f"消息处理完成: {message.id}")
             else:
                 logger.warning(f"Agent未返回响应: {message.id}")
-                
+                # 发送无响应事件
+                await sse_manager.send_event(
+                    message.conversation_id,
+                    "error",
+                    {
+                        "message": "Agent未返回响应",
+                        "message_id": message.id
+                    }
+                )
+
         except Exception as e:
             logger.error(f"处理消息失败: {message.id}, error={e}")
-            
+
             # 保存错误消息
             self.conversation_manager.add_message(
                 conversation_id=message.conversation_id,
@@ -87,4 +141,14 @@ class MessageProcessor:
                 role="assistant",
                 content=f"抱歉，处理您的请求时发生错误：{str(e)}",
                 metadata={"error": True}
+            )
+
+            # 发送错误事件
+            await sse_manager.send_event(
+                message.conversation_id,
+                "error",
+                {
+                    "message": f"处理您的请求时发生错误：{str(e)}",
+                    "message_id": message.id
+                }
             )

@@ -8,13 +8,18 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/agent/tools/file_ops.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/agent/tools/file_ops.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/agent/tools/python_tool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/conversations.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/conversations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/files.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/files.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/memory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/message_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/message_processor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/system_prompts/v1.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v1.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/system_prompts/v2.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v2.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/system_prompts/v3.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v3.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/models/conversation.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/models/conversation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements-chatbi.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements-chatbi.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/workspace/memory/users/web_web_default_user_web/HISTORY.md" beforeDir="false" afterPath="$PROJECT_DIR$/workspace/memory/users/web_web_default_user_web/HISTORY.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -31,6 +36,11 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="chatbi" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -63,12 +73,14 @@
     "Python.conversations.executor": "Run",
     "Python.main.executor": "Run",
     "Python.product_sales_visualization.executor": "Run",
+    "Python.sse_manager.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Shell Script.run.sh.executor": "Run",
     "Shell Script.start.sh.executor": "Run",
-    "git-widget-placeholder": "chatbi",
+    "Shell Script.start_with_image_server.sh.executor": "Run",
+    "git-widget-placeholder": "chatbi__frontend",
     "last_opened_file_path": "/Users/lianghaoyun/project/nanobot",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
@@ -79,29 +91,7 @@
       <recent name="$PROJECT_DIR$/nanobot" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
-    <configuration name="conversations" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="nanobot" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/chatbi/api" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chatbi/api/conversations.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Shell Script.start_with_image_server.sh">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="nanobot" />
       <option name="ENV_FILES" value="" />
@@ -146,6 +136,43 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="sse_manager" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="nanobot" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/chatbi/core" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chatbi/core/sse_manager.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="start_with_image_server.sh" type="ShConfigurationType" temporary="true">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/chatbi/start_with_image_server.sh" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/chatbi" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="nanobot" />
       <option name="ENV_FILES" value="" />
@@ -163,30 +190,13 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_sandbox_files.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="nanobot" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/chatbi/test_sandbox_files.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Shell Script.start_with_image_server.sh" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.product_sales_visualization" />
-        <item itemvalue="Python.conversations" />
         <item itemvalue="Python tests.pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" />
-        <item itemvalue="Python tests.pytest in test_sandbox_files.py" />
+        <item itemvalue="Python.sse_manager" />
+        <item itemvalue="Python.product_sales_visualization" />
       </list>
     </recent_temporary>
   </component>
@@ -212,7 +222,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="chatbi" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -223,8 +245,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>370</line>
-          <option name="timeStamp" value="19" />
+          <line>429</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
+          <line>534</line>
+          <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

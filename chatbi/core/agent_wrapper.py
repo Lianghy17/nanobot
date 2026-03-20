@@ -1,8 +1,10 @@
 """Agent包装器 - 封装nanobot的Agent核心"""
 import os
 import json
+import asyncio
 import logging
 import re
+import json_repair
 from typing import Dict, Any, Optional, List, Callable, Awaitable
 from datetime import datetime
 from ..config import chatbi_config
@@ -12,6 +14,7 @@ from .conversation_manager import ConversationManager
 from ..agent.tools import RAGTool, SQLTool, PythonTool, ReadFileTool, WriteFileTool
 from .llm_client import LLMClient
 from .memory import MemoryStore
+from .sse_manager import sse_manager
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -34,6 +37,7 @@ class AgentWrapper:
         self._tools = {}
         self._initialized = False
         self.conversation_manager = ConversationManager()
+        self._current_conversation_id = None  # 当前会话ID（用于SSE推送）
 
         # 初始化LLM客户端
         self.llm_client = LLMClient(
@@ -70,8 +74,9 @@ class AgentWrapper:
 
     def _set_tool_context(self, user_channel: str, conversation_id: str = None):
         """设置所有工具的上下文"""
-        # 更新memory的memory_key
-        memory_key = f"{user_channel}:web" if conversation_id else None
+        # 会话级别隔离：使用 conversation_id 作为 memory_key
+        # 目录结构: workspace/memory/conversations/{conversation_id}/
+        memory_key = f"conv:{conversation_id}" if conversation_id else None
         self.memory_store = MemoryStore(Path(chatbi_config.workspace_path), memory_key=memory_key)
 
         for tool in self._tools.values():
@@ -309,6 +314,55 @@ class AgentWrapper:
             logger.info("=" * 80)
             return f"Error: {str(e)}"
 
+    def _compress_tool_result(self, result: str, tool_name: str) -> str:
+        """
+        压缩工具结果（防止token爆炸）
+
+        Args:
+            result: 工具执行结果
+            tool_name: 工具名称
+
+        Returns:
+            压缩后的结果
+        """
+        max_length = chatbi_config.agent_max_tool_result_length
+
+        # 如果结果已经足够短，直接返回
+        if len(result) <= max_length:
+            return result
+
+        # 对于不同的工具类型，使用不同的压缩策略
+        if tool_name == "execute_python":
+            # Python执行结果可能包含大量输出或base64编码
+            # 尝试解析JSON，提取关键信息
+            try:
+                result_obj = json.loads(result)
+
+                # 如果有文件信息，保留文件信息但截断其他内容
+                if isinstance(result_obj, dict) and "files" in result_obj:
+                    files_info = result_obj["files"]
+                    compressed = json.dumps({
+                        "success": result_obj.get("success"),
+                        "output": result_obj.get("output", "")[:500],
+                        "files": files_info,
+                        "_truncated": True,
+                        "_original_length": len(result)
+                    }, ensure_ascii=False)
+                    return compressed
+            except (json.JSONDecodeError, TypeError):
+                pass
+
+            # 如果解析失败，简单截断
+            return result[:max_length] + f"\n\n... [结果已截断，原长度: {len(result)} 字符]"
+
+        elif tool_name == "read_file":
+            # read_file 工具已经在工具内部做了截断
+            return result
+
+        else:
+            # 其他工具，简单截断
+            return result[:max_length] + f"\n\n... [结果已截断，原长度: {len(result)} 字符]"
+
     @staticmethod
     def _strip_think(text: Optional[str]) -> Optional[str]:
         """
@@ -398,6 +452,16 @@ class AgentWrapper:
             if response.tool_calls:
                 logger.info(f"[Agent Loop] 检测到 {len(response.tool_calls)} 个工具调用，开始执行")
 
+                # 发送工具调用事件
+                await sse_manager.send_event(
+                    conversation.conversation_id,
+                    "tool_calling",
+                    {
+                        "iteration": iteration,
+                        "tools": [tc.name for tc in response.tool_calls]
+                    }
+                )
+
                 # 进度回调
                 if on_progress:
                     clean_content = self._strip_think(response.content)
@@ -431,12 +495,26 @@ class AgentWrapper:
                     # 执行工具
                     result = await self._execute_tool(tool_call.name, tool_call.arguments)
 
+                    # 压缩工具结果（防止token爆炸）
+                    compressed_result = self._compress_tool_result(result, tool_call.name)
+
+                    # 发送工具执行完成事件
+                    await sse_manager.send_event(
+                        conversation.conversation_id,
+                        "tool_completed",
+                        {
+                            "iteration": iteration,
+                            "tool": tool_call.name,
+                            "success": "Error" not in compressed_result
+                        }
+                    )
+
                     # 添加工具结果消息
                     tool_messages.append({
                         "role": "tool",
                         "tool_call_id": tool_call.id,
                         "name": tool_call.name,
-                        "content": result
+                        "content": compressed_result
                     })
 
                 logger.info(f"[Agent Loop] 工具执行完成，已使用工具: {tools_used}")
@@ -522,11 +600,119 @@ Tools: {', '.join(tools_used) if tools_used else 'None'}
 Scene: {conversation.scene_name}
 """
             # 更新history
-            self.memory_store.append_history(history_entry, level="user")
+            self.memory_store.append_history(history_entry, level="session")
             logger.debug(f"[Memory] 更新history成功")
 
         except Exception as e:
             logger.error(f"[Memory] 更新memory失败: {e}", exc_info=True)
+
+    async def _consolidate_memory(self, conversation: Conversation) -> None:
+        """
+        将旧消息整合到 MEMORY.md + HISTORY.md
+
+        参考 nanobot 的记忆整合机制：
+        - 当消息数超过 memory_window 时触发
+        - 使用 LLM 将历史对话压缩为摘要
+        - 保留最近 memory_window // 2 条消息不整合
+        """
+        if not chatbi_config.agent_consolidation_enabled:
+            return
+
+        memory_window = chatbi_config.agent_memory_window
+        keep_count = memory_window // 2
+
+        # 检查是否需要整合
+        if len(conversation.messages) <= keep_count:
+            logger.debug(f"[Memory整合] 会话消息数({len(conversation.messages)}) <= 保留数({keep_count})，无需整合")
+            return
+
+        # 计算待处理的消息数
+        messages_to_process = len(conversation.messages) - conversation.last_consolidated
+        if messages_to_process <= 0:
+            logger.debug(f"[Memory整合] 无新消息需要整合 (last_consolidated={conversation.last_consolidated})")
+            return
+
+        # 提取待整合的消息（排除最近 keep_count 条）
+        old_messages = conversation.messages[conversation.last_consolidated:-keep_count]
+        if not old_messages:
+            return
+
+        logger.info(f"[Memory整合] 开始整合: 总消息数={len(conversation.messages)}, 待整合={len(old_messages)}, 保留={keep_count}")
+
+        # 构建对话文本
+        lines = []
+        for msg in old_messages:
+            if not msg.content:
+                continue
+            tools = f" [tools: {', '.join(msg.tools_used)}]" if msg.tools_used else ""
+            timestamp = msg.timestamp.strftime("%Y-%m-%d %H:%M") if msg.timestamp else "?"
+            lines.append(f"[{timestamp}] {msg.role.upper()}{tools}: {msg.content}")
+
+        conversation_text = "\n".join(lines)
+
+        # 获取当前memory
+        current_memory = self.memory_store.read_long_term()
+
+        # 构建整合提示词
+        prompt = f"""You are a memory consolidation agent. Process this conversation and return a JSON object with exactly two keys:
+
+1. "history_entry": A paragraph (2-5 sentences) summarizing the key events/decisions/topics. Start with a timestamp like [YYYY-MM-DD HH:MM]. Include enough detail to be useful when found by grep search later.
+
+2. "memory_update": The updated session-level memory content. Add any new facts from this conversation. If nothing new, return the existing content unchanged.
+
+## Current Memory (may include Global and Personal sections)
+{current_memory or "(empty)"}
+
+## Conversation to Process
+{conversation_text}
+
+Respond with ONLY valid JSON, no markdown fences."""
+
+        try:
+            # 调用 LLM 进行整合
+            logger.info(f"[Memory LLM] 开始记忆整合, model={chatbi_config.llm_model}")
+            response = await self.llm_client.chat(
+                messages=[
+                    {"role": "system", "content": "You are a memory consolidation agent. Respond only with valid JSON."},
+                    {"role": "user", "content": prompt},
+                ],
+                tools=None,  # 不使用工具
+            )
+
+            if not response.content:
+                logger.warning("[Memory整合] LLM 返回空响应")
+                return
+
+            # 解析响应
+            text = response.content.strip()
+            if text.startswith("```"):
+                text = text.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+
+            # 使用 json_repair 解析（更宽容）
+            import json_repair
+            result = json_repair.loads(text)
+
+            if not isinstance(result, dict):
+                logger.warning(f"[Memory整合] 响应格式错误: {text[:200]}")
+                return
+
+            # 更新 history
+            if entry := result.get("history_entry"):
+                self.memory_store.append_history(entry, level="session")
+                logger.info(f"[Memory整合] 已添加历史条目: {entry[:100]}...")
+
+            # 更新长期记忆
+            if update := result.get("memory_update"):
+                if update != current_memory:
+                    self.memory_store.write_long_term(update, level="session")
+                    logger.info("[Memory整合] 已更新长期记忆")
+
+            # 更新 last_consolidated 指针
+            conversation.last_consolidated = len(conversation.messages) - keep_count
+            logger.info(f"[Memory整合] 完成, last_consolidated={conversation.last_consolidated}")
+
+        except Exception as e:
+            logger.error(f"[Memory整合] 失败: {e}", exc_info=True)
 
     async def process(self, conversation: Conversation, message: Message) -> Optional[Dict[str, Any]]:
         """
@@ -539,6 +725,9 @@ Scene: {conversation.scene_name}
         Returns:
             处理结果字典
         """
+        # 保存当前会话ID（用于SSE推送）
+        self._current_conversation_id = conversation.conversation_id
+
         # 测试终端输出
         pid = os.getpid()
         print(f"\n{'='*80}")
@@ -552,6 +741,16 @@ Scene: {conversation.scene_name}
         logger.info(f"[PID:{pid}] 场景: {conversation.scene_name} ({conversation.scene_code})")
         logger.info(f"[PID:{pid}] 用户消息: {message.content}")
         logger.info(f"[PID:{pid}] " + "=" * 80)
+
+        # 发送Agent开始处理事件
+        await sse_manager.send_event(
+            conversation.conversation_id,
+            "agent_started",
+            {
+                "conversation_id": conversation.conversation_id,
+                "scene": conversation.scene_name
+            }
+        )
 
         # 设置工具上下文
         self._set_tool_context(conversation.user_channel, conversation.conversation_id)
@@ -581,6 +780,13 @@ Scene: {conversation.scene_name}
             # 如果启用了memory功能，更新memory
             if chatbi_config.memory_enabled:
                 self._update_memory(conversation, message, final_content, tools_used)
+
+                # 后台触发记忆整合（检查是否超过阈值）
+                memory_window = chatbi_config.agent_memory_window
+                if len(conversation.messages) > memory_window:
+                    logger.info(f"[Memory整合] 消息数({len(conversation.messages)}) > 阈值({memory_window})，触发后台整合")
+                    import asyncio
+                    asyncio.create_task(self._consolidate_memory(conversation))
 
             return {
                 "content": final_content,

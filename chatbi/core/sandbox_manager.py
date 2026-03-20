@@ -129,6 +129,9 @@ class LocalSandbox:
             '.jpg': 'image/jpeg',
             '.jpeg': 'image/jpeg',
             '.gif': 'image/gif',
+            '.html': 'text/html',
+            '.htm': 'text/html',
+            '.pdf': 'application/pdf',
         }
 
         for root, dirs, filenames in os.walk(workspace_dir):
@@ -288,7 +291,7 @@ class LocalSandbox:
             }
 
     def _collect_generated_files(self) -> list:
-        """收集生成的文件（图片、CSV、Excel等）"""
+        """收集生成的文件（图片、CSV、Excel等），并复制到workspace/files"""
         if not self.temp_dir:
             return []
 
@@ -302,12 +305,15 @@ class LocalSandbox:
             '.jpeg': 'image/jpeg',
             '.gif': 'image/gif',
             '.svg': 'image/svg+xml',
+            '.html': 'text/html',
+            '.htm': 'text/html',
             '.csv': 'text/csv',
             '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             '.xls': 'application/vnd.ms-excel',
             '.json': 'application/json',
             '.txt': 'text/plain',
             '.md': 'text/markdown',
+            '.pdf': 'application/pdf',
         }
 
         if not os.path.exists(workspace_dir):
@@ -331,12 +337,98 @@ class LocalSandbox:
                         with open(file_path, 'rb') as f:
                             content = f.read()
 
-                    generated_files.append({
-                        'filename': filename,
-                        'type': supported_extensions[ext],
-                        'size': file_size,
-                        'content': content  # base64编码会在API层处理
-                    })
+                    # 复制文件到 workspace/files（保留备份）
+                    # 使用项目根目录下的 workspace/files
+                    from pathlib import Path
+                    project_root = Path(__file__).parent.parent.parent  # chatbi/core -> chatbi -> nanobot
+                    files_dir = project_root / "workspace" / "files"
+                    files_dir.mkdir(parents=True, exist_ok=True)
+                    files_dir = str(files_dir)
+                    
+                    sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+                    logger.info(f"{sandbox_info} 准备复制文件: {filename}, 目标目录: {files_dir}")
+
+                    # 生成唯一的文件名（避免冲突）
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                    unique_filename = f"{self.conversation_id}_{timestamp}_{filename}"
+                    target_path = os.path.join(files_dir, unique_filename)
+
+                    # 复制文件
+                    try:
+                        with open(file_path, 'rb') as src, open(target_path, 'wb') as dst:
+                            dst.write(src.read())
+
+                        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+                        logger.info(f"{sandbox_info} 复制文件到workspace/files: {filename} -> {unique_filename}")
+
+                        file_info = {
+                            'filename': filename,  # 原始文件名
+                            'unique_filename': unique_filename,  # 唯一文件名
+                            'type': supported_extensions[ext],
+                            'size': file_size,
+                            'local_path': f'/files/{unique_filename}',  # 本地静态URL（备用）
+                        }
+                        
+                        # 图片文件上传到图片服务器
+                        if supported_extensions[ext].startswith('image/') and content:
+                            logger.info(f"{sandbox_info} 检测到图片文件，准备上传到图片服务器...")
+                            try:
+                                from ..config import chatbi_config
+                                logger.info(f"{sandbox_info} 图片服务器配置: enabled={chatbi_config.image_server_enabled}, url={chatbi_config.image_server_url}")
+                                if chatbi_config.image_server_enabled:
+                                    import httpx
+                                    import base64
+                                    
+                                    # 上传到图片服务器
+                                    base64_data = base64.b64encode(content).decode('utf-8')
+                                    logger.info(f"{sandbox_info} 图片base64编码完成，大小: {len(base64_data)} 字符")
+                                    
+                                    with httpx.Client(timeout=chatbi_config.image_server_upload_timeout) as client:
+                                        response = client.post(
+                                            f"{chatbi_config.image_server_url}/upload/base64",
+                                            json={
+                                                "base64": f"data:{supported_extensions[ext]};base64,{base64_data}",
+                                                "filename": filename,
+                                                "conversation_id": self.conversation_id
+                                            }
+                                        )
+                                        
+                                        logger.info(f"{sandbox_info} 图片服务器响应: status={response.status_code}")
+                                        
+                                        if response.status_code == 200:
+                                            result = response.json()
+                                            file_info['url'] = result.get('url', file_info['local_path'])
+                                            file_info['image_id'] = result.get('image_id')
+                                            logger.info(f"{sandbox_info} 图片上传成功: {filename} -> {file_info['url']}")
+                                        else:
+                                            logger.warning(f"{sandbox_info} 图片上传失败: {response.text}")
+                                            file_info['url'] = file_info['local_path']
+                                else:
+                                    logger.info(f"{sandbox_info} 图片服务器未启用，使用本地路径")
+                                    file_info['url'] = file_info['local_path']
+                            except Exception as e:
+                                logger.warning(f"{sandbox_info} 图片上传异常: {e}", exc_info=True)
+                                file_info['url'] = file_info['local_path']
+                        else:
+                            logger.info(f"{sandbox_info} 非图片文件或内容为空，使用本地路径")
+                            file_info['url'] = file_info['local_path']
+                        
+                        # 移除 local_path，避免混淆
+                        if 'local_path' in file_info:
+                            del file_info['local_path']
+                            
+                        generated_files.append(file_info)
+                    except Exception as e:
+                        sandbox_info = f"[沙箱: {self.sandbox_id}|workspace: {self.temp_dir}/workspace|会话: {self.conversation_id}]"
+                        logger.error(f"{sandbox_info} 复制文件失败: {filename}, error={e}")
+
+                        # 复制失败，仍然返回文件信息（但不包含URL）
+                        generated_files.append({
+                            'filename': filename,
+                            'type': supported_extensions[ext],
+                            'size': file_size,
+                        })
 
         return generated_files
 
