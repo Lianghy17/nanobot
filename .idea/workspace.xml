@@ -4,49 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sandbox_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/services/image_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/services/image_server.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922285_f446a141_20260319_201201_auto_figure_1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201355_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201410_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201427_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201442_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201515_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201548_auto_figure_1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201548_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201606_auto_figure_1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201606_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201628_auto_figure_1.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773922420_8a12d226_20260319_201628_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091203_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091222_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091228_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091236_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091251_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091310_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091322_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091352_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091416_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091454_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091454_sales_analysis_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091507_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091507_sales_analysis_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091525_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091525_sales_analysis_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091559_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091559_sales_trend_distribution.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091600_sales_analysis_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091633_daily_sales.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091633_sales_analysis_overview.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/conv_1773969105_699824aa_20260320_091633_sales_trend_distribution.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/workspace/files/test_file.txt" beforeDir="false" />
-    </list>
+    <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

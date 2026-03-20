@@ -21,4 +21,9 @@ poetry.lock
 botpy.log
 tests/
 
+# Workspace directories
 workspace/sessions/*
+workspace/data/*
+workspace/files/*
+workspace/images/*
+workspace/memory/*
