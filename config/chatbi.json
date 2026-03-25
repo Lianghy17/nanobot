@@ -62,5 +62,106 @@
       "enabled": true,
       "description": "写入文件内容"
     }
+  },
+  "pattern": {
+    "enabled": true,
+    "config_path": "config/pattern_config.json",
+    "match_threshold": 0.6
+  },
+  "param_mapper": {
+    "enabled": true,
+    "model": "kimi-k2.5",
+    "temperature": 0.6,
+    "max_tokens": 4096,
+    "timeout": 30,
+    "thinking_disabled": true,
+    "rules": {
+      "metric": {
+        "description": "将业务指标的中文名称映射为数据库字段名（蛇形命名 snake_case）",
+        "examples": {
+          "销售额": "total_amount",
+          "销售量": "quantity",
+          "订单量": "order_count",
+          "活跃用户数": "active_users",
+          "用户数": "user_count",
+          "营收": "revenue",
+          "GMV": "gmv",
+          "转化率": "conversion_rate",
+          "客单价": "avg_order_value",
+          "退货率": "return_rate"
+        },
+        "output_format": "string (snake_case)"
+      },
+      "time_grain": {
+        "description": "将中文时间粒度映射为标准枚举值",
+        "allowed_values": ["DAY", "WEEK", "MONTH", "QUARTER", "YEAR"],
+        "examples": {
+          "日": "DAY", "每日": "DAY", "每天": "DAY", "天": "DAY",
+          "周": "WEEK", "每周": "WEEK",
+          "月": "MONTH", "每月": "MONTH",
+          "季度": "QUARTER", "每季度": "QUARTER",
+          "年": "YEAR", "每年": "YEAR"
+        },
+        "output_format": "enum string (DAY/WEEK/MONTH/QUARTER/YEAR)"
+      },
+      "time_point": {
+        "description": "将中文时间点转换为SQL表达式，使用MySQL函数",
+        "examples": {
+          "今天": "CURRENT_DATE",
+          "昨天": "DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)",
+          "前天": "DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY)",
+          "本月第一天": "DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')",
+          "上周一": "DATE_SUB(DATE_SUB(CURRENT_DATE, INTERVAL WEEKDAY(CURRENT_DATE) DAY), INTERVAL 6 DAY)"
+        },
+        "output_format": "SQL expression string"
+      },
+      "time_range": {
+        "description": "将中文时间范围转换为包含start和end的SQL表达式对象，使用MySQL函数",
+        "examples": {
+          "最近7天": {"start": "DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)", "end": "CURRENT_DATE"},
+          "最近30天": {"start": "DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY)", "end": "CURRENT_DATE"},
+          "最近3个月": {"start": "DATE_SUB(CURRENT_DATE, INTERVAL 3 MONTH)", "end": "CURRENT_DATE"},
+          "最近1年": {"start": "DATE_SUB(CURRENT_DATE, INTERVAL 1 YEAR)", "end": "CURRENT_DATE"},
+          "本周": {"start": "DATE_SUB(CURRENT_DATE, INTERVAL WEEKDAY(CURRENT_DATE) DAY)", "end": "CURRENT_DATE"},
+          "上周": {"start": "DATE_SUB(DATE_SUB(CURRENT_DATE, INTERVAL WEEKDAY(CURRENT_DATE) DAY), INTERVAL 7 DAY)", "end": "DATE_SUB(CURRENT_DATE, INTERVAL WEEKDAY(CURRENT_DATE) + 1 DAY)"},
+          "本月": {"start": "DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')", "end": "CURRENT_DATE"},
+          "上月": {"start": "DATE_FORMAT(DATE_SUB(CURRENT_DATE, INTERVAL 1 MONTH), '%Y-%m-01')", "end": "DATE_FORMAT(CURRENT_DATE, '%Y-%m-01')"},
+          "本季度": {"start": "DATE_FORMAT(DATE_SUB(CURRENT_DATE, INTERVAL QUARTER(CURRENT_DATE)-1 MONTH), '%Y-%m-01')", "end": "CURRENT_DATE"},
+          "本年": {"start": "DATE_FORMAT(CURRENT_DATE, '%Y-01-01')", "end": "CURRENT_DATE"}
+        },
+        "output_format": "object with 'start' and 'end' SQL expression strings"
+      },
+      "comparison_types": {
+        "description": "将中文对比类型映射为标准枚举值列表",
+        "allowed_values": ["yoy", "mom"],
+        "examples": {
+          "同比": ["yoy"],
+          "环比": ["mom"],
+          "同比环比": ["yoy", "mom"],
+          "同比和环比": ["yoy", "mom"]
+        },
+        "output_format": "array of enum strings"
+      },
+      "dimension": {
+        "description": "将中文维度名映射为数据库字段名（蛇形命名）",
+        "examples": {
+          "地区": "region",
+          "城市": "city",
+          "省份": "province",
+          "品类": "category",
+          "商品分类": "category",
+          "品牌": "brand",
+          "渠道": "channel",
+          "门店": "store_name",
+          "性别": "gender",
+          "年龄段": "age_group"
+        },
+        "output_format": "string (snake_case)"
+      },
+      "dimensions": {
+        "description": "将中文维度列表映射为数据库字段名列表（蛇形命名）",
+        "output_format": "array of strings (snake_case)"
+      }
+    }
   }
 }

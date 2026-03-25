@@ -1,0 +1,387 @@
+{
+  "templates": [
+    {
+      "id": "dau_trend",
+      "name": "DAU趋势分析",
+      "category": "用户活跃",
+      "description": "查看指定时间范围内每日活跃用户数的变化趋势",
+      "question_template": "查询{{time_range}}的DAU趋势",
+      "pattern_id": "trend_analysis",
+      "default_params": {
+        "metric": "dau",
+        "time_grain": "DAY",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        }
+      },
+      "params_schema": {
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_30_days"
+        },
+        "metric": {
+          "label": "活跃指标",
+          "type": "select",
+          "options": [
+            {"value": "dau", "label": "日活跃用户数(DAU)"},
+            {"value": "wau", "label": "周活跃用户数(WAU)"},
+            {"value": "mau", "label": "月活跃用户数(MAU)"}
+          ],
+          "default": "dau"
+        },
+        "time_grain": {
+          "label": "时间粒度",
+          "type": "select",
+          "options": [
+            {"value": "DAY", "label": "日"},
+            {"value": "WEEK", "label": "周"},
+            {"value": "MONTH", "label": "月"}
+          ],
+          "default": "DAY"
+        }
+      },
+      "examples": [
+        "查询最近30天的DAU趋势",
+        "查看今年1月份的MAU变化",
+        "显示上个季度的周活跃用户趋势"
+      ]
+    },
+    {
+      "id": "funnel_conversion",
+      "name": "漏斗转化分析",
+      "category": "转化分析",
+      "description": "分析用户在关键路径上的转化情况",
+      "question_template": "分析{{funnel_name}}漏斗的转化情况",
+      "pattern_id": "funnel",
+      "default_params": {
+        "steps": ["page_view", "add_to_cart", "order", "payment"],
+        "time_window": 7,
+        "strict_order": true,
+        "segment_by": null
+      },
+      "params_schema": {
+        "funnel_name": {
+          "label": "漏斗名称",
+          "type": "select",
+          "options": [
+            {"value": "purchase_funnel", "label": "购买漏斗"},
+            {"value": "registration_funnel", "label": "注册漏斗"},
+            {"value": "activation_funnel", "label": "激活漏斗"}
+          ],
+          "default": "purchase_funnel"
+        },
+        "steps": {
+          "label": "漏斗步骤",
+          "type": "multi_select",
+          "options": [
+            {"value": "page_view", "label": "浏览页面"},
+            {"value": "click_product", "label": "点击商品"},
+            {"value": "add_to_cart", "label": "加入购物车"},
+            {"value": "order", "label": "下单"},
+            {"value": "payment", "label": "支付"}
+          ],
+          "default": ["page_view", "add_to_cart", "order", "payment"]
+        },
+        "time_window": {
+          "label": "时间窗口",
+          "type": "number",
+          "unit": "天",
+          "default": 7,
+          "description": "完成漏斗的允许时间范围"
+        },
+        "strict_order": {
+          "label": "严格顺序",
+          "type": "boolean",
+          "default": true,
+          "description": "是否要求步骤严格按顺序完成"
+        }
+      },
+      "examples": [
+        "分析购买漏斗的转化率",
+        "查看从浏览到支付的转化情况",
+        "哪个步骤的流失率最高？"
+      ]
+    },
+    {
+      "id": "day7_retention",
+      "name": "7日留存分析",
+      "category": "留存分析",
+      "description": "计算新用户的7日留存率",
+      "question_template": "{{time_period}}新用户的7日留存率是多少",
+      "pattern_id": "retention",
+      "default_params": {
+        "cohort_grain": "DAY",
+        "retention_grain": "DAY",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        },
+        "retention_type": "nday"
+      },
+      "params_schema": {
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_30_days"
+        },
+        "cohort_grain": {
+          "label": "同期群粒度",
+          "type": "select",
+          "options": [
+            {"value": "DAY", "label": "日"},
+            {"value": "WEEK", "label": "周"},
+            {"value": "MONTH", "label": "月"}
+          ],
+          "default": "DAY"
+        },
+        "retention_days": {
+          "label": "留存天数",
+          "type": "multi_select",
+          "options": [
+            {"value": "1", "label": "次日"},
+            {"value": "7", "label": "7日"},
+            {"value": "30", "label": "30日"}
+          ],
+          "default": ["1", "7", "30"]
+        }
+      },
+      "examples": [
+        "本月新用户的7日留存率是多少",
+        "查看上季度用户的30日留存情况",
+        "比较不同渠道用户的留存差异"
+      ]
+    },
+    {
+      "id": "user_path_analysis",
+      "name": "用户路径分析",
+      "category": "路径分析",
+      "description": "分析用户在产品中的行为路径",
+      "question_template": "分析{{time_range}}用户的主要行为路径",
+      "pattern_id": "path",
+      "default_params": {
+        "start_event": null,
+        "end_event": null,
+        "session_timeout": 30,
+        "max_path_length": 10,
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        }
+      },
+      "params_schema": {
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_7_days"
+        },
+        "start_event": {
+          "label": "起始事件",
+          "type": "select",
+          "options": [
+            {"value": null, "label": "任意"},
+            {"value": "page_view", "label": "浏览页面"},
+            {"value": "enter_home", "label": "进入首页"}
+          ],
+          "default": null
+        },
+        "end_event": {
+          "label": "结束事件",
+          "type": "select",
+          "options": [
+            {"value": null, "label": "任意"},
+            {"value": "payment", "label": "支付"},
+            {"value": "order", "label": "下单"}
+          ],
+          "default": null
+        },
+        "max_path_length": {
+          "label": "最大路径长度",
+          "type": "number",
+          "min": 3,
+          "max": 20,
+          "default": 10
+        },
+        "session_timeout": {
+          "label": "会话超时（分钟）",
+          "type": "number",
+          "default": 30
+        }
+      },
+      "examples": [
+        "用户从首页到下单的主要路径是什么",
+        "查看最常见的用户访问路径",
+        "从注册到激活的用户路径分析"
+      ]
+    },
+    {
+      "id": "user_segmentation",
+      "name": "用户分群分析",
+      "category": "用户分析",
+      "description": "分析不同用户群体的行为特征",
+      "question_template": "分析{{time_range}}不同用户群体的活跃情况",
+      "pattern_id": "agg_query",
+      "default_params": {
+        "dimensions": ["user_segment"],
+        "metric": "dau",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        },
+        "filters": []
+      },
+      "params_schema": {
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_30_days"
+        },
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "dau", "label": "活跃用户数"},
+            {"value": "avg_session_duration", "label": "平均会话时长"},
+            {"value": "page_views", "label": "页面浏览量"}
+          ],
+          "default": "dau"
+        },
+        "segmentation": {
+          "label": "分群维度",
+          "type": "multi_select",
+          "options": [
+            {"value": "user_segment", "label": "用户分群"},
+            {"value": "device_type", "label": "设备类型"},
+            {"value": "platform", "label": "平台"}
+          ],
+          "default": ["user_segment"]
+        }
+      },
+      "examples": [
+        "分析不同用户群体的活跃度",
+        "查看新老用户的会话时长对比",
+        "不同设备类型用户的行为差异"
+      ]
+    },
+    {
+      "id": "bounce_rate",
+      "name": "跳出率分析",
+      "category": "互动分析",
+      "description": "分析页面的跳出率情况",
+      "question_template": "{{time_range}}的跳出率是多少",
+      "pattern_id": "point_query",
+      "default_params": {
+        "metric": "bounce_rate",
+        "time_point": "2024-01"
+      },
+      "params_schema": {
+        "time_point": {
+          "label": "时间点",
+          "type": "date",
+          "required": true,
+          "default": "current_month"
+        },
+        "breakdown": {
+          "label": "分组维度",
+          "type": "multi_select",
+          "options": [
+            {"value": "device_type", "label": "设备类型"},
+            {"value": "source", "label": "来源"},
+            {"value": "platform", "label": "平台"}
+          ],
+          "default": []
+        }
+      },
+      "examples": [
+        "本月整体的跳出率是多少",
+        "不同来源用户的跳出率对比",
+        "移动端和桌面端的跳出率差异"
+      ]
+    },
+    {
+      "id": "session_duration",
+      "name": "会话时长分析",
+      "category": "互动分析",
+      "description": "分析用户会话时长的分布情况",
+      "question_template": "分析{{time_range}}的用户会话时长",
+      "pattern_id": "trend_analysis",
+      "default_params": {
+        "metric": "avg_session_duration",
+        "time_grain": "DAY",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        }
+      },
+      "params_schema": {
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_30_days"
+        },
+        "time_grain": {
+          "label": "时间粒度",
+          "type": "select",
+          "options": [
+            {"value": "DAY", "label": "日"},
+            {"value": "WEEK", "label": "周"}
+          ],
+          "default": "DAY"
+        },
+        "metric": {
+          "label": "时长指标",
+          "type": "select",
+          "options": [
+            {"value": "avg_session_duration", "label": "平均会话时长"},
+            {"value": "total_session_duration", "label": "总会话时长"},
+            {"value": "sessions_count", "label": "会话数量"}
+          ],
+          "default": "avg_session_duration"
+        }
+      },
+      "examples": [
+        "最近7天的平均会话时长变化",
+        "查看本月会话时长的趋势",
+        "不同用户群体的会话时长对比"
+      ]
+    }
+  ],
+  "categories": {
+    "用户活跃": {
+      "templates": ["dau_trend"],
+      "icon": "📊",
+      "description": "追踪用户活跃度变化"
+    },
+    "转化分析": {
+      "templates": ["funnel_conversion"],
+      "icon": "🎯",
+      "description": "分析用户转化漏斗"
+    },
+    "留存分析": {
+      "templates": ["day7_retention"],
+      "icon": "🔄",
+      "description": "了解用户留存情况"
+    },
+    "路径分析": {
+      "templates": ["user_path_analysis"],
+      "icon": "🛣️",
+      "description": "追踪用户行为路径"
+    },
+    "用户分析": {
+      "templates": ["user_segmentation"],
+      "icon": "👥",
+      "description": "分析用户群体特征"
+    },
+    "互动分析": {
+      "templates": ["bounce_rate", "session_duration"],
+      "icon": "💬",
+      "description": "了解用户互动情况"
+    }
+  }
+}

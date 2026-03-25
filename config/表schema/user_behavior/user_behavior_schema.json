@@ -1,0 +1,506 @@
+{
+  "tables": [
+    {
+      "table_name": "fact_user_events",
+      "table_alias": "用户行为事实表",
+      "description": "记录用户在产品中的所有行为事件",
+      "fields": [
+        {
+          "field_name": "event_id",
+          "field_alias": "事件ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "事件唯一标识"
+        },
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_user",
+          "description": "用户唯一标识"
+        },
+        {
+          "field_name": "event_type",
+          "field_alias": "事件类型",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "事件类型:page_view/click/add_to_cart/order/payment/share/comment"
+        },
+        {
+          "field_name": "event_date",
+          "field_alias": "事件日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "事件发生日期"
+        },
+        {
+          "field_name": "event_time",
+          "field_alias": "事件时间",
+          "data_type": "datetime",
+          "description": "事件精确时间"
+        },
+        {
+          "field_name": "page_url",
+          "field_alias": "页面URL",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "页面路径"
+        },
+        {
+          "field_name": "page_title",
+          "field_alias": "页面标题",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "页面标题"
+        },
+        {
+          "field_name": "session_id",
+          "field_alias": "会话ID",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "会话标识"
+        },
+        {
+          "field_name": "device_type",
+          "field_alias": "设备类型",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "设备类型:mobile/desktop/tablet"
+        },
+        {
+          "field_name": "platform",
+          "field_alias": "平台",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "平台:iOS/Android/Web"
+        },
+        {
+          "field_name": "source",
+          "field_alias": "来源",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "用户来源渠道"
+        },
+        {
+          "field_name": "campaign",
+          "field_alias": "活动",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "营销活动标识"
+        },
+        {
+          "field_name": "referrer",
+          "field_alias": "来源页面",
+          "data_type": "string",
+          "description": "来源页面URL"
+        },
+        {
+          "field_name": "properties",
+          "field_alias": "事件属性",
+          "data_type": "json",
+          "description": "事件附加属性（JSON格式）"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_user",
+      "table_alias": "用户维度表",
+      "description": "用户基本信息",
+      "fields": [
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "用户唯一标识"
+        },
+        {
+          "field_name": "register_date",
+          "field_alias": "注册日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "用户注册日期"
+        },
+        {
+          "field_name": "first_active_date",
+          "field_alias": "首次活跃日期",
+          "data_type": "date",
+          "description": "首次活跃日期"
+        },
+        {
+          "field_name": "last_active_date",
+          "field_alias": "最后活跃日期",
+          "data_type": "date",
+          "description": "最后活跃日期"
+        },
+        {
+          "field_name": "user_segment",
+          "field_alias": "用户分群",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "用户分群:new/active/inactive/churned/vip"
+        },
+        {
+          "field_name": "total_sessions",
+          "field_alias": "总会话数",
+          "data_type": "integer",
+          "description": "历史总会话数"
+        },
+        {
+          "field_name": "total_events",
+          "field_alias": "总事件数",
+          "data_type": "integer",
+          "description": "历史总事件数"
+        },
+        {
+          "field_name": "lifetime_days",
+          "field_alias": "生命周期天数",
+          "data_type": "integer",
+          "description": "用户生命周期（天）"
+        },
+        {
+          "field_name": "device_preference",
+          "field_alias": "设备偏好",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "偏好设备"
+        }
+      ]
+    },
+    {
+      "table_name": "fact_sessions",
+      "table_alias": "会话事实表",
+      "description": "用户访问会话信息",
+      "fields": [
+        {
+          "field_name": "session_id",
+          "field_alias": "会话ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "会话唯一标识"
+        },
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_user",
+          "description": "用户ID"
+        },
+        {
+          "field_name": "session_start_time",
+          "field_alias": "会话开始时间",
+          "data_type": "datetime",
+          "description": "会话开始时间"
+        },
+        {
+          "field_name": "session_end_time",
+          "field_alias": "会话结束时间",
+          "data_type": "datetime",
+          "description": "会话结束时间"
+        },
+        {
+          "field_name": "session_duration",
+          "field_alias": "会话时长",
+          "data_type": "integer",
+          "unit": "秒",
+          "is_metric": true,
+          "description": "会话持续时间（秒）"
+        },
+        {
+          "field_name": "page_views",
+          "field_alias": "页面浏览数",
+          "data_type": "integer",
+          "is_metric": true,
+          "description": "会话内页面浏览数"
+        },
+        {
+          "field_name": "events_count",
+          "field_alias": "事件数",
+          "data_type": "integer",
+          "is_metric": true,
+          "description": "会话内事件总数"
+        },
+        {
+          "field_name": "is_bounce",
+          "field_alias": "是否跳出",
+          "data_type": "boolean",
+          "is_dimension": true,
+          "description": "是否单页跳出会话"
+        },
+        {
+          "field_name": "device_type",
+          "field_alias": "设备类型",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "设备类型"
+        },
+        {
+          "field_name": "platform",
+          "field_alias": "平台",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "平台"
+        }
+      ]
+    },
+    {
+      "table_name": "fact_funnel",
+      "table_alias": "漏斗事实表",
+      "description": "用户转化漏斗数据",
+      "fields": [
+        {
+          "field_name": "funnel_id",
+          "field_alias": "漏斗ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "漏斗唯一标识"
+        },
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_user",
+          "description": "用户ID"
+        },
+        {
+          "field_name": "funnel_name",
+          "field_alias": "漏斗名称",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "漏斗名称"
+        },
+        {
+          "field_name": "step_number",
+          "field_alias": "步骤编号",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "漏斗步骤编号"
+        },
+        {
+          "field_name": "step_name",
+          "field_alias": "步骤名称",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "漏斗步骤名称"
+        },
+        {
+          "field_name": "enter_time",
+          "field_alias": "进入时间",
+          "data_type": "datetime",
+          "description": "进入步骤时间"
+        },
+        {
+          "field_name": "exit_time",
+          "field_alias": "退出时间",
+          "data_type": "datetime",
+          "description": "退出步骤时间"
+        },
+        {
+          "field_name": "converted",
+          "field_alias": "是否转化",
+          "data_type": "boolean",
+          "description": "是否完成该步骤"
+        },
+        {
+          "field_name": "time_in_step",
+          "field_alias": "步骤停留时间",
+          "data_type": "integer",
+          "unit": "秒",
+          "description": "在步骤停留时间"
+        }
+      ]
+    },
+    {
+      "table_name": "fact_retention",
+      "table_alias": "留存事实表",
+      "description": "用户留存数据",
+      "fields": [
+        {
+          "field_name": "retention_id",
+          "field_alias": "留存ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "留存记录唯一标识"
+        },
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_user",
+          "description": "用户ID"
+        },
+        {
+          "field_name": "cohort_date",
+          "field_alias": "同期群日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "用户首次活跃日期"
+        },
+        {
+          "field_name": "retention_day",
+          "field_alias": "留存天数",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "留存天数（0表示当天）"
+        },
+        {
+          "field_name": "is_active",
+          "field_alias": "是否活跃",
+          "data_type": "boolean",
+          "description": "该日是否活跃"
+        },
+        {
+          "field_name": "is_new_user",
+          "field_alias": "是否新用户",
+          "data_type": "boolean",
+          "description": "是否为新用户"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_event_type",
+      "table_alias": "事件类型维度表",
+      "description": "事件类型定义",
+      "fields": [
+        {
+          "field_name": "event_type",
+          "field_alias": "事件类型",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "事件类型标识"
+        },
+        {
+          "field_name": "event_name",
+          "field_alias": "事件名称",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "事件名称"
+        },
+        {
+          "field_name": "category",
+          "field_alias": "类别",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "事件类别"
+        },
+        {
+          "field_name": "description",
+          "field_alias": "描述",
+          "data_type": "string",
+          "description": "事件描述"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_date",
+      "table_alias": "日期维度表",
+      "description": "日期维度信息",
+      "fields": [
+        {
+          "field_name": "date_key",
+          "field_alias": "日期键",
+          "data_type": "date",
+          "is_primary_key": true,
+          "description": "日期"
+        },
+        {
+          "field_name": "year",
+          "field_alias": "年",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "年份"
+        },
+        {
+          "field_name": "month",
+          "field_alias": "月",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "月份"
+        },
+        {
+          "field_name": "day",
+          "field_alias": "日",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "日期"
+        },
+        {
+          "field_name": "weekday",
+          "field_alias": "星期",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "星期几(1-7)"
+        },
+        {
+          "field_name": "week_of_year",
+          "field_alias": "周",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "一年中的第几周"
+        },
+        {
+          "field_name": "quarter",
+          "field_alias": "季度",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "季度(1-4)"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "fact_user_events",
+      "from_field": "user_id",
+      "to_table": "dim_user",
+      "to_field": "user_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_user_events",
+      "from_field": "event_date",
+      "to_table": "dim_date",
+      "to_field": "date_key",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_user_events",
+      "from_field": "event_type",
+      "to_table": "dim_event_type",
+      "to_field": "event_type",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_sessions",
+      "from_field": "user_id",
+      "to_table": "dim_user",
+      "to_field": "user_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_funnel",
+      "from_field": "user_id",
+      "to_table": "dim_user",
+      "to_field": "user_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_retention",
+      "from_field": "user_id",
+      "to_table": "dim_user",
+      "to_field": "user_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_retention",
+      "from_field": "cohort_date",
+      "to_table": "dim_date",
+      "to_field": "date_key",
+      "relationship_type": "many_to_one"
+    }
+  ]
+}

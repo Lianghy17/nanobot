@@ -18,7 +18,7 @@ from fastapi.responses import HTMLResponse, FileResponse
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from chatbi.config import settings
-from chatbi.api import conversations_router, messages_router, scenes_router, files_router, sse_router
+from chatbi.api import conversations_router, messages_router, scenes_router, files_router, sse_router, patterns_router, qa_templates_router
 from chatbi.core.loop_queue import LoopQueue
 from chatbi.core.message_processor import MessageProcessor
 from chatbi.core.sandbox_manager import SandboxManager
@@ -101,6 +101,8 @@ app.include_router(messages_router, prefix="/api/messages", tags=["messages"])
 app.include_router(scenes_router, prefix="/api/scenes", tags=["scenes"])
 app.include_router(files_router, tags=["files"])
 app.include_router(sse_router, prefix="/api/sse", tags=["sse"])
+app.include_router(patterns_router, prefix="/api/patterns", tags=["patterns"])
+app.include_router(qa_templates_router, prefix="/api/qa", tags=["qa"])
 
 # 挂载静态文件服务（前端文件）
 frontend_path = Path(__file__).parent.parent / "frontend"

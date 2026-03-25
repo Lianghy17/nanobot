@@ -6,6 +6,12 @@ let selectedScene = null;
 let scenes = [];
 let conversations = [];
 let eventSource = null;  // SSE连接
+let currentMessageId = null;  // 当前正在处理的消息ID（用于取消）
+let isProcessing = false;  // 是否正在处理
+let currentMode = 'template';  // 当前问答模式: template/react/qa
+let qaTemplates = {};  // QA模板数据
+let currentTemplate = null;  // 当前选中的模板
+let inTemplateMode = false;  // 是否在模板模式中
 
 // API基础URL
 const API_BASE = '/api';
@@ -16,6 +22,167 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHistory();
     setupInputListener();
 });
+
+// 加载热门问题（改为加载QA模板）
+async function loadHotQuestions(sceneCode) {
+    try {
+        const response = await fetch(`${API_BASE}/qa/templates/${sceneCode}`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            qaTemplates = data;
+            renderQATemplates(data);
+            document.getElementById('hotQuestionsPanel').classList.add('active');
+        }
+    } catch (error) {
+        console.error('加载QA模板失败:', error);
+        // 显示默认消息
+        document.getElementById('hotQuestionsList').innerHTML = '<div class="loading"><p>QA模板加载失败</p></div>';
+    }
+}
+
+// 渲染QA模板（只显示模板模式的模板）
+function renderQATemplates(qaData) {
+    const hotQuestionsList = document.getElementById('hotQuestionsList');
+
+    if (!qaData.templates || qaData.templates.length === 0) {
+        hotQuestionsList.innerHTML = '<div class="loading"><p>暂无QA模板</p></div>';
+        return;
+    }
+
+    // 只显示模板模式的模板（mode='template'或没有mode字段的模板）
+    const allTemplates = qaData.templates || [];
+    const templateModeTemplates = allTemplates.filter(t => !t.mode || t.mode === 'template');
+
+    if (templateModeTemplates.length === 0) {
+        hotQuestionsList.innerHTML = '<div class="loading"><p>暂无模板模式的QA模板</p></div>';
+        return;
+    }
+
+    // 按类别分组
+    const categories = qaData.categories || {};
+
+    // 如果有分类，按分类渲染
+    if (Object.keys(categories).length > 0) {
+        let html = '';
+        for (const [categoryKey, categoryInfo] of Object.entries(categories)) {
+            const categoryTemplates = templateModeTemplates.filter(t => categoryInfo.templates.includes(t.id));
+
+            if (categoryTemplates.length > 0) {
+                html += `
+                    <div class="qa-category">
+                        <div class="qa-category-header" onclick="toggleCategory('${categoryKey}')">
+                            <span class="category-icon">${categoryInfo.icon || '📁'}</span>
+                            <span class="category-name">${categoryKey}</span>
+                            <span class="category-desc">${categoryTemplates.length}个模板</span>
+                        </div>
+                        <div class="qa-category-content" id="category-${categoryKey}">
+                            ${categoryTemplates.map(t => renderTemplateItem(t)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        hotQuestionsList.innerHTML = html || '<div class="loading"><p>暂无模板模式的QA模板</p></div>';
+    } else {
+        // 没有分类，直接渲染所有模板
+        hotQuestionsList.innerHTML = templateModeTemplates.map(t => renderTemplateItem(t)).join('');
+    }
+}
+
+// 渲染单个模板项
+function renderTemplateItem(template) {
+    return `
+        <div class="hot-question-item" onclick="useTemplate('${template.id}')">
+            <div class="pattern-tag">${template.category || '默认'}</div>
+            <div class="question-text">${template.name || template.question_template}</div>
+            <div class="template-hint">${template.description || ''}</div>
+        </div>
+    `;
+}
+
+// 切换分类展开/收起
+function toggleCategory(categoryKey) {
+    const content = document.getElementById(`category-${categoryKey}`);
+    content.classList.toggle('expanded');
+}
+
+// 更新模式指示器（在输入框右上角）
+function updateModeIndicator(mode) {
+    const indicator = document.getElementById('modeIndicator');
+    const modeText = document.getElementById('modeText');
+
+    if (!indicator || !modeText) {
+        return;
+    }
+
+    // 移除所有模式类
+    indicator.classList.remove('template-mode', 'react-mode');
+
+    if (mode === 'template') {
+        indicator.classList.add('template-mode');
+        indicator.querySelector('.mode-icon').textContent = '🎯';
+        modeText.textContent = '模板模式';
+    } else if (mode === 'react') {
+        indicator.classList.add('react-mode');
+        indicator.querySelector('.mode-icon').textContent = '🤖';
+        modeText.textContent = 'React模式';
+    }
+}
+
+// 切换问答模式
+function switchMode(mode) {
+    currentMode = mode;
+
+    // 更新模式指示器（在输入框右上角）
+    updateModeIndicator(mode);
+
+    // 更新UI状态（如果还存在mode-btn的话）
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+    });
+
+    // 不再在消息列表中显示模式提示
+}
+
+// 使用QA模板
+function useTemplate(templateId) {
+    if (!currentConversation) {
+        alert('请先创建对话');
+        return;
+    }
+    
+    const templates = qaTemplates.templates || [];
+    const template = templates.find(t => t.id === templateId);
+    
+    if (!template) {
+        alert('模板不存在');
+        return;
+    }
+    
+    currentTemplate = template;
+    inTemplateMode = true;
+    
+    // 切换到模板模式
+    switchMode('template');
+    
+    // 构建模板提示
+    const prompt = `我想使用"${template.name}"模板：${template.description}\n\n请引导我填写参数。`;
+    
+    // 发送消息，带上模板元数据
+    sendMessage(prompt, {
+        template_mode: true,
+        template_id: templateId,
+        template_name: template.name,
+        template_data: template  // 传递完整模板数据
+    });
+}
+
+// 显示模式提示（已废弃，使用switchMode）
+function showModeTip() {
+    // 使用默认模板模式
+    switchMode('template');
+}
 
 // 加载场景列表
 async function loadScenes() {
@@ -105,6 +272,12 @@ async function createConversation() {
         hideSceneDialog();
         loadHistory();
 
+        // 默认显示React模式（未选择模板时）
+        switchMode('react');
+
+        // 加载QA模板
+        loadHotQuestions(selectedScene.scene_code);
+
         // 聚焦输入框
         document.getElementById('messageInput').focus();
 
@@ -174,6 +347,9 @@ async function loadConversation(conversationId) {
         renderHistory();
         scrollToBottom();
 
+        // 加载QA模板
+        loadHotQuestions(conversation.scene_code);
+
         // 建立SSE连接
         establishSSEConnection(conversationId);
 
@@ -207,11 +383,40 @@ function renderMessages(messages) {
             // 渲染文件列表，跳过已在markdown中渲染的图片
             const filesHtml = renderFiles(msg.metadata?.files || [], renderedImages);
 
+            // 检查是否在模板模式中
+            const isPatternMode = msg.metadata?.pattern_mode || msg.metadata?.template_mode;
+            const showExitButton = isPatternMode && inTemplateMode;
+
+            // 构建操作按钮
+            let actionButtonsHtml = '';
+            if (showExitButton) {
+                actionButtonsHtml = `
+                    <div class="message-actions">
+                        <button class="btn-exit-template" onclick="exitTemplateMode()">
+                            退出模板模式
+                        </button>
+                    </div>
+                `;
+            }
+
+            // 如果是React模式，显示提示
+            let modeTipHtml = '';
+            if (msg.metadata?.mode === 'react' && !isPatternMode) {
+                modeTipHtml = `
+                    <div class="mode-indicator">
+                        <span class="mode-icon">🤖</span>
+                        <span>当前为React模式 - 灵活分析</span>
+                    </div>
+                `;
+            }
+
             return `
                 <div class="message ${msg.role}">
                     <div class="bubble">
+                        ${modeTipHtml}
                         <div class="markdown-content">${fixedHtml}</div>
                         ${filesHtml}
+                        ${actionButtonsHtml}
                     </div>
                     <div class="time">${time}</div>
                 </div>
@@ -455,9 +660,9 @@ function downloadFile(url, filename) {
 }
 
 // 发送消息
-async function sendMessage() {
+async function sendMessage(messageContent = null, customMetadata = {}) {
     const input = document.getElementById('messageInput');
-    const content = input.value.trim();
+    const content = messageContent || input.value.trim();
 
     if (!content) {
         alert('请输入内容');
@@ -469,9 +674,25 @@ async function sendMessage() {
         return;
     }
 
-    // 清空输入框
-    input.value = '';
-    document.getElementById('sendBtn').disabled = true;
+    // 清空输入框（如果不是使用预定义内容）
+    if (!messageContent) {
+        input.value = '';
+    }
+
+    // 构建元数据
+    let metadata = { ...customMetadata };
+    
+    // 如果在模板模式中，添加模板状态信息
+    if (inTemplateMode && currentTemplate && !metadata.template_mode) {
+        metadata.template_mode = true;
+        metadata.template_id = currentTemplate.id;
+        metadata.template_name = currentTemplate.name;
+        metadata.continuing_pattern = true;  // 标记为继续Pattern模式
+    }
+
+    // 标记为正在处理
+    isProcessing = true;
+    updateSendButton();
 
     // 显示用户消息
     appendMessage('user', content);
@@ -487,7 +708,8 @@ async function sendMessage() {
             },
             body: JSON.stringify({
                 conversation_id: currentConversation.conversation_id,
-                content: content
+                content: content,
+                metadata: metadata  // 添加元数据
             })
         });
 
@@ -496,6 +718,7 @@ async function sendMessage() {
         }
 
         const result = await response.json();
+        currentMessageId = result.message_id; // 保存消息ID用于取消
         console.log('消息已发送:', result);
 
         // 等待SSE推送结果，不再使用轮询
@@ -504,7 +727,63 @@ async function sendMessage() {
         console.error('发送消息失败:', error);
         removeThinkingMessage(thinkingMessageId);
         appendMessage('assistant', '抱歉，发送消息失败，请稍后重试。');
-        document.getElementById('sendBtn').disabled = false;
+        isProcessing = false;
+        updateSendButton();
+    }
+}
+
+// 取消消息
+async function cancelMessage() {
+    if (!currentMessageId) {
+        return;
+    }
+
+    if (!confirm('确定要取消当前任务吗？')) {
+        return;
+    }
+
+    try {
+        // 发送取消请求到后端
+        const response = await fetch(`${API_BASE}/messages/${currentMessageId}/cancel`, {
+            method: 'POST'
+        });
+
+        if (!response.ok) {
+            throw new Error('取消请求失败');
+        }
+
+        const result = await response.json();
+        console.log('取消请求已发送到后端:', result);
+
+        // 注意：不要立即重置状态，等待 SSE 的 processing_cancelled 事件
+        // 这样可以确保后端真正停止了任务
+
+    } catch (error) {
+        console.error('取消任务失败:', error);
+        alert('取消任务失败: ' + error.message);
+    }
+}
+
+// 更新发送按钮状态
+function updateSendButton() {
+    const sendBtn = document.getElementById('sendBtn');
+
+    if (isProcessing) {
+        sendBtn.textContent = '取消';
+        sendBtn.classList.add('canceling');
+        sendBtn.disabled = false;  // 取消按钮应该可用
+    } else {
+        sendBtn.textContent = '发送';
+        sendBtn.classList.remove('canceling');
+    }
+}
+
+// 处理发送/取消按钮点击
+function handleSendOrCancel() {
+    if (isProcessing) {
+        cancelMessage();
+    } else {
+        sendMessage();
     }
 }
 
@@ -573,6 +852,22 @@ function establishSSEConnection(conversationId) {
         console.log('[SSE] 用户消息已保存:', JSON.parse(event.data));
     });
 
+    // 意图分析完成
+    eventSource.addEventListener('intent_analyzed', (event) => {
+        console.log('[SSE] 意图分析完成:', JSON.parse(event.data));
+        try {
+            const data = JSON.parse(event.data);
+            console.log('[SSE] 意图类型:', data.intent_type, '匹配Pattern:', data.matched_pattern, '模式:', data.mode);
+
+            // 根据意图分析结果更新模式指示器
+            if (data.mode) {
+                switchMode(data.mode);
+            }
+        } catch (e) {
+            console.error('[SSE] 解析intent_analyzed事件失败:', e, event.data);
+        }
+    });
+
     // 处理完成
     eventSource.addEventListener('processing_completed', (event) => {
         console.log('[SSE] 收到处理完成事件:', event.data);
@@ -585,11 +880,13 @@ function establishSSEConnection(conversationId) {
             thinkingElements.forEach(el => el.remove());
 
             // 显示AI回复
-            console.log('[SSE] 准备显示消息, content长度:', data.content?.length, 'files数量:', data.files?.length);
-            appendMessage('assistant', data.content || '处理完成', data.files || []);
+            console.log('[SSE] 准备显示消息, content长度:', data.content?.length, 'files数量:', data.files?.length, 'metadata:', data.metadata);
+            appendMessage('assistant', data.content || '处理完成', data.files || [], data.metadata || {});
 
-            // 启用发送按钮
-            document.getElementById('sendBtn').disabled = false;
+            // 重置状态
+            isProcessing = false;
+            currentMessageId = null;
+            updateSendButton();
 
             // 只更新历史列表，不重新加载整个对话（避免覆盖刚添加的消息）
             loadHistory();
@@ -609,7 +906,37 @@ function establishSSEConnection(conversationId) {
 
         // 显示错误消息
         appendMessage('assistant', data.message || '抱歉，处理请求时发生错误。');
-        document.getElementById('sendBtn').disabled = false;
+
+        // 重置状态
+        isProcessing = false;
+        currentMessageId = null;
+        updateSendButton();
+    });
+
+    // 取消事件
+    eventSource.addEventListener('processing_cancelled', (event) => {
+        console.log('[SSE] 收到处理取消事件:', event.data);
+        try {
+            const data = JSON.parse(event.data);
+            console.log('[SSE] 解析后数据:', data);
+
+            // 移除思考中的消息
+            const thinkingElements = document.querySelectorAll('.message.assistant[id^="thinking_"]');
+            thinkingElements.forEach(el => el.remove());
+
+            // 显示取消消息
+            appendMessage('assistant', '⚠️ 任务已被取消');
+
+            // 重置状态
+            isProcessing = false;
+            currentMessageId = null;
+            updateSendButton();
+
+            // 更新历史列表
+            loadHistory();
+        } catch (e) {
+            console.error('[SSE] 解析processing_cancelled事件失败:', e, event.data);
+        }
     });
 
     // 心跳事件
@@ -634,7 +961,7 @@ function closeSSEConnection() {
 }
 
 // 添加消息到列表
-function appendMessage(role, content, files = []) {
+function appendMessage(role, content, files = [], metadata = {}) {
     const messageList = document.getElementById('messageList');
 
     // 移除loading提示
@@ -648,17 +975,51 @@ function appendMessage(role, content, files = []) {
 
     // 对于assistant的消息，渲染markdown
     if (role === 'assistant') {
+        // 根据metadata.mode更新模式指示器
+        if (metadata.mode) {
+            switchMode(metadata.mode);
+        }
+
         const markdownHtml = marked.parse(content);
         // 修复markdown中的图片路径，获取已渲染的图片列表
         const { html: contentHtml, renderedImages } = fixMarkdownImagePaths(markdownHtml, files);
         // 渲染文件列表，跳过已在markdown中渲染的图片
         const filesHtml = renderFiles(files, renderedImages);
 
+        // 检查是否在模板模式中
+        const isPatternMode = metadata.pattern_mode || metadata.template_mode;
+        const showExitButton = isPatternMode && inTemplateMode;
+
+        // 构建操作按钮
+        let actionButtonsHtml = '';
+        if (showExitButton) {
+            actionButtonsHtml = `
+                <div class="message-actions">
+                    <button class="btn-exit-template" onclick="exitTemplateMode()">
+                        退出模板模式
+                    </button>
+                </div>
+            `;
+        }
+
+        // 如果是React模式，显示提示（可选，可以根据需要显示或隐藏）
+        let modeTipHtml = '';
+        if (metadata.mode === 'react' && !isPatternMode) {
+            modeTipHtml = `
+                <div class="message-mode-indicator">
+                    <span class="mode-icon">🤖</span>
+                    <span>当前为React模式 - 灵活分析</span>
+                </div>
+            `;
+        }
+
         messageHtml = `
             <div class="message ${role}">
                 <div class="bubble">
+                    ${modeTipHtml}
                     <div class="markdown-content">${contentHtml}</div>
                     ${filesHtml}
+                    ${actionButtonsHtml}
                 </div>
                 <div class="time">${time}</div>
             </div>
@@ -684,6 +1045,22 @@ function scrollToBottom() {
     messageList.scrollTop = messageList.scrollHeight;
 }
 
+// 退出模板模式
+function exitTemplateMode() {
+    if (!confirm('确定要退出模板模式吗？')) {
+        return;
+    }
+
+    inTemplateMode = false;
+    currentTemplate = null;
+
+    // 切换到React模式
+    switchMode('react');
+
+    // 发送系统消息
+    appendMessage('assistant', '已退出模板模式，现在将使用React模式进行灵活分析。', [], { mode: 'react' });
+}
+
 // 键盘事件处理
 function handleKeyPress(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -696,8 +1073,13 @@ function handleKeyPress(event) {
 function setupInputListener() {
     const input = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
-    
+
     input.addEventListener('input', () => {
+        // 如果正在处理，不改变按钮状态（保持取消按钮可用）
+        if (isProcessing) {
+            return;
+        }
+        // 如果没有正在处理，根据输入内容启用/禁用按钮
         sendBtn.disabled = !input.value.trim() || !currentConversation;
     });
 }

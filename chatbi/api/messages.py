@@ -8,6 +8,7 @@ from typing import Optional
 from ..models.message import MessageCreate
 from ..core.conversation_manager import ConversationManager
 from ..core.loop_queue import LoopQueue
+from ..core.sse_manager import sse_manager as SSEManager
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,11 @@ def get_conversation_manager():
 
 
 def get_loop_queue():
+    return LoopQueue()
+
+
+def get_sse_manager():
+    return SSEManager
     return LoopQueue.get_instance()
 
 
@@ -91,10 +97,10 @@ async def get_messages(
     try:
         user_channel = f"web_{user_id}"
         conversation = conv_manager.get(conversation_id, user_channel)
-        
+
         if not conversation:
             raise HTTPException(status_code=404, detail="对话不存在")
-        
+
         return {
             "conversation_id": conversation_id,
             "messages": [
@@ -108,9 +114,42 @@ async def get_messages(
                 for msg in conversation.messages
             ]
         }
-    
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"获取消息历史失败: {e}")
         raise HTTPException(status_code=500, detail="获取消息历史失败")
+
+
+@router.post("/{message_id}/cancel")
+async def cancel_message(
+    message_id: str,
+    user_id: str = "web_default_user",
+    conv_manager: ConversationManager = Depends(get_conversation_manager),
+    loop_queue: LoopQueue = Depends(get_loop_queue),
+    sse_mgr: SSEManager = Depends(get_sse_manager)
+):
+    """取消正在处理的消息"""
+    try:
+        logger.info(f"请求取消消息: {message_id}")
+
+        # 通过SSEManager标记消息为已取消
+        if sse_mgr.cancel_message(message_id):
+            logger.info(f"消息已标记为取消: {message_id}")
+            return {
+                "status": "cancelled",
+                "message_id": message_id,
+                "detail": "消息已取消"
+            }
+        else:
+            logger.warning(f"消息已经被取消: {message_id}")
+            return {
+                "status": "already_cancelled",
+                "message_id": message_id,
+                "detail": "消息已经被取消"
+            }
+
+    except Exception as e:
+        logger.error(f"取消消息失败: {e}")
+        raise HTTPException(status_code=500, detail="取消消息失败")

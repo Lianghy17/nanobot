@@ -1,0 +1,326 @@
+{
+  "templates": [
+    {
+      "id": "flexible_query",
+      "name": "灵活查询",
+      "category": "自由查询",
+      "description": "使用自然语言进行灵活的数据查询",
+      "question_template": "查询{{description}}",
+      "pattern_id": "react",
+      "default_params": {},
+      "params_schema": {},
+      "examples": [
+        "查询最近30天的销售额",
+        "查看销售额最高的5个产品",
+        "对比本月和上月的订单量"
+      ]
+    },
+    {
+      "id": "data_exploration",
+      "name": "数据探索",
+      "category": "自由查询",
+      "description": "自由探索数据，发现业务洞察",
+      "question_template": "探索{{data_topic}}数据",
+      "pattern_id": "react",
+      "default_params": {},
+      "params_schema": {},
+      "examples": [
+        "探索销售数据的季节性规律",
+        "分析用户行为的异常点",
+        "发现产品销售的增长机会"
+      ]
+    },
+    {
+      "id": "custom_report",
+      "name": "自定义报表",
+      "category": "自由查询",
+      "description": "根据业务需求自定义报表",
+      "question_template": "生成{{report_type}}报表",
+      "pattern_id": "react",
+      "default_params": {},
+      "params_schema": {},
+      "examples": [
+        "生成月度销售报表",
+        "创建用户活跃度报表",
+        "制作产品分析报表"
+      ]
+    },
+    {
+      "id": "quick_point_query",
+      "name": "快速点查",
+      "category": "快速查询",
+      "description": "快速查询特定指标的值",
+      "question_template": "查询{{time_point}}的{{metric}}",
+      "pattern_id": "point_query",
+      "default_params": {
+        "metric": "total_amount",
+        "time_point": "today"
+      },
+      "params_schema": {
+        "time_point": {
+          "label": "时间点",
+          "type": "date",
+          "required": true,
+          "default": "today"
+        },
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "total_amount", "label": "销售额"},
+            {"value": "order_count", "label": "订单量"},
+            {"value": "active_users", "label": "活跃用户数"}
+          ],
+          "default": "total_amount"
+        }
+      },
+      "examples": [
+        "今天的销售额是多少",
+        "本月的订单量",
+        "上周的活跃用户数"
+      ]
+    },
+    {
+      "id": "trend_overview",
+      "name": "趋势概览",
+      "category": "趋势分析",
+      "description": "查看关键指标的趋势变化",
+      "question_template": "查看{{metric}}的趋势",
+      "pattern_id": "trend_analysis",
+      "default_params": {
+        "metric": "total_amount",
+        "time_grain": "DAY",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-01-31"
+        }
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "total_amount", "label": "销售额"},
+            {"value": "order_count", "label": "订单量"},
+            {"value": "active_users", "label": "活跃用户数"}
+          ],
+          "default": "total_amount"
+        },
+        "time_grain": {
+          "label": "时间粒度",
+          "type": "select",
+          "options": [
+            {"value": "DAY", "label": "日"},
+            {"value": "WEEK", "label": "周"},
+            {"value": "MONTH", "label": "月"}
+          ],
+          "default": "DAY"
+        },
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_30_days"
+        }
+      },
+      "examples": [
+        "查看最近30天的销售额趋势",
+        "显示今年的订单量变化",
+        "上周活跃用户数的趋势"
+      ]
+    },
+    {
+      "id": "multi_dimension_analysis",
+      "name": "多维度分析",
+      "category": "维度分析",
+      "description": "从多个维度交叉分析数据",
+      "question_template": "分析{{dimensions}}的{{metric}}",
+      "pattern_id": "agg_query",
+      "default_params": {
+        "dimensions": ["category_name", "region"],
+        "metric": "total_amount",
+        "time_point": "2024-01"
+      },
+      "params_schema": {
+        "time_point": {
+          "label": "时间点",
+          "type": "date",
+          "required": true,
+          "default": "current_month"
+        },
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "total_amount", "label": "销售额"},
+            {"value": "order_count", "label": "订单量"},
+            {"value": "active_users", "label": "活跃用户数"}
+          ],
+          "default": "total_amount"
+        },
+        "dimensions": {
+          "label": "分析维度",
+          "type": "multi_select",
+          "options": [
+            {"value": "category_name", "label": "产品类别"},
+            {"value": "brand", "label": "品牌"},
+            {"value": "region", "label": "地区"},
+            {"value": "customer_type", "label": "客户类型"}
+          ],
+          "default": ["category_name", "region"]
+        }
+      },
+      "examples": [
+        "按产品和地区分析销售额",
+        "按品牌和客户类型分析订单量",
+        "多维度交叉分析活跃用户"
+      ]
+    },
+    {
+      "id": "ranking_analysis",
+      "name": "排名分析",
+      "category": "排名分析",
+      "description": "查询TopN排名数据",
+      "question_template": "查询{{metric}}Top{{n}}的{{dimension}}",
+      "pattern_id": "topn",
+      "default_params": {
+        "metric": "total_amount",
+        "dimension": "product_name",
+        "n": 10,
+        "time_point": "2024-01"
+      },
+      "params_schema": {
+        "time_point": {
+          "label": "时间点",
+          "type": "date",
+          "required": true,
+          "default": "current_month"
+        },
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "total_amount", "label": "销售额"},
+            {"value": "order_count", "label": "订单量"},
+            {"value": "active_users", "label": "活跃用户数"}
+          ],
+          "default": "total_amount"
+        },
+        "dimension": {
+          "label": "排名维度",
+          "type": "select",
+          "options": [
+            {"value": "product_name", "label": "产品"},
+            {"value": "category_name", "label": "产品类别"},
+            {"value": "brand", "label": "品牌"},
+            {"value": "region", "label": "地区"}
+          ],
+          "default": "product_name"
+        },
+        "n": {
+          "label": "Top N",
+          "type": "number",
+          "min": 1,
+          "max": 100,
+          "default": 10
+        }
+      },
+      "examples": [
+        "销售额Top10的产品",
+        "订单量Top5的品牌",
+        "活跃用户Top20的地区"
+      ]
+    },
+    {
+      "id": "comparison_analysis",
+      "name": "对比分析",
+      "category": "对比分析",
+      "description": "对比不同时间、维度的数据",
+      "question_template": "对比{{comparison_type}}的{{metric}}",
+      "pattern_id": "yoy_mom",
+      "default_params": {
+        "metric": "total_amount",
+        "time_grain": "MONTH",
+        "time_range": {
+          "start": "2024-01-01",
+          "end": "2024-03-31"
+        },
+        "comparison_types": ["yoy", "mom"]
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "select",
+          "options": [
+            {"value": "total_amount", "label": "销售额"},
+            {"value": "order_count", "label": "订单量"},
+            {"value": "active_users", "label": "活跃用户数"}
+          ],
+          "default": "total_amount"
+        },
+        "time_grain": {
+          "label": "时间粒度",
+          "type": "select",
+          "options": [
+            {"value": "DAY", "label": "日"},
+            {"value": "WEEK", "label": "周"},
+            {"value": "MONTH", "label": "月"}
+          ],
+          "default": "MONTH"
+        },
+        "time_range": {
+          "label": "时间范围",
+          "type": "date_range",
+          "required": true,
+          "default": "last_6_months"
+        },
+        "comparison_types": {
+          "label": "对比类型",
+          "type": "multi_select",
+          "options": [
+            {"value": "yoy", "label": "同比"},
+            {"value": "mom", "label": "环比"}
+          ],
+          "default": ["yoy", "mom"]
+        }
+      },
+      "examples": [
+        "销售额的同比增长率",
+        "订单量的环比变化",
+        "活跃用户的同环比对比"
+      ]
+    }
+  ],
+  "categories": {
+    "自由查询": {
+      "templates": ["flexible_query", "data_exploration", "custom_report"],
+      "icon": "🔍",
+      "description": "使用自然语言灵活查询"
+    },
+    "快速查询": {
+      "templates": ["quick_point_query"],
+      "icon": "⚡",
+      "description": "快速获取指标值"
+    },
+    "趋势分析": {
+      "templates": ["trend_overview"],
+      "icon": "📈",
+      "description": "查看指标趋势变化"
+    },
+    "维度分析": {
+      "templates": ["multi_dimension_analysis"],
+      "icon": "📊",
+      "description": "多维度交叉分析"
+    },
+    "排名分析": {
+      "templates": ["ranking_analysis"],
+      "icon": "🏆",
+      "description": "查询TopN排名"
+    },
+    "对比分析": {
+      "templates": ["comparison_analysis"],
+      "icon": "🔄",
+      "description": "同环比对比分析"
+    }
+  }
+}

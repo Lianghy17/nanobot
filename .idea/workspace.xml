@@ -4,7 +4,27 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="" />
+    <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
+      <change afterPath="$PROJECT_DIR$/参考代码.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2026_3_16_10_41_[更改]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2026_3_16_10_41___.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/api/messages.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/messages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/message_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/message_processor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/sse_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sse_manager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_memory_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test_memory_integration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/scenes.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/scenes.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/system_prompts/v3.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v3.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -47,27 +67,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.pytest for chatbi.test_sandbox_files.test_sandbox_file_operations.executor": "Debug",
-    "Python tests.pytest in test_sandbox_files.py.executor": "Run",
-    "Python.app.executor": "Run",
-    "Python.commands.executor": "Debug",
-    "Python.conversations.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.product_sales_visualization.executor": "Run",
-    "Python.sse_manager.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Shell Script.run.sh.executor": "Run",
-    "Shell Script.start.sh.executor": "Run",
-    "Shell Script.start_with_image_server.sh.executor": "Run",
-    "git-widget-placeholder": "chatbi__frontend",
-    "last_opened_file_path": "/Users/lianghaoyun/project/nanobot",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.pytest for chatbi.test_sandbox_files.test_sandbox_file_operations.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.pytest in test_sandbox_files.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.commands.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.conversations.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.product_sales_visualization.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sse_manager.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Shell Script.run.sh.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.start.sh.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.start_with_image_server.sh.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.stop_servers.sh.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;chatbi__frontend__v2&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/lianghaoyun/project/nanobot&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/workspace/memory/conversations" />
@@ -90,28 +111,6 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/chatbi/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="product_sales_visualization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="nanobot" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/product_sales_visualization.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -157,6 +156,21 @@
       <envs />
       <method v="2" />
     </configuration>
+    <configuration name="stop_servers.sh" type="ShConfigurationType" temporary="true">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/chatbi/stop_servers.sh" />
+      <option name="SCRIPT_OPTIONS" value="" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/chatbi" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="/bin/bash" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="nanobot" />
       <option name="ENV_FILES" value="" />
@@ -177,10 +191,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Shell Script.start_with_image_server.sh" />
+        <item itemvalue="Shell Script.stop_servers.sh" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python tests.pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" />
         <item itemvalue="Python.sse_manager" />
-        <item itemvalue="Python.product_sales_visualization" />
       </list>
     </recent_temporary>
   </component>
@@ -212,7 +226,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="chatbi" />
+                        <option value="chatbi_frontend_v2" />
                       </list>
                     </value>
                   </entry>
@@ -229,12 +243,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>484</line>
-          <option name="timeStamp" value="24" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>589</line>
+          <line>284</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>

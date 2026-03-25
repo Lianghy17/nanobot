@@ -4,9 +4,36 @@
       "scene_code": "sales_analysis",
       "scene_name": "销售数据分析",
       "description": "用于分析销售业绩、趋势、产品表现等",
-      "supported_skills": ["read_file", "execute_python", "write_file"],
+      "supported_skills": ["execute_sql", "rag_search", "execute_python"],
       "default_model": "gpt-4",
-      "max_iterations": 15
+      "max_iterations": 15,
+      "supported_patterns": ["point_query", "trend_analysis", "topn", "breakdown", "yoy_mom", "agg_query"],
+      "data_config": {
+        "table_name": "sales_orders",
+        "time_field": "order_date",
+        "primary_key": "order_id"
+      },
+      "available_metrics": [
+        {"name": "销售额", "field": "total_amount", "type": "decimal", "description": "订单总金额"},
+        {"name": "销售量", "field": "quantity", "type": "integer", "description": "销售商品数量"},
+        {"name": "订单数", "field": "order_id", "type": "count", "description": "订单数量"},
+        {"name": "客单价", "field": "avg_order_value", "type": "decimal", "description": "平均订单金额"}
+      ],
+      "available_dimensions": [
+        {"name": "商品分类", "field": "category", "description": "商品所属类别"},
+        {"name": "品牌", "field": "brand", "description": "商品品牌"},
+        {"name": "地区", "field": "region", "description": "销售地区"},
+        {"name": "省份", "field": "province", "description": "省份"},
+        {"name": "城市", "field": "city", "description": "城市"},
+        {"name": "渠道", "field": "channel", "description": "销售渠道(线上/线下/代理)"},
+        {"name": "门店", "field": "store_name", "description": "门店名称"}
+      ],
+      "user_prompt": "您可以询问销售相关问题，例如：\n• 本月各商品分类的销售额是多少？\n• 最近7天的销售趋势如何？\n• 销售额TOP10的品牌有哪些？\n• 各地区的销售对比情况？",
+      "important_notes": [
+        "销售额、销售量为核心指标，建议优先关注",
+        "时间范围默认为近30天，可根据需要调整",
+        "地区维度支持省市级下钻分析"
+      ]
     },
     {
       "scene_code": "user_behavior",
@@ -14,7 +41,31 @@
       "description": "分析用户留存、活跃、转化等行为数据",
       "supported_skills": ["execute_sql", "rag_search", "execute_python"],
       "default_model": "gpt-4",
-      "max_iterations": 20
+      "max_iterations": 20,
+      "supported_patterns": ["funnel", "retention", "path", "point_query", "trend_analysis"],
+      "data_config": {
+        "table_name": "user_events",
+        "time_field": "event_time",
+        "primary_key": "event_id"
+      },
+      "available_metrics": [
+        {"name": "活跃用户数", "field": "active_users", "type": "count_distinct", "description": "去重活跃用户"},
+        {"name": "新增用户数", "field": "new_users", "type": "count", "description": "新注册用户"},
+        {"name": "事件次数", "field": "event_count", "type": "count", "description": "用户行为事件总数"},
+        {"name": "会话数", "field": "session_count", "type": "count", "description": "用户会话数"}
+      ],
+      "available_dimensions": [
+        {"name": "事件类型", "field": "event_type", "description": "用户行为事件类型"},
+        {"name": "平台", "field": "platform", "description": "访问平台(iOS/Android/Web)"},
+        {"name": "渠道来源", "field": "source", "description": "用户来源渠道"},
+        {"name": "用户等级", "field": "user_level", "description": "用户等级(VIP/普通)"}
+      ],
+      "user_prompt": "您可以询问用户行为相关问题，例如：\n• 用户注册到购买的转化漏斗是怎样的？\n• 最近30天用户的留存情况如何？\n• 用户最常见的行为路径是什么？\n• 各渠道带来的用户活跃度如何？",
+      "important_notes": [
+        "留存分析建议观察7日/30日留存率",
+        "漏斗分析需要明确定义各步骤的事件类型",
+        "路径分析可帮助优化产品体验"
+      ]
     },
     {
       "scene_code": "general_bi",
@@ -22,7 +73,29 @@
       "description": "通用商业智能分析，支持多种数据查询和分析场景",
       "supported_skills": ["execute_sql", "read_file", "execute_python", "rag_search"],
       "default_model": "gpt-4",
-      "max_iterations": 20
+      "max_iterations": 20,
+      "supported_patterns": ["point_query", "detail_query", "agg_query", "trend_analysis", "topn", "breakdown", "comparison", "yoy_mom", "cumulative"],
+      "data_config": {
+        "table_name": "business_data",
+        "time_field": "created_at",
+        "primary_key": "id"
+      },
+      "available_metrics": [
+        {"name": "数量", "field": "count", "type": "count", "description": "记录数量"},
+        {"name": "金额", "field": "amount", "type": "decimal", "description": "金额总计"},
+        {"name": "人数", "field": "user_count", "type": "count_distinct", "description": "去重人数"}
+      ],
+      "available_dimensions": [
+        {"name": "类型", "field": "type", "description": "数据类型"},
+        {"name": "状态", "field": "status", "description": "状态标识"},
+        {"name": "分类", "field": "category", "description": "业务分类"}
+      ],
+      "user_prompt": "您可以进行通用的数据分析，例如：\n• 查询特定条件的明细数据\n• 按维度汇总统计\n• 分析数据趋势变化\n• 进行同环比分析",
+      "important_notes": [
+        "请明确指定分析的时间范围",
+        "复杂分析可能需要较长时间",
+        "建议从简单查询开始逐步深入"
+      ]
     }
   ]
 }

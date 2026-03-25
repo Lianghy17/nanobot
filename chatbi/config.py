@@ -278,6 +278,70 @@ class ChatBIConfig:
         """图片上传超时时间"""
         return int(self._config.get("image_server", {}).get("upload_timeout", 30))
 
+    @property
+    def pattern_config_path(self) -> str:
+        """Pattern配置文件路径"""
+        # 优先使用配置文件中的路径
+        configured_path = self._config.get("pattern", {}).get("config_path")
+        if configured_path:
+            path = Path(configured_path)
+            if not path.is_absolute():
+                path = get_project_root() / configured_path
+            return str(path)
+        
+        # 默认路径
+        return str(get_project_root() / "config" / "pattern_config.json")
+
+    @property
+    def pattern_enabled(self) -> bool:
+        """是否启用Pattern模式"""
+        return self._config.get("pattern", {}).get("enabled", True)
+
+    @property
+    def pattern_match_threshold(self) -> float:
+        """Pattern匹配置信度阈值"""
+        return float(self._config.get("pattern", {}).get("match_threshold", 0.6))
+
+    @property
+    def param_mapper_enabled(self) -> bool:
+        """是否启用LLM参数映射"""
+        return self._config.get("param_mapper", {}).get("enabled", True)
+
+    @property
+    def param_mapper_config(self) -> Dict[str, Any]:
+        """参数映射器完整配置"""
+        return self._config.get("param_mapper", {})
+
+    @property
+    def param_mapper_model(self) -> str:
+        """参数映射使用的模型"""
+        return self._config.get("param_mapper", {}).get("model", self.llm_model)
+
+    @property
+    def param_mapper_temperature(self) -> float:
+        """参数映射LLM温度"""
+        return float(self._config.get("param_mapper", {}).get("temperature", 0.1))
+
+    @property
+    def param_mapper_max_tokens(self) -> int:
+        """参数映射最大token数"""
+        return int(self._config.get("param_mapper", {}).get("max_tokens", 4096))
+
+    @property
+    def param_mapper_timeout(self) -> int:
+        """参数映射超时时间"""
+        return int(self._config.get("param_mapper", {}).get("timeout", 30))
+
+    @property
+    def param_mapper_rules(self) -> Dict[str, Any]:
+        """参数映射规则配置"""
+        return self._config.get("param_mapper", {}).get("rules", {})
+
+    @property
+    def param_mapper_thinking_disabled(self) -> bool:
+        """参数映射是否禁用思考"""
+        return self._config.get("param_mapper", {}).get("thinking_disabled", True)
+
     def get_tool_config(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """获取特定工具的配置"""
         return self.tools_config.get(tool_name)
@@ -294,6 +358,11 @@ class ChatBIConfig:
         python_version = platform.python_version()
         system = platform.system()
         return f"Python {python_version} on {system}"
+
+    @property
+    def config_dir(self) -> str:
+        """获取配置目录路径"""
+        return str(get_project_root() / "config")
 
 
 # 全局配置实例

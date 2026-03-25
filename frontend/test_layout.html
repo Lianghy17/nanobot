@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>布局测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: #2c3e50;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .history-list {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            background: white;
+            min-width: 0;
+            position: relative;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            min-width: 0;
+            max-width: calc(100% - 320px);
+            border: 2px solid #3498db;
+        }
+
+        .header {
+            height: 50px;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .messages {
+            flex: 1;
+            background: #ecf0f1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .input-area {
+            height: 120px;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            background: white;
+        }
+
+        .hot-questions-panel {
+            width: 320px;
+            background: white;
+            border-left: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+            border: 2px solid #e74c3c;
+        }
+
+        .hot-questions-header {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .hot-questions-list {
+            flex: 1;
+            padding: 10px;
+        }
+
+        .info {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff3cd;
+            padding: 10px 20px;
+            border-radius: 4px;
+            z-index: 9999;
+            border: 1px solid #ffc107;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="info">这是布局测试页面 - QA模板库应该在右侧（红色边框）</div>
+
+    <div class="container">
+        <!-- 左侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>ChatBI</h2>
+            </div>
+            <div class="history-list">
+                <p style="color: #95a5a6;">历史对话列表</p>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="main">
+            <!-- 聊天区域 -->
+            <div class="chat-area">
+                <!-- 头部 -->
+                <div class="header">
+                    <h1>选择场景开始对话</h1>
+                </div>
+
+                <!-- 消息列表 -->
+                <div class="messages">
+                    <p>消息列表区域（蓝色边框）</p>
+                </div>
+
+                <!-- 输入区域 -->
+                <div class="input-area">
+                    <p>输入区域</p>
+                </div>
+            </div>
+
+            <!-- 右侧热门问题面板 -->
+            <div class="hot-questions-panel">
+                <div class="hot-questions-header">
+                    <h3>📋 QA模板库</h3>
+                </div>
+                <div class="hot-questions-list">
+                    <p>QA模板列表区域（红色边框）</p>
+                    <p>✅ 如果这个红色边框的框在蓝色框的右侧，说明布局正确</p>
+                    <p>❌ 如果这个红色边框的框在蓝色框的下面，说明布局有问题</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('布局测试页面已加载');
+        console.log('容器方向:', getComputedStyle(document.querySelector('.container')).flexDirection);
+        console.log('主区域方向:', getComputedStyle(document.querySelector('.main')).flexDirection);
+        console.log('聊天区域最大宽度:', getComputedStyle(document.querySelector('.chat-area')).maxWidth);
+        console.log('QA面板宽度:', getComputedStyle(document.querySelector('.hot-questions-panel')).width);
+    </script>
+</body>
+</html>

@@ -30,6 +30,7 @@ class SSEManager:
 
     _instance: Optional["SSEManager"] = None
     _connections: Dict[str, SSEConnection] = {}
+    _cancelled_messages: Set[str] = set()  # 已取消的消息ID集合
 
     def __new__(cls):
         if cls._instance is None:
@@ -87,6 +88,24 @@ class SSEManager:
         """向所有连接广播事件"""
         for conversation_id in list(self._connections.keys()):
             await self.send_event(conversation_id, event_type, data)
+
+    def cancel_message(self, message_id: str) -> bool:
+        """标记消息为已取消"""
+        if message_id not in self._cancelled_messages:
+            self._cancelled_messages.add(message_id)
+            logger.info(f"[SSE] 消息已标记为取消: {message_id}")
+            return True
+        return False
+
+    def is_cancelled(self, message_id: str) -> bool:
+        """检查消息是否已被取消"""
+        return message_id in self._cancelled_messages
+
+    def clear_cancelled(self, message_id: str):
+        """清除取消标记（用于消息处理完成后）"""
+        if message_id in self._cancelled_messages:
+            self._cancelled_messages.remove(message_id)
+            logger.info(f"[SSE] 清除取消标记: {message_id}")
 
 
 # 全局单例

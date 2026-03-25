@@ -1,0 +1,266 @@
+{
+  "tables": [
+    {
+      "table_name": "fact_sales",
+      "table_alias": "销售事实表",
+      "description": "销售交易数据",
+      "fields": [
+        {
+          "field_name": "order_id",
+          "field_alias": "订单ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "订单唯一标识"
+        },
+        {
+          "field_name": "customer_id",
+          "field_alias": "客户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_customer",
+          "description": "客户标识"
+        },
+        {
+          "field_name": "product_id",
+          "field_alias": "产品ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_product",
+          "description": "产品标识"
+        },
+        {
+          "field_name": "order_date",
+          "field_alias": "订单日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "订单日期"
+        },
+        {
+          "field_name": "quantity",
+          "field_alias": "数量",
+          "data_type": "integer",
+          "is_metric": true,
+          "description": "购买数量"
+        },
+        {
+          "field_name": "total_amount",
+          "field_alias": "总金额",
+          "data_type": "decimal(10,2)",
+          "is_metric": true,
+          "description": "订单总金额"
+        }
+      ]
+    },
+    {
+      "table_name": "fact_user_events",
+      "table_alias": "用户行为事实表",
+      "description": "用户行为事件数据",
+      "fields": [
+        {
+          "field_name": "event_id",
+          "field_alias": "事件ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "事件唯一标识"
+        },
+        {
+          "field_name": "user_id",
+          "field_alias": "用户ID",
+          "data_type": "string",
+          "is_foreign_key": true,
+          "reference_table": "dim_user",
+          "description": "用户标识"
+        },
+        {
+          "field_name": "event_type",
+          "field_alias": "事件类型",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "事件类型"
+        },
+        {
+          "field_name": "event_date",
+          "field_alias": "事件日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "事件日期"
+        },
+        {
+          "field_name": "event_time",
+          "field_alias": "事件时间",
+          "data_type": "datetime",
+          "description": "事件时间"
+        },
+        {
+          "field_name": "page_url",
+          "field_alias": "页面URL",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "页面路径"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_customer",
+      "table_alias": "客户维度表",
+      "description": "客户基本信息",
+      "fields": [
+        {
+          "field_name": "customer_id",
+          "field_alias": "客户ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "客户唯一标识"
+        },
+        {
+          "field_name": "customer_type",
+          "field_alias": "客户类型",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "客户类型:new/returning/vip"
+        },
+        {
+          "field_name": "register_date",
+          "field_alias": "注册日期",
+          "data_type": "date",
+          "is_dimension": true,
+          "description": "注册日期"
+        },
+        {
+          "field_name": "region",
+          "field_alias": "地区",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "所在地区"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_product",
+      "table_alias": "产品维度表",
+      "description": "产品基本信息",
+      "fields": [
+        {
+          "field_name": "product_id",
+          "field_alias": "产品ID",
+          "data_type": "string",
+          "is_primary_key": true,
+          "description": "产品唯一标识"
+        },
+        {
+          "field_name": "product_name",
+          "field_alias": "产品名称",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "产品名称"
+        },
+        {
+          "field_name": "category_id",
+          "field_alias": "产品类别ID",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "产品类别"
+        },
+        {
+          "field_name": "brand",
+          "field_alias": "品牌",
+          "data_type": "string",
+          "is_dimension": true,
+          "description": "产品品牌"
+        },
+        {
+          "field_name": "price",
+          "field_alias": "价格",
+          "data_type": "decimal(10,2)",
+          "description": "产品价格"
+        }
+      ]
+    },
+    {
+      "table_name": "dim_date",
+      "table_alias": "日期维度表",
+      "description": "日期维度信息",
+      "fields": [
+        {
+          "field_name": "date_key",
+          "field_alias": "日期键",
+          "data_type": "date",
+          "is_primary_key": true,
+          "description": "日期"
+        },
+        {
+          "field_name": "year",
+          "field_alias": "年",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "年份"
+        },
+        {
+          "field_name": "month",
+          "field_alias": "月",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "月份"
+        },
+        {
+          "field_name": "day",
+          "field_alias": "日",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "日期"
+        },
+        {
+          "field_name": "weekday",
+          "field_alias": "星期",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "星期几(1-7)"
+        },
+        {
+          "field_name": "quarter",
+          "field_alias": "季度",
+          "data_type": "integer",
+          "is_dimension": true,
+          "description": "季度(1-4)"
+        }
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "from_table": "fact_sales",
+      "from_field": "customer_id",
+      "to_table": "dim_customer",
+      "to_field": "customer_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_sales",
+      "from_field": "product_id",
+      "to_table": "dim_product",
+      "to_field": "product_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_sales",
+      "from_field": "order_date",
+      "to_table": "dim_date",
+      "to_field": "date_key",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_user_events",
+      "from_field": "user_id",
+      "to_table": "dim_customer",
+      "to_field": "customer_id",
+      "relationship_type": "many_to_one"
+    },
+    {
+      "from_table": "fact_user_events",
+      "from_field": "event_date",
+      "to_table": "dim_date",
+      "to_field": "date_key",
+      "relationship_type": "many_to_one"
+    }
+  ]
+}

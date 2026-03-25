@@ -26,44 +26,46 @@ async def test_agent_memory_integration():
 
     # 测试memory store初始化
     print("\n1. 检查memory store初始化")
-    print(f"Memory store类型: {type(agent.memory_store)}")
-    print(f"Memory store workspace: {agent.memory_store.workspace}")
+    agent.memory_manager.init_session_memory()
+    print(f"Memory store类型: {type(agent.memory_manager.memory_store)}")
+    print(f"Memory store workspace: {agent.memory_manager.memory_store.workspace}")
 
-    # 测试_set_tool_context
+    # 测试set_tool_context
     print("\n2. 测试设置工具上下文")
-    agent._set_tool_context("test_user", "test_conversation")
-    print(f"Memory key: {agent.memory_store.memory_key}")
-    print(f"User memory path: {agent.memory_store._user_memory}")
-    print(f"User history path: {agent.memory_store._user_history}")
+    agent.tool_executor.set_tool_context("test_user", "test_conversation")
+    agent.memory_manager.init_session_memory("test_conversation")
+    print(f"Memory key: {agent.memory_manager.memory_store.memory_key}")
+    print(f"User memory path: {agent.memory_manager.memory_store._user_memory}")
+    print(f"User history path: {agent.memory_manager.memory_store._user_history}")
 
     # 测试memory context获取
     print("\n3. 测试获取memory context")
-    context = agent.memory_store.get_memory_context()
+    context = agent.memory_manager.get_memory_context()
     print(f"Memory context长度: {len(context)}")
     if context:
         print(f"Memory context预览: {context[:200]}...")
 
     # 测试写入memory
     print("\n4. 测试写入memory")
-    agent.memory_store.write_long_term("用户偏好：喜欢使用SQL查询", level="user")
-    agent.memory_store.write_long_term("全局知识：支持MySQL和Hive", level="global")
-    content = agent.memory_store.read_long_term()
+    agent.memory_manager.memory_store.write_long_term("用户偏好：喜欢使用SQL查询", level="user")
+    agent.memory_manager.memory_store.write_long_term("全局知识：支持MySQL和Hive", level="global")
+    content = agent.memory_manager.memory_store.read_long_term()
     print(f"Memory内容:\n{content}")
 
     # 测试history记录
     print("\n5. 测试history记录")
-    agent.memory_store.append_history("2026-03-17: 用户查询了销售数据", level="user")
-    history = agent.memory_store.read_history(level="user")
+    agent.memory_manager.memory_store.append_history("2026-03-17: 用户查询了销售数据", level="user")
+    history = agent.memory_manager.memory_store.read_history(level="user")
     print(f"History内容:\n{history}")
 
     # 测试memory context格式
     print("\n6. 测试memory context格式")
-    formatted_context = agent.memory_store.get_memory_context()
+    formatted_context = agent.memory_manager.get_memory_context()
     print(f"格式化的memory context:\n{formatted_context}")
 
     # 清理
     import shutil
-    test_workspace = Path(agent.memory_store.workspace)
+    test_workspace = Path(agent.memory_manager.workspace_path)
     memory_dir = test_workspace / "memory"
     if memory_dir.exists():
         shutil.rmtree(memory_dir)

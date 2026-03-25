@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>前端调试</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .hot-questions-panel {
+            width: 320px;
+            background: white;
+            border: 2px solid #3498db;
+            padding: 10px;
+            display: none;
+        }
+        .hot-questions-panel.active {
+            display: block;
+        }
+        .hot-questions-list {
+            margin-top: 10px;
+        }
+        .hot-question-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .hot-question-item:hover {
+            background: #e8f4f8;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>QA模板加载测试</h1>
+    <button onclick="testLoadSales()">加载销售分析模板</button>
+    <button onclick="testLoadUserBehavior()">加载用户行为模板</button>
+    <button onclick="testLoadGeneralBI()">加载通用BI模板</button>
+    
+    <div class="hot-questions-panel" id="hotQuestionsPanel">
+        <h3>📋 QA模板库</h3>
+        <div class="hot-questions-list" id="hotQuestionsList">
+            <p>点击按钮加载模板...</p>
+        </div>
+    </div>
+    
+    <div id="debug" style="margin-top: 20px; padding: 10px; background: #fff3cd;">
+        <h3>调试信息:</h3>
+        <pre id="debugContent"></pre>
+    </div>
+    
+    <script>
+        const API_BASE = '/api';
+        let qaTemplates = {};
+        
+        function debug(msg) {
+            const debugContent = document.getElementById('debugContent');
+            debugContent.textContent += msg + '\n';
+        }
+        
+        async function loadHotQuestions(sceneCode) {
+            debug(`开始加载场景: ${sceneCode}`);
+            try {
+                const url = `${API_BASE}/qa/templates/${sceneCode}`;
+                debug(`请求URL: ${url}`);
+                
+                const response = await fetch(url);
+                debug(`响应状态: ${response.status}`);
+                
+                const data = await response.json();
+                debug(`响应数据: ${JSON.stringify(data, null, 2).substring(0, 200)}...`);
+                
+                if (data.status === 'success') {
+                    qaTemplates = data;
+                    renderQATemplates(data);
+                    document.getElementById('hotQuestionsPanel').classList.add('active');
+                    debug('✅ QA模板加载成功！');
+                } else {
+                    debug(`❌ 加载失败: ${data}`);
+                }
+            } catch (error) {
+                debug(`❌ 错误: ${error.message}`);
+                console.error('加载QA模板失败:', error);
+                document.getElementById('hotQuestionsList').innerHTML = '<p>QA模板加载失败</p>';
+            }
+        }
+        
+        function renderQATemplates(qaData) {
+            const hotQuestionsList = document.getElementById('hotQuestionsList');
+            
+            if (!qaData.templates || qaData.templates.length === 0) {
+                hotQuestionsList.innerHTML = '<p>暂无QA模板</p>';
+                debug('⚠️ 没有找到QA模板');
+                return;
+            }
+            
+            debug(`找到 ${qaData.templates.length} 个模板`);
+            
+            // 按类别分组
+            const categories = qaData.categories || {};
+            const templates = qaData.templates || [];
+            
+            // 如果有分类，按分类渲染
+            if (Object.keys(categories).length > 0) {
+                let html = '';
+                for (const [categoryKey, categoryInfo] of Object.entries(categories)) {
+                    const categoryTemplates = templates.filter(t => categoryInfo.templates.includes(t.id));
+                    
+                    if (categoryTemplates.length > 0) {
+                        html += `
+                            <div class="qa-category">
+                                <h4>${categoryKey} (${categoryTemplates.length}个模板)</h4>
+                                ${categoryTemplates.map(t => renderTemplateItem(t)).join('')}
+                            </div>
+                        `;
+                    }
+                }
+                hotQuestionsList.innerHTML = html;
+            } else {
+                // 没有分类，直接渲染所有模板
+                hotQuestionsList.innerHTML = templates.map(t => renderTemplateItem(t)).join('');
+            }
+        }
+        
+        function renderTemplateItem(template) {
+            return `
+                <div class="hot-question-item" onclick="useTemplate('${template.id}')">
+                    <div><strong>${template.name || template.question_template}</strong></div>
+                    <div style="font-size: 12px; color: #666;">${template.description || ''}</div>
+                </div>
+            `;
+        }
+        
+        function useTemplate(templateId) {
+            debug(`使用模板: ${templateId}`);
+            alert(`模板ID: ${templateId}`);
+        }
+        
+        async function testLoadSales() {
+            document.getElementById('debugContent').textContent = '';
+            await loadHotQuestions('sales_analysis');
+        }
+        
+        async function testLoadUserBehavior() {
+            document.getElementById('debugContent').textContent = '';
+            await loadHotQuestions('user_behavior');
+        }
+        
+        async function testLoadGeneralBI() {
+            document.getElementById('debugContent').textContent = '';
+            await loadHotQuestions('general_bi');
+        }
+    </script>
+</body>
+</html>
