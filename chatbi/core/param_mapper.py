@@ -36,9 +36,14 @@ class ParamMapper:
     def _get_llm_client(self) -> LLMClient:
         """延迟初始化LLM客户端"""
         if self._llm_client is None:
+            # 优先使用param_mapper配置的api_base和api_key
+            param_config = chatbi_config.param_mapper_config
+            api_base = param_config.get("api_base", chatbi_config.llm_api_base)
+            api_key = param_config.get("api_key", chatbi_config.llm_api_key)
+
             self._llm_client = LLMClient(
-                api_base=chatbi_config.llm_api_base,
-                api_key=chatbi_config.llm_api_key,
+                api_base=api_base,
+                api_key=api_key,
                 model=chatbi_config.param_mapper_model,
                 temperature=chatbi_config.param_mapper_temperature,
                 max_tokens=chatbi_config.param_mapper_max_tokens,
@@ -47,7 +52,7 @@ class ParamMapper:
             )
             logger.info(
                 f"[参数映射] LLM客户端初始化: model={chatbi_config.param_mapper_model}, "
-                f"temperature={chatbi_config.param_mapper_temperature}"
+                f"api_base={api_base}, temperature={chatbi_config.param_mapper_temperature}"
             )
         return self._llm_client
 
@@ -97,7 +102,7 @@ class ParamMapper:
 
     async def map_params(
         self,
-        pattern_id: str,
+        template_id: str,
         params: Dict[str, Any],
         scene_code: str,
         context: Optional[Dict] = None
@@ -106,10 +111,10 @@ class ParamMapper:
         使用LLM映射参数值
 
         Args:
-            pattern_id: Pattern ID
+            template_id: Template ID
             params: 原始参数（可能包含中文值）
             scene_code: 场景代码
-            context: 上下文信息（可包含 pattern 的 params_schema）
+            context: 上下文信息（可包含 template 的 params_schema）
 
         Returns:
             (mapped_params, error_message)
@@ -126,7 +131,7 @@ class ParamMapper:
             logger.info("[参数映射] LLM映射已禁用，跳过映射")
             return params, None
 
-        # 获取 params_schema（从 context 或 pattern 配置中）
+        # 获取 params_schema（从 context 或 template 配置中）
         params_schema = {}
         if context and "params_schema" in context:
             params_schema = context["params_schema"]
@@ -134,7 +139,9 @@ class ParamMapper:
         # 构建 prompt
         user_prompt = self._build_user_prompt(params_to_map, params_schema)
 
-        logger.info(f"[参数映射] 开始LLM映射, pattern={pattern_id}, params={list(params_to_map.keys())}")
+        logger.info(f"[参数映射] 开始LLM映射, template={template_id}, params={list(params_to_map.keys())}")
+        logger.info(f"[参数映射] 使用模型: {chatbi_config.param_mapper_model}")
+        logger.info(f"[参数映射] Prompt长度: {len(user_prompt)} 字符")
         logger.debug(f"[参数映射] Prompt:\n{user_prompt}")
 
         try:

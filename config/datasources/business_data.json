@@ -1,0 +1,43 @@
+{
+  "datasource_id": "business_data",
+  "name": "通用业务数据表",
+  "description": "通用商业智能分析数据表",
+  "table_name": "business_data",
+  "time_field": "created_at",
+  "primary_key": "id",
+  
+  "metrics": [
+    {
+      "id": "count",
+      "name": "数量",
+      "field": "id",
+      "type": "count",
+      "agg": "COUNT",
+      "description": "记录数量"
+    },
+    {
+      "id": "amount",
+      "name": "金额",
+      "field": "amount",
+      "type": "decimal",
+      "agg": "SUM",
+      "description": "金额总计"
+    },
+    {
+      "id": "user_count",
+      "name": "人数",
+      "field": "user_id",
+      "type": "count_distinct",
+      "agg": "COUNT_DISTINCT",
+      "description": "去重人数"
+    }
+  ],
+  
+  "dimensions": [
+    {"id": "type", "name": "类型", "field": "type", "description": "数据类型"},
+    {"id": "status", "name": "状态", "field": "status", "description": "状态标识"},
+    {"id": "category", "name": "分类", "field": "category", "description": "业务分类"}
+  ],
+  
+  "common_filters": []
+}

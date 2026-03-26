@@ -27,3 +27,4 @@ workspace/data/*
 workspace/files/*
 workspace/images/*
 workspace/memory/*
+nanobot/config/chatbi.json

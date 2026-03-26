@@ -11,7 +11,7 @@ from ..models.llm import LLMResponse, ToolCallRequest
 from .conversation_manager import ConversationManager
 from .llm_client import LLMClient
 from .sse_manager import sse_manager
-from .pattern_loader import PatternLoader
+from .template_loader import SceneTemplateLoader
 from .intent_analyzer import IntentAnalyzer
 from .token_manager import estimate_tokens, trim_history_by_tokens
 from .tool_executor import ToolExecutor
@@ -64,17 +64,30 @@ class AgentWrapper:
         self.tool_executor = ToolExecutor()
         self.memory_manager = MemoryManager(self.llm_client, chatbi_config.workspace_path)
 
-        # Pattern 相关组件
+        # Pattern 相关组件（使用TemplateLoader）
         if chatbi_config.pattern_enabled:
             try:
-                logger.info(f"[Agent初始化] 开始加载Pattern组件, config_path={chatbi_config.pattern_config_path}")
-                self.pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
-                logger.info("[Agent初始化] PatternLoader加载成功")
-                self.intent_analyzer = IntentAnalyzer(self.llm_client, self.pattern_loader)
+                logger.info(f"[Agent初始化] 开始加载Template组件")
+                import os
+                from pathlib import Path
+
+                # 正确构建场景配置路径
+                scenes_config_path = os.path.join(chatbi_config.config_dir, "scenes.json")
+                logger.info(f"[Agent初始化] 场景配置路径: {scenes_config_path}")
+
+                # 验证文件是否存在
+                if not os.path.exists(scenes_config_path):
+                    logger.error(f"[Agent初始化] 场景配置文件不存在: {scenes_config_path}")
+                    self._init_pattern_none()
+                    return
+
+                self.template_loader = SceneTemplateLoader(scenes_config_path)
+                logger.info(f"[Agent初始化] SceneTemplateLoader加载成功, 模板数: {len(self.template_loader.get_all_templates())}")
+                self.intent_analyzer = IntentAnalyzer(self.llm_client, self.template_loader)
                 logger.info("[Agent初始化] IntentAnalyzer加载成功")
-                sql_builder = PatternSQLBuilder(self.pattern_loader)
+                sql_builder = PatternSQLBuilder(self.template_loader)
                 logger.info("[Agent初始化] PatternSQLBuilder加载成功")
-                self.pattern_handler = PatternHandler(self.pattern_loader, sql_builder)
+                self.pattern_handler = PatternHandler(self.template_loader, sql_builder)
                 logger.info("[Agent初始化] Pattern组件加载成功")
             except Exception as e:
                 logger.error(f"[Agent初始化] Pattern组件加载失败: {e}", exc_info=True)
@@ -85,7 +98,7 @@ class AgentWrapper:
 
     def _init_pattern_none(self):
         """Pattern组件初始化失败时的空值设置"""
-        self.pattern_loader = None
+        self.template_loader = None
         self.intent_analyzer = None
         self.pattern_handler = None
 
@@ -331,6 +344,11 @@ class AgentWrapper:
 
     async def _dispatch(self, conversation: Conversation, message: Message) -> Optional[Dict[str, Any]]:
         """分发消息到Pattern模式或React模式"""
+        # 检查是否降级到React模式
+        if message.metadata and message.metadata.get("fallback_to_react"):
+            logger.info("[降级模式] 用户选择降级到React模式")
+            return await self._process_react(conversation, message)
+
         # 检查是否首次选择模板
         if self._is_template_selection(message):
             if not self.pattern_handler:
@@ -359,19 +377,19 @@ class AgentWrapper:
                 conversation.conversation_id, "intent_analyzed",
                 {
                     "intent_type": intent_result.intent_type,
-                    "matched_pattern": intent_result.matched_pattern,
+                    "matched_template": intent_result.matched_template,
                     "confidence": intent_result.confidence,
-                    "mode": "template" if intent_result.intent_type == "pattern_match" else "react"
+                    "mode": "template" if intent_result.intent_type == "template_match" else "react"
                 }
             )
 
-            # 匹配到 Pattern
-            if (intent_result.intent_type == "pattern_match"
-                and intent_result.matched_pattern
-                and intent_result.pattern_config
+            # 匹配到 Template
+            if (intent_result.intent_type == "template_match"
+                and intent_result.matched_template
+                and intent_result.template_config
                 and intent_result.confidence >= chatbi_config.pattern_match_threshold):
 
-                logger.info(f"[Pattern模式] 匹配到Pattern: {intent_result.matched_pattern}")
+                logger.info(f"[Template模式] 匹配到Template: {intent_result.matched_template}")
                 return await self.pattern_handler.process_with_pattern(conversation, message, intent_result)
 
             # 需要澄清

@@ -1,10 +1,10 @@
-"""SQL构建器 - 基于Pattern配置生成SQL"""
+"""SQL构建器 - 基于Template配置生成SQL"""
 import logging
 import re
 from typing import Dict, Any, Optional, List, Set
 from abc import ABC, abstractmethod
 
-from .pattern_loader import PatternLoader, PatternConfig
+from .template_loader import SceneTemplateLoader, TemplateConfig
 from .param_mapper import ParamMapper
 
 logger = logging.getLogger(__name__)
@@ -134,10 +134,15 @@ class PlaceholderResolver:
         "rollup_clause": "rollup_clause",
         "pivot_values": "pivot_values",
         "pivot_columns": "pivot_columns",
+        "metric_field": "metric_field",
+        "dimension": "dimension_single",
+        "n": "n",
+        "steps": "steps",
     }
     
-    def __init__(self, time_field: str = "created_at"):
+    def __init__(self, time_field: str = "created_at", params_schema: Dict[str, Any] = None):
         self.time_field = time_field
+        self.params_schema = params_schema or {}
     
     def resolve(self, placeholder: str, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         """解析单个占位符"""
@@ -161,22 +166,92 @@ class PlaceholderResolver:
         
         return str(value) if value is not None else ""
     
+    def _resolve_metric_field(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+        """解析指标字段映射"""
+        metric = params.get("metric")
+        if not metric:
+            return "COUNT(*)"  # 默认值
+        
+        # 从 params_schema 中获取 field_mapping
+        metric_schema = self.params_schema.get("metric", {})
+        field_mapping = metric_schema.get("field_mapping", {})
+        
+        # 映射指标名称到 SQL 字段
+        mapped_value = field_mapping.get(metric)
+        if mapped_value:
+            return mapped_value
+        
+        # 如果 metric 本身就是 SQL 表达式（包含函数）
+        if "(" in metric:
+            return metric
+        
+        return metric
+    
+    def _resolve_dimension_single(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+        """解析单个维度字段映射"""
+        dimension = params.get("dimension")
+        if not dimension:
+            return "1"  # 默认值
+        
+        # 从 params_schema 中获取 field_mapping
+        dimension_schema = self.params_schema.get("dimension", {})
+        field_mapping = dimension_schema.get("field_mapping", {})
+        
+        # 映射维度名称到数据库字段
+        mapped_value = field_mapping.get(dimension)
+        if mapped_value:
+            return mapped_value
+        
+        return dimension
+    
+    def _resolve_n(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+        """解析排名数量"""
+        n = params.get("n", 10)
+        return str(n)
+    
+    def _resolve_steps(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+        """解析漏斗步骤"""
+        steps = params.get("steps", [])
+        if not steps:
+            return ""
+        # 转为 SQL IN 子句格式
+        return ", ".join([f"'{s}'" for s in steps])
+    
     def _resolve_time_filter(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         """构建时间过滤条件"""
         time_point = params.get("time_point")
         time_range = params.get("time_range", {})
         
         if time_point:
-            return f"{self.time_field} = '{time_point}'"
+            # 检查是否是SQL表达式（包含函数名或括号）
+            # 如果是SQL表达式，直接使用；如果是日期字符串，用引号包裹
+            sql_keywords = {'CURRENT_DATE', 'CURRENT_TIMESTAMP', 'DATE_SUB', 'DATE_ADD',
+                          'DATE_FORMAT', 'DATE_TRUNC', 'CURDATE', 'NOW', 'SYSDATE'}
+            if any(keyword in time_point.upper() for keyword in sql_keywords) or '(' in time_point:
+                # SQL表达式，直接使用
+                return f"{self.time_field} = {time_point}"
+            else:
+                # 日期字符串，用引号包裹
+                return f"{self.time_field} = '{time_point}'"
         
         start = time_range.get("start")
         end = time_range.get("end")
         if start and end:
-            return f"{self.time_field} BETWEEN '{start}' AND '{end}'"
+            # 检查start和end是否是SQL表达式
+            if '(' in start:
+                return f"{self.time_field} BETWEEN {start} AND {end}"
+            else:
+                return f"{self.time_field} BETWEEN '{start}' AND '{end}'"
         elif start:
-            return f"{self.time_field} >= '{start}'"
+            if '(' in start:
+                return f"{self.time_field} >= {start}"
+            else:
+                return f"{self.time_field} >= '{start}'"
         elif end:
-            return f"{self.time_field} <= '{end}'"
+            if '(' in end:
+                return f"{self.time_field} <= {end}"
+            else:
+                return f"{self.time_field} <= '{end}'"
         
         return f"{self.time_field} <= CURRENT_TIMESTAMP"
     
@@ -235,7 +310,7 @@ class SQLBuilder(ABC):
     """SQL构建器基类"""
     
     @abstractmethod
-    def build_sql(self, pattern_config: PatternConfig, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+    def build_sql(self, template_config: TemplateConfig, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         """构建SQL"""
         pass
     
@@ -254,28 +329,29 @@ class SQLBuilder(ABC):
 class UniversalSQLBuilder(SQLBuilder):
     """通用SQL构建器 - 基于模板自动解析占位符"""
     
-    def build_sql(self, pattern_config: PatternConfig, params: Dict[str, Any], context: Dict[str, Any]) -> str:
+    def build_sql(self, template_config: TemplateConfig, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         time_field = context.get("time_field", "created_at")
         table_name = context.get("table_name", "unknown_table")
+        params_schema = template_config.params_schema or context.get("params_schema", {})
         
-        # 创建占位符解析器
-        resolver = PlaceholderResolver(time_field)
+        # 创建占位符解析器（传入 params_schema 用于字段映射）
+        resolver = PlaceholderResolver(time_field, params_schema)
         
         # 提取模板中的所有占位符
-        placeholders_needed = self.extract_placeholders(pattern_config.sql_template)
+        placeholders_needed = self.extract_placeholders(template_config.sql_template)
         
         logger.debug(f"[SQL构建器] 模板占位符: {placeholders_needed}")
         
         # 构建占位符值映射
         placeholders = {}
         
-        # 1. 先填充 table（来自 context）
-        if "table" in placeholders_needed:
-            placeholders["table"] = table_name
+        # 1. 先填充 table_name（来自 context）
+        if "table_name" in placeholders_needed:
+            placeholders["table_name"] = table_name
         
         # 2. 自动填充其他占位符
         for placeholder in placeholders_needed:
-            if placeholder == "table":
+            if placeholder == "table_name":
                 continue  # 已处理
             
             # 使用解析器解析
@@ -285,7 +361,7 @@ class UniversalSQLBuilder(SQLBuilder):
         logger.info(f"[SQL构建器] 占位符映射: {placeholders}")
         
         # 渲染模板
-        return self.render_template(pattern_config.sql_template, placeholders)
+        return self.render_template(template_config.sql_template, placeholders)
 
 
 class SQLBuilderFactory:
@@ -294,22 +370,22 @@ class SQLBuilderFactory:
     _default_builder = UniversalSQLBuilder
     
     @classmethod
-    def create_builder(cls, pattern_config: PatternConfig) -> SQLBuilder:
+    def create_builder(cls, template_config: TemplateConfig) -> SQLBuilder:
         """创建SQL构建器 - 统一使用通用构建器"""
         return cls._default_builder()
 
 
 class PatternSQLBuilder:
-    """Pattern SQL构建器主类"""
+    """Pattern SQL构建器主类（实际是Template构建器）"""
     
-    def __init__(self, pattern_loader: PatternLoader):
-        self.pattern_loader = pattern_loader
+    def __init__(self, template_loader: SceneTemplateLoader):
+        self.template_loader = template_loader
         self.factory = SQLBuilderFactory()
         self.param_mapper = ParamMapper()
     
     async def build(
         self, 
-        pattern_id: str, 
+        template_id: str, 
         params: Dict[str, Any], 
         context: Dict[str, Any]
     ) -> tuple[Optional[str], Optional[str]]:
@@ -319,15 +395,15 @@ class PatternSQLBuilder:
         Returns:
             (sql, error_message) - 成功时sql有值，失败时error_message有值
         """
-        # 获取pattern配置
-        pattern_config = self.pattern_loader.get_pattern(pattern_id)
-        if not pattern_config:
-            return None, f"Pattern {pattern_id} not found"
+        # 获取template配置
+        template_config = self.template_loader.get_template(template_id)
+        if not template_config:
+            return None, f"Template {template_id} not found"
         
         # 第一步：使用参数映射器将中文参数转换为SQL友好值（必须在验证之前）
         logger.info(f"[SQL构建器] 原始参数: {params}")
         mapped_params, map_error = await self.param_mapper.map_params(
-            pattern_id=pattern_id,
+            template_id=template_id,
             params=params,
             scene_code=context.get("scene_code", "sales_analysis"),
             context=context
@@ -339,20 +415,20 @@ class PatternSQLBuilder:
         logger.info(f"[SQL构建器] 映射后参数: {mapped_params}")
         
         # 第二步：验证映射后的参数
-        is_valid, errors = self.pattern_loader.validate_params(pattern_id, mapped_params)
+        is_valid, errors = self.template_loader.validate_params(template_id, mapped_params)
         if not is_valid:
             error_detail = "; ".join(errors)
             logger.error(f"[SQL构建器] 参数验证失败: {error_detail}")
             return None, f"参数验证失败: {error_detail}"
         
         # 创建构建器
-        builder = self.factory.create_builder(pattern_config)
+        builder = self.factory.create_builder(template_config)
         
         try:
-            sql = builder.build_sql(pattern_config, mapped_params, context)
+            sql = builder.build_sql(template_config, mapped_params, context)
             # 格式化SQL
             formatted_sql = SQLFormatter.format(sql)
-            logger.info(f"[SQL构建器] 构建成功: {pattern_id}")
+            logger.info(f"[SQL构建器] 构建成功: {template_id}")
             logger.debug(f"[SQL构建器] 格式化SQL:\n{formatted_sql}")
             return formatted_sql, None
         except Exception as e:

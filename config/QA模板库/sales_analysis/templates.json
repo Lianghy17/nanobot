@@ -1,394 +1,335 @@
 {
+  "datasource": "sales_orders",
   "templates": [
     {
-      "id": "sales_trend_daily",
-      "name": "日销售趋势",
-      "category": "销售趋势",
-      "description": "查看指定时间范围内的每日销售额变化趋势",
-      "question_template": "查询{{time_range}}的每日销售额趋势",
-      "pattern_id": "trend_analysis",
+      "id": "sales_point_query",
+      "name": "销售点查",
+      "category": "基础查询",
+      "description": "查询单个时间点的销售指标值",
+      "pattern_id": "point_query",
+      "sql_template": "SELECT {metric_field} as value FROM {table_name} WHERE {time_filter}",
       "default_params": {
-        "metric": "actual_amount",
-        "time_grain": "DAY",
-        "time_range": {
-          "start": "2024-01-01",
-          "end": "2024-01-31"
-        }
+        "metric": "销售额",
+        "time_point": "今天"
       },
       "params_schema": {
-        "time_range": {
-          "label": "时间范围",
-          "type": "date_range",
-          "required": true,
-          "default": "last_30_days"
-        },
         "metric": {
           "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "quantity", "label": "商品数量"}
-          ],
-          "default": "actual_amount"
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数", "客单价"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)",
+            "客单价": "AVG(total_amount)"
+          }
+        },
+        "time_point": {
+          "label": "时间点",
+          "type": "time_point",
+          "required": true,
+          "description": "如：今天、昨天、本月、2024-01-01"
+        }
+      },
+      "user_prompt": "查询单个时间点的销售指标值，适合快速获取某个时间点的数据快照。",
+      "important_notes": [
+        "指标和时间点是必填参数",
+        "支持相对时间(今天/昨天/本周/本月)和绝对时间(2024-01-01)",
+        "指标会自动求和聚合"
+      ],
+      "examples": [
+        "查询今天的销售额",
+        "查询昨天的订单量"
+      ]
+    },
+    {
+      "id": "sales_trend_analysis",
+      "name": "销售趋势分析",
+      "category": "趋势分析",
+      "description": "分析销售额随时间的变化趋势",
+      "pattern_id": "trend_analysis",
+      "sql_template": "SELECT {time_trunc} as period, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {time_trunc} ORDER BY period",
+      "default_params": {
+        "metric": "销售额",
+        "time_grain": "DAY",
+        "time_range": "最近30天"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)"
+          }
         },
         "time_grain": {
           "label": "时间粒度",
-          "type": "select",
-          "options": [
-            {"value": "DAY", "label": "日"},
-            {"value": "WEEK", "label": "周"},
-            {"value": "MONTH", "label": "月"}
-          ],
-          "default": "DAY"
+          "type": "time_grain",
+          "required": false,
+          "default": "DAY",
+          "options": ["DAY", "WEEK", "MONTH"],
+          "time_trunc_mapping": {
+            "DAY": "DATE({time_field})",
+            "WEEK": "DATE_TRUNC('week', {time_field})",
+            "MONTH": "DATE_TRUNC('month', {time_field})"
+          }
+        },
+        "time_range": {
+          "label": "时间范围",
+          "type": "time_range",
+          "required": true,
+          "description": "如：最近30天、从2024-01-01到2024-03-31、今年、本月"
         }
       },
+      "user_prompt": "分析销售指标随时间的变化趋势，按日/周/月粒度查看数据走势。",
+      "important_notes": [
+        "时间范围是必填参数",
+        "时间粒度可选：日、周、月（超过90天建议用周或月）",
+        "适合发现销售增长或下降的趋势"
+      ],
       "examples": [
-        "查询最近30天的每日销售额趋势",
-        "查看今年1月份的销售订单量趋势",
-        "显示上个季度的商品销售趋势"
+        "分析最近30天的销售趋势",
+        "查看今年每月的销售额变化"
+      ]
+    },
+    {
+      "id": "sales_topn",
+      "name": "销售排名",
+      "category": "排名分析",
+      "description": "按指标值进行排名分析，获取TOP N的数据项",
+      "pattern_id": "topn",
+      "sql_template": "SELECT {dimension} as item, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimension} ORDER BY value DESC LIMIT {n}",
+      "default_params": {
+        "metric": "销售额",
+        "dimension": "商品分类",
+        "n": 10,
+        "time_point": "本月"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)"
+          }
+        },
+        "dimension": {
+          "label": "排名维度",
+          "type": "string",
+          "required": true,
+          "options": ["商品分类", "品牌", "地区", "省份", "城市", "渠道", "门店"],
+          "field_mapping": {
+            "商品分类": "category",
+            "品牌": "brand",
+            "地区": "region",
+            "省份": "province",
+            "城市": "city",
+            "渠道": "channel",
+            "门店": "store_name"
+          }
+        },
+        "n": {
+          "label": "排名数量",
+          "type": "integer",
+          "required": false,
+          "default": 10,
+          "min": 1,
+          "max": 100
+        },
+        "time_point": {
+          "label": "统计时间",
+          "type": "time_point",
+          "required": true
+        }
+      },
+      "user_prompt": "按指标值进行排名分析，获取TOP N的销售数据项，快速识别头部数据。",
+      "important_notes": [
+        "N的范围是1-100，默认10",
+        "结果按降序排列",
+        "适合找出销售表现最佳的商品、地区、品牌等"
+      ],
+      "examples": [
+        "本月销售额TOP10的商品分类",
+        "今年订单量最多的TOP5城市"
+      ]
+    },
+    {
+      "id": "sales_breakdown",
+      "name": "销售维度拆解",
+      "category": "多维分析",
+      "description": "从多个维度交叉拆解分析销售指标，找出贡献最大的维度组合",
+      "pattern_id": "breakdown",
+      "sql_template": "SELECT {dimensions}, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimensions} ORDER BY value DESC",
+      "default_params": {
+        "metric": "销售额",
+        "dimensions": ["商品分类", "地区"],
+        "time_point": "本月"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)"
+          }
+        },
+        "dimensions": {
+          "label": "拆解维度",
+          "type": "array",
+          "required": true,
+          "min_items": 1,
+          "max_items": 3,
+          "items": {
+            "type": "string",
+            "options": ["商品分类", "品牌", "地区", "省份", "城市", "渠道", "门店"],
+            "field_mapping": {
+              "商品分类": "category",
+              "品牌": "brand",
+              "地区": "region",
+              "省份": "province",
+              "城市": "city",
+              "渠道": "channel",
+              "门店": "store_name"
+            }
+          }
+        },
+        "time_point": {
+          "label": "分析时间",
+          "type": "time_point",
+          "required": true
+        }
+      },
+      "user_prompt": "从多个维度交叉拆解分析销售指标，找出贡献最大的维度组合，支持多维数据透视。",
+      "important_notes": [
+        "支持1-3个维度的交叉分析",
+        "适合进行细粒度的销售结构分析",
+        "可发现不同维度组合下的销售表现"
+      ],
+      "examples": [
+        "分析本月各分类各地区的销售额分布",
+        "查看今年不同品牌和不同渠道的销售对比"
+      ]
+    },
+    {
+      "id": "sales_agg_query",
+      "name": "销售聚合查询",
+      "category": "聚合分析",
+      "description": "按维度对销售指标进行分组汇总",
+      "pattern_id": "agg_query",
+      "sql_template": "SELECT {dimensions}, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimensions} ORDER BY value DESC",
+      "default_params": {
+        "dimensions": ["商品分类"],
+        "metric": "销售额"
+      },
+      "params_schema": {
+        "dimensions": {
+          "label": "分组维度",
+          "type": "array",
+          "required": true,
+          "min_items": 1,
+          "max_items": 3,
+          "items": {
+            "type": "string",
+            "options": ["商品分类", "品牌", "地区", "省份", "城市", "渠道", "门店"],
+            "field_mapping": {
+              "商品分类": "category",
+              "品牌": "brand",
+              "地区": "region",
+              "省份": "province",
+              "城市": "city",
+              "渠道": "channel",
+              "门店": "store_name"
+            }
+          }
+        },
+        "metric": {
+          "label": "聚合指标",
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)"
+          }
+        }
+      },
+      "user_prompt": "按一个或多个维度对销售指标进行分组汇总，适合做销售数据透视分析。",
+      "important_notes": [
+        "维度和指标是必填参数",
+        "最多支持3个维度进行分组",
+        "结果按指标值降序排列"
+      ],
+      "examples": [
+        "按商品分类统计本月的销售额",
+        "按地区和渠道统计今年的订单量"
       ]
     },
     {
       "id": "sales_yoy_mom",
       "name": "销售同环比分析",
-      "category": "销售趋势",
-      "description": "对比当前销售额与去年同期和上期的变化",
-      "question_template": "{{time_period}}的销售额同环比分析",
+      "category": "对比分析",
+      "description": "对比分析销售指标的同比(与去年同期)和环比(与上一周期)变化",
       "pattern_id": "yoy_mom",
+      "sql_template": "SELECT {time_trunc} as period, {metric_field} as current_value, LAG({metric_field}, 1) OVER (ORDER BY {time_trunc}) as mom_value, LAG({metric_field}, 12) OVER (ORDER BY {time_trunc}) as yoy_value FROM (SELECT {time_trunc}, {metric_field} FROM {table_name} WHERE {time_filter} GROUP BY {time_trunc}) t ORDER BY period",
       "default_params": {
-        "metric": "actual_amount",
+        "metric": "销售额",
         "time_grain": "MONTH",
-        "time_range": {
-          "start": "2024-01-01",
-          "end": "2024-03-31"
-        },
-        "comparison_types": ["yoy", "mom"]
+        "time_range": "最近12个月"
       },
       "params_schema": {
         "metric": {
           "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"}
-          ],
-          "default": "actual_amount"
+          "type": "string",
+          "required": true,
+          "options": ["销售额", "销售量", "订单数"],
+          "field_mapping": {
+            "销售额": "SUM(total_amount)",
+            "销售量": "SUM(quantity)",
+            "订单数": "COUNT(order_id)"
+          }
         },
         "time_grain": {
           "label": "时间粒度",
-          "type": "select",
-          "options": [
-            {"value": "DAY", "label": "日"},
-            {"value": "WEEK", "label": "周"},
-            {"value": "MONTH", "label": "月"}
-          ],
-          "default": "MONTH"
+          "type": "time_grain",
+          "required": false,
+          "default": "MONTH",
+          "options": ["DAY", "WEEK", "MONTH"],
+          "time_trunc_mapping": {
+            "DAY": "DATE({time_field})",
+            "WEEK": "DATE_TRUNC('week', {time_field})",
+            "MONTH": "DATE_TRUNC('month', {time_field})"
+          }
         },
         "time_range": {
           "label": "时间范围",
-          "type": "date_range",
-          "required": true,
-          "default": "last_6_months"
-        },
-        "comparison_types": {
-          "label": "对比类型",
-          "type": "multi_select",
-          "options": [
-            {"value": "yoy", "label": "同比"},
-            {"value": "mom", "label": "环比"}
-          ],
-          "default": ["yoy", "mom"]
+          "type": "time_range",
+          "required": true
         }
       },
+      "user_prompt": "对比分析销售指标的同比(与去年同期)和环比(与上一周期)变化，发现增长或下降趋势。",
+      "important_notes": [
+        "时间范围是必填参数",
+        "建议以月为粒度进行同比分析",
+        "可同时分析同比和环比"
+      ],
       "examples": [
-        "今年第一季度销售额的同比增长率是多少",
-        "本月销售额与上月相比变化如何",
-        "最近6个月的销售额同环比情况"
-      ]
-    },
-    {
-      "id": "top_products",
-      "name": "TopN产品销售",
-      "category": "产品分析",
-      "description": "查询销售额排名TopN的产品",
-      "question_template": "查询{{time_point}}销售额Top{{n}}的产品",
-      "pattern_id": "topn",
-      "default_params": {
-        "metric": "actual_amount",
-        "dimension": "product_name",
-        "n": 10,
-        "time_point": "2024-01",
-        "include_others": true
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "quantity", "label": "销售量"},
-            {"value": "order_count", "label": "订单量"}
-          ],
-          "default": "actual_amount"
-        },
-        "n": {
-          "label": "Top N",
-          "type": "number",
-          "min": 1,
-          "max": 100,
-          "default": 10
-        },
-        "include_others": {
-          "label": "包含其他",
-          "type": "boolean",
-          "default": true
-        }
-      },
-      "examples": [
-        "本月销售额Top10的产品有哪些",
-        "查询2023年销售量Top20的产品",
-        "上个季度订单最多的5个产品"
-      ]
-    },
-    {
-      "id": "category_breakdown",
-      "name": "产品类别销售分布",
-      "category": "产品分析",
-      "description": "按产品类别分组查看销售数据分布",
-      "question_template": "{{time_point}}各类别的{{metric}}分布",
-      "pattern_id": "agg_query",
-      "default_params": {
-        "dimensions": ["category_name"],
-        "metric": "actual_amount",
-        "time_point": "2024-01",
-        "filters": []
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "quantity", "label": "销售量"},
-            {"value": "order_count", "label": "订单量"}
-          ],
-          "default": "actual_amount"
-        },
-        "dimensions": {
-          "label": "维度",
-          "type": "multi_select",
-          "options": [
-            {"value": "category_name", "label": "产品类别"},
-            {"value": "brand", "label": "品牌"},
-            {"value": "channel_name", "label": "渠道"}
-          ],
-          "default": ["category_name"]
-        }
-      },
-      "examples": [
-        "本月各类别的销售额分布如何",
-        "查看各品牌的销售数量占比",
-        "不同渠道的订单数量分布"
-      ]
-    },
-    {
-      "id": "channel_comparison",
-      "name": "渠道销售对比",
-      "category": "渠道分析",
-      "description": "对比不同销售渠道的业绩表现",
-      "question_template": "对比{{time_point}}各渠道的{{metric}}",
-      "pattern_id": "comparison",
-      "default_params": {
-        "metric": "actual_amount",
-        "dimension": "channel_name",
-        "comparison_field": "channel_type",
-        "comparison_values": ["online", "offline"],
-        "time_point": "2024-01"
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"}
-          ],
-          "default": "actual_amount"
-        },
-        "comparison_values": {
-          "label": "对比渠道",
-          "type": "multi_select",
-          "options": [
-            {"value": "online", "label": "线上"},
-            {"value": "offline", "label": "线下"},
-            {"value": "direct", "label": "直营"},
-            {"value": "third_party", "label": "第三方"}
-          ],
-          "default": ["online", "offline"]
-        }
-      },
-      "examples": [
-        "对比线上和线下渠道的销售额",
-        "各平台的订单量对比",
-        "直营和第三方渠道的业绩对比"
-      ]
-    },
-    {
-      "id": "customer_type_analysis",
-      "name": "客户类型分析",
-      "category": "客户分析",
-      "description": "分析不同类型客户（新客/老客/VIP）的消费行为",
-      "question_template": "分析{{time_range}}不同客户类型的{{metric}}",
-      "pattern_id": "agg_query",
-      "default_params": {
-        "dimensions": ["customer_type"],
-        "metric": "actual_amount",
-        "time_range": {
-          "start": "2024-01-01",
-          "end": "2024-01-31"
-        },
-        "filters": []
-      },
-      "params_schema": {
-        "time_range": {
-          "label": "时间范围",
-          "type": "date_range",
-          "required": true,
-          "default": "last_30_days"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "customer_count", "label": "客户数"}
-          ],
-          "default": "actual_amount"
-        }
-      },
-      "examples": [
-        "分析新客和老客的销售额对比",
-        "查看VIP客户的消费占比",
-        "不同客户类型的订单量分布"
-      ]
-    },
-    {
-      "id": "repurchase_rate",
-      "name": "复购率分析",
-      "category": "客户分析",
-      "description": "计算指定时间范围内的客户复购率",
-      "question_template": "{{time_period}}的客户复购率是多少",
-      "pattern_id": "point_query",
-      "default_params": {
-        "metric": "repurchase_rate",
-        "time_point": "2024-01"
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        }
-      },
-      "examples": [
-        "本月客户复购率是多少",
-        "上季度复购率如何",
-        "今年复购率变化趋势"
-      ]
-    },
-    {
-      "id": "regional_sales",
-      "name": "地区销售分析",
-      "category": "区域分析",
-      "description": "按地区维度分析销售数据分布",
-      "question_template": "分析{{time_point}}各地区{{metric}}",
-      "pattern_id": "agg_query",
-      "default_params": {
-        "dimensions": ["province"],
-        "metric": "actual_amount",
-        "time_point": "2024-01",
-        "filters": []
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "actual_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "customer_count", "label": "客户数"}
-          ],
-          "default": "actual_amount"
-        },
-        "dimensions": {
-          "label": "地区维度",
-          "type": "multi_select",
-          "options": [
-            {"value": "province", "label": "省份"},
-            {"value": "city", "label": "城市"}
-          ],
-          "default": ["province"]
-        }
-      },
-      "examples": [
-        "本月各省市的销售额分布",
-        "查看不同城市的订单量对比",
-        "各地区的客户数量分析"
+        "分析本月销售额的同比环比情况",
+        "查看最近12个月各月的同比增长率"
       ]
     }
-  ],
-  "categories": {
-    "销售趋势": {
-      "templates": ["sales_trend_daily", "sales_yoy_mom"],
-      "icon": "📈",
-      "description": "分析销售数据的时间趋势和变化"
-    },
-    "产品分析": {
-      "templates": ["top_products", "category_breakdown"],
-      "icon": "📦",
-      "description": "了解产品和类别的销售表现"
-    },
-    "渠道分析": {
-      "templates": ["channel_comparison"],
-      "icon": "🛒",
-      "description": "对比不同销售渠道的业绩"
-    },
-    "客户分析": {
-      "templates": ["customer_type_analysis", "repurchase_rate"],
-      "icon": "👥",
-      "description": "分析客户群体的消费行为"
-    },
-    "区域分析": {
-      "templates": ["regional_sales"],
-      "icon": "🗺️",
-      "description": "了解不同地区的销售分布"
-    }
-  }
+  ]
 }

@@ -4,6 +4,7 @@ import json
 import logging
 import json_repair
 import asyncio
+import time
 from openai import AsyncOpenAI
 from ..models.llm import LLMResponse, ToolCallRequest, UsageInfo
 
@@ -85,13 +86,27 @@ class LLMClient:
         logger.info(f"工具数: {len(tools) if tools else 0}")
         logger.info(f"温度: {current_temp}")
         logger.info(f"最大Token: {current_max_tokens}")
-        logger.info(f"最后一条消息: {messages[-1]['content'][:100]}...")
 
-        # 打印完整消息列表（用于调试）
+        # 打印完整消息列表
         for i, msg in enumerate(messages):
-            logger.debug(f"  [{i}] role={msg['role']}, content={msg['content'][:80]}...")
+            role = msg['role']
+            content = msg.get('content', '')
+            logger.info(f"  [{i}] role={role}")
+            logger.info(f"      content: {content[:500]}{'...' if len(content) > 500 else ''}")
+            if 'name' in msg:
+                logger.info(f"      name: {msg['name']}")
+
+        # 打印工具定义
+        if tools:
+            logger.info(f"[LLM 请求] 工具定义:")
+            for i, tool in enumerate(tools):
+                logger.info(f"  [{i}] name={tool['function']['name']}")
+                logger.info(f"       description={tool['function']['description'][:100]}{'...' if len(tool['function']['description']) > 100 else ''}")
 
         logger.info("=" * 80)
+
+        # 记录开始时间
+        start_time = time.time()
 
         # 构建OpenAI API参数
         kwargs: Dict[str, Any] = {
@@ -124,10 +139,15 @@ class LLMClient:
         for attempt in range(max_retries + 1):
             try:
                 # 调用OpenAI API
+                logger.info(f"[LLM 请求] 开始第 {attempt + 1} 次调用...")
                 response = await self._client.chat.completions.create(**kwargs)
 
+                # 计算耗时
+                elapsed_time = time.time() - start_time
+                logger.info(f"[LLM 请求] 调用成功，耗时: {elapsed_time:.2f}秒")
+
                 # 解析响应
-                return self._parse_response(response)
+                return self._parse_response(response, elapsed_time)
 
             except Exception as e:
                 last_error = e
@@ -168,18 +188,22 @@ class LLMClient:
             metadata={"error": str(last_error), "retries": max_retries}
         )
 
-    def _parse_response(self, response: Any) -> LLMResponse:
+    def _parse_response(self, response: Any, elapsed_time: float = 0.0) -> LLMResponse:
         """
         解析OpenAI API响应
 
         Args:
             response: OpenAI API原始响应
+            elapsed_time: 调用耗时（秒）
 
         Returns:
             LLMResponse: 解析后的响应对象
         """
         choice = response.choices[0]
         msg = choice.message
+
+        # 记录耗时
+        logger.info(f"[LLM 响应] 总耗时: {elapsed_time:.2f}秒")
 
         # 解析工具调用
         tool_calls = []
@@ -220,16 +244,22 @@ class LLMClient:
         logger.info(f"响应ID: {response.id}")
         logger.info(f"模型: {response.model}")
         logger.info(f"完成原因: {choice.finish_reason}")
+        logger.info(f"耗时: {elapsed_time:.2f}秒")
 
         # Token使用量
         if response.usage:
             logger.info(f"Token使用: prompt={response.usage.prompt_tokens}, "
                        f"completion={response.usage.completion_tokens}, "
                        f"total={response.usage.total_tokens}")
+            # 计算每秒的token速度
+            if elapsed_time > 0:
+                tokens_per_second = response.usage.total_tokens / elapsed_time
+                logger.info(f"Token速度: {tokens_per_second:.1f} tokens/秒")
 
         # 响应内容
         if msg.content:
-            logger.info(f"响应内容: {msg.content[:200]}{'...' if len(msg.content) > 200 else ''}")
+            logger.info(f"响应内容: {msg.content[:500]}{'...' if len(msg.content) > 500 else ''}")
+            logger.info(f"响应长度: {len(msg.content)} 字符")
         else:
             logger.info("响应内容: (空)")
 

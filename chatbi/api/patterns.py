@@ -1,101 +1,120 @@
-"""Pattern API路由"""
+"""Scene模板API路由 - 只使用scenes.json中的配置"""
 import logging
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, List, Optional
 
-from ..core.pattern_loader import PatternLoader
+from ..core.template_loader import SceneTemplateLoader
 from ..core.intent_analyzer import IntentAnalyzer
 from ..core.llm_client import LLMClient
 from ..config import chatbi_config
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
+def get_template_loader():
+    """获取模板加载器实例"""
+    scenes_config_path = Path(chatbi_config.config_dir) / "scenes.json"
+    return SceneTemplateLoader(str(scenes_config_path))
+
+
 @router.get("/catalog")
-async def get_pattern_catalog():
-    """获取Pattern目录"""
+async def get_template_catalog(scene_code: Optional[str] = None):
+    """获取模板目录"""
     try:
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
-        catalog = pattern_loader.get_pattern_catalog()
+        template_loader = get_template_loader()
+        catalog = template_loader.get_template_catalog(scene_code)
         
         return {
             "status": "success",
-            "catalog": catalog,
-            "categories": pattern_loader._config.get("categories", {}),
-            "global_settings": pattern_loader._config.get("global_settings", {})
+            "catalog": catalog
         }
     except Exception as e:
-        logger.error(f"获取Pattern目录失败: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"获取Pattern目录失败: {str(e)}")
+        logger.error(f"获取模板目录失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"获取模板目录失败: {str(e)}")
 
 
-@router.get("/{pattern_id}")
-async def get_pattern_detail(pattern_id: str):
-    """获取Pattern详情"""
+@router.get("/scenes")
+async def get_all_scenes():
+    """获取所有场景"""
     try:
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
-        pattern = pattern_loader.get_pattern(pattern_id)
-        
-        if not pattern:
-            raise HTTPException(status_code=404, detail=f"Pattern {pattern_id} not found")
-        
-        # 获取热门模板
-        hot_templates = pattern_loader.get_hot_templates(pattern_id)
+        template_loader = get_template_loader()
+        scenes = template_loader.get_all_scenes()
         
         return {
             "status": "success",
-            "pattern": {
-                "id": pattern.id,
-                "name": pattern.name,
-                "description": pattern.description,
-                "category": pattern.category,
-                "complexity": pattern.complexity,
-                "time_mode": pattern.time_mode,
-                "space_mode": pattern.space_mode,
-                "sql_template": pattern.sql_template,
-                "features": pattern.features,
-                "required_tables": pattern.required_tables,
-                "optional_features": pattern.optional_features,
-                "params_schema": pattern.params_schema,
-                "hot_templates": hot_templates
+            "scenes": scenes
+        }
+    except Exception as e:
+        logger.error(f"获取场景列表失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"获取场景列表失败: {str(e)}")
+
+
+@router.get("/scenes/{scene_code}")
+async def get_scene_detail(scene_code: str):
+    """获取场景详情"""
+    try:
+        template_loader = get_template_loader()
+        scene = template_loader.get_scene(scene_code)
+        templates = template_loader.get_scene_templates(scene_code)
+        
+        if not scene:
+            raise HTTPException(status_code=404, detail=f"场景 {scene_code} 不存在")
+        
+        return {
+            "status": "success",
+            "scene": scene,
+            "templates": [
+                {
+                    "id": t.template_id,
+                    "name": t.name,
+                    "description": t.description
+                }
+                for t in templates
+            ]
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"获取场景详情失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"获取场景详情失败: {str(e)}")
+
+
+@router.get("/templates/{template_id}")
+async def get_template_detail(template_id: str):
+    """获取模板详情"""
+    try:
+        template_loader = get_template_loader()
+        template = template_loader.get_template(template_id)
+        
+        if not template:
+            raise HTTPException(status_code=404, detail=f"模板 {template_id} 不存在")
+        
+        return {
+            "status": "success",
+            "template": {
+                "id": template.template_id,
+                "name": template.name,
+                "description": template.description,
+                "sql_template": template.sql_template,
+                "params_schema": template.params_schema,
+                "user_prompt": template.user_prompt,
+                "important_notes": template.important_notes,
+                "examples": template.examples
             }
         }
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"获取Pattern详情失败: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"获取Pattern详情失败: {str(e)}")
-
-
-@router.get("/{pattern_id}/templates")
-async def get_pattern_templates(pattern_id: str):
-    """获取Pattern的热门问题模板"""
-    try:
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
-        pattern = pattern_loader.get_pattern(pattern_id)
-        
-        if not pattern:
-            raise HTTPException(status_code=404, detail=f"Pattern {pattern_id} not found")
-        
-        hot_templates = pattern_loader.get_hot_templates(pattern_id)
-        
-        return {
-            "status": "success",
-            "pattern_id": pattern_id,
-            "templates": hot_templates
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"获取Pattern模板失败: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"获取Pattern模板失败: {str(e)}")
+        logger.error(f"获取模板详情失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"获取模板详情失败: {str(e)}")
 
 
 @router.post("/analyze")
 async def analyze_intent(request: Dict[str, Any]):
-    """分析用户意图(匹配Pattern)"""
+    """分析用户意图(匹配Template)"""
     try:
         user_query = request.get("query")
         scene_code = request.get("scene_code")
@@ -104,8 +123,8 @@ async def analyze_intent(request: Dict[str, Any]):
         if not user_query:
             raise HTTPException(status_code=400, detail="缺少query参数")
         
-        # 初始化组件
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
+        # 初始化组件（使用SceneTemplateLoader）
+        template_loader = get_template_loader()
         llm_client = LLMClient(
             api_base=chatbi_config.llm_api_base,
             api_key=chatbi_config.llm_api_key,
@@ -116,7 +135,7 @@ async def analyze_intent(request: Dict[str, Any]):
             thinking_disabled=chatbi_config.llm_thinking_disabled
         )
         
-        intent_analyzer = IntentAnalyzer(llm_client, pattern_loader)
+        intent_analyzer = IntentAnalyzer(llm_client, template_loader)
         
         # 分析意图
         result = await intent_analyzer.analyze(user_query, scene_code, context)
@@ -125,9 +144,9 @@ async def analyze_intent(request: Dict[str, Any]):
             "status": "success",
             "result": {
                 "intent_type": result.intent_type,
-                "matched_pattern": result.matched_pattern,
-                "pattern_name": result.pattern_config.name if result.pattern_config else None,
-                "pattern_description": result.pattern_config.description if result.pattern_config else None,
+                "matched_template": result.matched_template,
+                "template_name": result.template_config.name if result.template_config else None,
+                "template_description": result.template_config.description if result.template_config else None,
                 "confidence": result.confidence,
                 "params": result.params,
                 "clarification_needed": result.clarification_needed,
@@ -144,29 +163,29 @@ async def analyze_intent(request: Dict[str, Any]):
 
 @router.post("/build-sql")
 async def build_sql(request: Dict[str, Any]):
-    """根据Pattern和参数构建SQL"""
+    """根据Template和参数构建SQL"""
     try:
-        pattern_id = request.get("pattern_id")
+        template_id = request.get("template_id") or request.get("pattern_id")
         params = request.get("params", {})
         context = request.get("context", {})
         
-        if not pattern_id:
-            raise HTTPException(status_code=400, detail="缺少pattern_id参数")
+        if not template_id:
+            raise HTTPException(status_code=400, detail="缺少template_id或pattern_id参数")
         
-        # 初始化组件
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
+        # 初始化组件（使用SceneTemplateLoader）
+        template_loader = get_template_loader()
         from ..core.sql_builder import PatternSQLBuilder
-        sql_builder = PatternSQLBuilder(pattern_loader)
+        sql_builder = PatternSQLBuilder(template_loader)
         
         # 构建SQL
-        sql, error = sql_builder.build(pattern_id, params, context)
+        sql, error = sql_builder.build(template_id, params, context)
         
         if error:
             raise HTTPException(status_code=400, detail=error)
         
         return {
             "status": "success",
-            "pattern_id": pattern_id,
+            "template_id": template_id,
             "sql": sql,
             "params": params
         }
@@ -177,37 +196,28 @@ async def build_sql(request: Dict[str, Any]):
         raise HTTPException(status_code=500, detail=f"SQL构建失败: {str(e)}")
 
 
-@router.get("/scene/{scene_code}/supported")
-async def get_scene_supported_patterns(scene_code: str):
-    """获取场景支持的Patterns"""
+@router.get("/scene/{scene_code}/templates")
+async def get_scene_templates(scene_code: str):
+    """获取场景支持的Templates"""
     try:
-        pattern_loader = PatternLoader(chatbi_config.pattern_config_path)
-        
-        # TODO: 从场景配置中读取支持的patterns
-        # 目前返回所有patterns
-        all_patterns = pattern_loader.get_all_patterns()
-        
-        # 过滤场景支持的patterns
-        # 这里可以添加场景特定的过滤逻辑
-        supported_patterns = list(all_patterns.values())
+        template_loader = get_template_loader()
+        templates = template_loader.get_scene_templates(scene_code)
         
         return {
             "status": "success",
             "scene_code": scene_code,
-            "supported_patterns": [
+            "supported_templates": [
                 {
-                    "id": p.id,
-                    "name": p.name,
-                    "description": p.description,
-                    "category": p.category,
-                    "complexity": p.complexity
+                    "id": t.template_id,
+                    "name": t.name,
+                    "description": t.description
                 }
-                for p in supported_patterns
+                for t in templates
             ]
         }
     except Exception as e:
-        logger.error(f"获取场景支持的Patterns失败: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"获取场景支持的Patterns失败: {str(e)}")
+        logger.error(f"获取场景支持的Templates失败: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"获取场景支持的Templates失败: {str(e)}")
 
 
 @router.get("/hot-questions")
@@ -215,20 +225,31 @@ async def get_hot_questions(scene_code: Optional[str] = None):
     """获取热门问题(按场景)"""
     logger.info(f"[GET /api/patterns/hot-questions] scene_code={scene_code}")
     try:
-        # 简化版本：直接返回测试数据
+        template_loader = get_template_loader()
+        
+        # 获取场景的模板
+        hot_questions = []
+        if scene_code:
+            templates = template_loader.get_scene_templates(scene_code)
+        else:
+            templates = list(template_loader.get_all_templates().values())
+        
+        # 为每个模板生成示例问题
+        for template in templates[:5]:  # 限制返回前5个模板
+            if template.examples:
+                for example in template.examples[:1]:  # 每个模板最多1个示例
+                    hot_questions.append({
+                        "template_id": template.template_id,
+                        "template_name": template.name,
+                        "question": example,
+                        "default_params": {}
+                    })
+        
         return {
             "status": "success",
             "scene_code": scene_code,
-            "hot_questions": [
-                {
-                    "pattern_id": "point_query",
-                    "pattern_name": "点查",
-                    "question": "查询今天的销售额",
-                    "template": "查询{{time_point}}的{{metric}}",
-                    "default_params": {"metric": "销售额", "time_point": "今天"}
-                }
-            ],
-            "total": 1
+            "hot_questions": hot_questions,
+            "total": len(hot_questions)
         }
     except Exception as e:
         logger.error(f"获取热门问题失败: {e}", exc_info=True)

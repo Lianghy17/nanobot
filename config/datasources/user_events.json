@@ -1,0 +1,55 @@
+{
+  "datasource_id": "user_events",
+  "name": "用户事件表",
+  "description": "记录用户行为事件数据",
+  "table_name": "user_events",
+  "time_field": "event_time",
+  "primary_key": "event_id",
+  
+  "metrics": [
+    {
+      "id": "active_users",
+      "name": "活跃用户数",
+      "field": "user_id",
+      "type": "count_distinct",
+      "agg": "COUNT_DISTINCT",
+      "description": "去重活跃用户"
+    },
+    {
+      "id": "new_users",
+      "name": "新增用户数",
+      "field": "user_id",
+      "type": "count",
+      "agg": "COUNT",
+      "description": "新注册用户",
+      "filter": "event_type = 'register'"
+    },
+    {
+      "id": "event_count",
+      "name": "事件次数",
+      "field": "event_id",
+      "type": "count",
+      "agg": "COUNT",
+      "description": "用户行为事件总数"
+    },
+    {
+      "id": "session_count",
+      "name": "会话数",
+      "field": "session_id",
+      "type": "count_distinct",
+      "agg": "COUNT_DISTINCT",
+      "description": "用户会话数"
+    }
+  ],
+  
+  "dimensions": [
+    {"id": "event_type", "name": "事件类型", "field": "event_type", "description": "用户行为事件类型"},
+    {"id": "platform", "name": "平台", "field": "platform", "description": "访问平台(iOS/Android/Web)"},
+    {"id": "source", "name": "渠道来源", "field": "source", "description": "用户来源渠道"},
+    {"id": "user_level", "name": "用户等级", "field": "user_level", "description": "用户等级(VIP/普通)"}
+  ],
+  
+  "common_filters": [
+    {"field": "event_type", "name": "事件类型", "type": "dynamic", "suggestions": ["register", "login", "view", "click", "purchase", "share"]}
+  ]
+}

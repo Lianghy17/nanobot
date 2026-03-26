@@ -8,7 +8,7 @@ from ..config import chatbi_config
 from ..models import Conversation, Message
 from .sse_manager import sse_manager
 from .intent_analyzer import IntentAnalysisResult
-from .pattern_loader import PatternLoader
+from .template_loader import SceneTemplateLoader, TemplateConfig
 from .sql_builder import PatternSQLBuilder
 
 logger = logging.getLogger(__name__)
@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 class PatternHandler:
     """Pattern模式处理器 - 负责模板模式的全部处理流程"""
 
-    def __init__(self, pattern_loader: PatternLoader, sql_builder: PatternSQLBuilder):
-        self.pattern_loader = pattern_loader
+    def __init__(self, template_loader: SceneTemplateLoader, sql_builder: PatternSQLBuilder):
+        self.template_loader = template_loader
         self.sql_builder = sql_builder
 
     async def process_with_pattern(
@@ -28,7 +28,13 @@ class PatternHandler:
         intent_result: IntentAnalysisResult
     ) -> Optional[Dict[str, Any]]:
         """
-        使用Pattern模式处理消息
+        使用Template模式处理消息
+
+        ⚠️ **硬编码逻辑**：
+        1. 当前系统没有真实数据库，execute_sql 是假的
+        2. Template模式只生成SQL，不执行SQL
+        3. 返回生成的SQL语句给用户查看
+        4. 如果用户想要执行SQL，需要切换到React模式或手动执行
 
         Args:
             conversation: 会话对象
@@ -36,31 +42,31 @@ class PatternHandler:
             intent_result: 意图分析结果
 
         Returns:
-            处理结果字典
+            处理结果字典（包含生成的SQL语句）
         """
-        logger.info(f"[Pattern模式] 开始处理: {intent_result.matched_pattern}")
+        logger.info(f"[Template模式] 开始处理: {intent_result.matched_template}")
 
         try:
             await sse_manager.send_event(
                 conversation.conversation_id,
-                "pattern_processing_started",
+                "template_processing_started",
                 {
-                    "pattern_id": intent_result.matched_pattern,
-                    "pattern_name": intent_result.pattern_config.name if intent_result.pattern_config else "Unknown"
+                    "template_id": intent_result.matched_template,
+                    "template_name": intent_result.template_config.name if intent_result.template_config else "Unknown"
                 }
             )
 
-            # 检查pattern_config是否存在
-            if not intent_result.pattern_config:
-                logger.error(f"[Pattern模式] Pattern配置不存在: {intent_result.matched_pattern}")
+            # 检查template_config是否存在
+            if not intent_result.template_config:
+                logger.error(f"[Template模式] Template配置不存在: {intent_result.matched_template}")
                 return {
-                    "content": f"未找到Pattern配置: {intent_result.matched_pattern}，请重新选择模板或输入查询。",
+                    "content": f"未找到Template配置: {intent_result.matched_template}，请重新选择模板或输入查询。",
                     "tools_used": [],
                     "metadata": {
-                        "pattern_mode": True,
-                        "pattern_id": intent_result.matched_pattern,
+                        "template_mode": True,
+                        "template_id": intent_result.matched_template,
                         "mode": "template",
-                        "error": "pattern_config_not_found"
+                        "error": "template_config_not_found"
                     }
                 }
 
@@ -73,34 +79,37 @@ class PatternHandler:
 
             # 尝试使用默认值
             if not params:
-                params = self._apply_defaults(params, intent_result.pattern_config.params_schema)
+                params = self._apply_defaults(params, intent_result.template_config.params_schema)
 
             # 构建SQL上下文
             sql_context = {
                 "table_name": conversation.scene_code,
                 "time_field": "created_at",
                 "scene_code": conversation.scene_code,
-                "params_schema": intent_result.pattern_config.params_schema or {}
+                "params_schema": intent_result.template_config.params_schema or {}
             }
 
-            # 构建SQL
-            logger.info(f"[Pattern模式] 构建SQL, params: {params}")
-            sql, error = await self.sql_builder.build(intent_result.matched_pattern, params, sql_context)
+            # 🎯 硬编码逻辑：只生成SQL，不执行SQL
+            # 原因：当前系统没有真实数据库，execute_sql 是假的
+            logger.info(f"[Template模式] 🎯 构建SQL（不执行SQL）, params: {params}")
+            sql, error = await self.sql_builder.build(intent_result.matched_template, params, sql_context)
 
             if error:
-                logger.error(f"[Pattern模式] SQL构建失败: {error}")
+                logger.error(f"[Template模式] SQL构建失败: {error}")
                 return self._build_param_error_response(intent_result, params, error)
 
-            logger.info(f"[Pattern模式] SQL构建成功: {sql}")
+            logger.info(f"[Template模式] ✅ SQL构建成功（已生成，未执行）: {sql}")
 
+            # 格式化SQL响应（显示SQL语句，但不执行）
             response_text = self._format_sql_response(intent_result, params, sql)
 
             await sse_manager.send_event(
                 conversation.conversation_id,
-                "pattern_processing_completed",
+                "template_processing_completed",
                 {
-                    "pattern_id": intent_result.matched_pattern,
-                    "sql": sql
+                    "template_id": intent_result.matched_template,
+                    "sql": sql,
+                    "executed": False  # 硬编码：未执行SQL
                 }
             )
 
@@ -108,18 +117,18 @@ class PatternHandler:
                 "content": response_text,
                 "tools_used": [],
                 "metadata": {
-                    "pattern_mode": True,
                     "template_mode": True,
-                    "pattern_id": intent_result.matched_pattern,
-                    "pattern_name": intent_result.pattern_config.name,
+                    "template_id": intent_result.matched_template,
+                    "template_name": intent_result.template_config.name,
                     "sql": sql,
                     "params": params,
-                    "mode": "template"
+                    "mode": "template",
+                    "executed": False  # 硬编码：未执行SQL
                 }
             }
 
         except Exception as e:
-            logger.error(f"[Pattern模式] 处理失败: {e}", exc_info=True)
+            logger.error(f"[Template模式] 处理失败: {e}", exc_info=True)
             raise
 
     async def guide_template_params(
@@ -134,7 +143,7 @@ class PatternHandler:
         template_name = template_data.get("name", "未命名模板")
         template_description = template_data.get("description", "")
         params_schema = template_data.get("params_schema", {})
-        pattern_id = template_data.get("pattern_id")
+        template_id = template_data.get("template_id")
 
         response_lines = [
             f"## 📋 模板模式: {template_name}",
@@ -172,20 +181,16 @@ class PatternHandler:
 
         response_lines.append(f"---")
 
-        # 根据Pattern类型显示不同提示
-        pattern_config = self.pattern_loader.get_pattern(pattern_id)
-        pattern_category = pattern_config.category if pattern_config else "unknown"
-        response_lines.extend(self._get_category_hints(pattern_category))
-
-        # 添加Pattern配置的user_prompt和important_notes
-        if pattern_config and pattern_config.user_prompt:
+        # 添加Template配置的user_prompt和important_notes
+        template_config = self.template_loader.get_template(template_id)
+        if template_config and template_config.user_prompt:
             response_lines.append(f"💡 **使用说明**:")
-            response_lines.append(f"{pattern_config.user_prompt}")
+            response_lines.append(f"{template_config.user_prompt}")
             response_lines.append(f"")
 
-        if pattern_config and pattern_config.important_notes:
+        if template_config and template_config.important_notes:
             response_lines.append(f"⚠️ **重要提示**:")
-            for note in pattern_config.important_notes:
+            for note in template_config.important_notes:
                 response_lines.append(f"- {note}")
             response_lines.append(f"")
         else:
@@ -204,9 +209,8 @@ class PatternHandler:
             "tools_used": [],
             "metadata": {
                 "template_mode": True,
-                "template_id": template_data.get("id"),
+                "template_id": template_data.get("id") or template_data.get("template_id"),
                 "template_name": template_name,
-                "pattern_id": pattern_id,
                 "params_schema": params_schema,
                 "mode": "template"
             }
@@ -223,6 +227,20 @@ class PatternHandler:
         clarification_text = "## 🤔 需要更多信息\n\n"
         clarification_text += "为了准确生成查询，请补充以下信息：\n\n"
 
+        # 获取缺失的必需参数
+        missing_params = []
+        if intent_result.template_config and intent_result.template_config.params_schema:
+            params_schema = intent_result.template_config.params_schema
+            for param_name, param_config in params_schema.items():
+                if param_config.get("required", False) and param_name not in (intent_result.params or {}):
+                    missing_params.append({
+                        "name": param_name,
+                        "label": param_config.get("label", param_name),
+                        "type": param_config.get("type", "string"),
+                        "options": param_config.get("options", []),
+                        "default": param_config.get("default")
+                    })
+
         if intent_result.params:
             clarification_text += "### 已识别的参数\n"
             for key, value in intent_result.params.items():
@@ -230,8 +248,19 @@ class PatternHandler:
             clarification_text += "\n"
 
         clarification_text += "### 需要补充的参数\n"
-        for i, q in enumerate(intent_result.clarification_questions, 1):
-            clarification_text += f"{i}. {q}\n"
+        if missing_params:
+            for param in missing_params:
+                line = f"- **{param['label']}**"
+                if param.get('options'):
+                    options = [f"`{opt.get('label', opt.get('value', opt))}`" if isinstance(opt, dict) else f"`{opt}`" 
+                             for opt in param['options']]
+                    line += f" - 可选: {', '.join(options)}"
+                if param.get('default'):
+                    line += f" - 默认: `{param['default']}`"
+                clarification_text += f"{line}\n"
+        elif intent_result.clarification_questions:
+            for i, q in enumerate(intent_result.clarification_questions, 1):
+                clarification_text += f"{i}. {q}\n"
 
         clarification_text += "\n---\n"
         clarification_text += "💡 您可以直接告诉我缺失的参数，例如：\n"
@@ -243,19 +272,21 @@ class PatternHandler:
             "content": clarification_text,
             "tools_used": [],
             "metadata": {
-                "pattern_mode": True,
-                "pattern_id": intent_result.matched_pattern,
+                "template_mode": True,
+                "template_id": intent_result.matched_template,
                 "needs_clarification": True,
                 "clarification_questions": intent_result.clarification_questions,
+                "missing_params": missing_params,
                 "params": intent_result.params,
+                "allow_fallback_to_react": True,  # 允许降级到React模式
                 "mode": "template"
             }
         }
 
     def _build_param_error_response(self, intent_result: IntentAnalysisResult, params: dict, error: str) -> Dict[str, Any]:
         """构建参数错误响应（禁止降级，引导用户修正参数）"""
-        pattern_config = intent_result.pattern_config
-        params_schema = pattern_config.params_schema if pattern_config else {}
+        template_config = intent_result.template_config
+        params_schema = template_config.params_schema if template_config else {}
 
         error_text = "## ❌ 参数有误，请修正\n\n"
         error_text += f"**错误原因**: {error}\n\n"
@@ -295,8 +326,8 @@ class PatternHandler:
             "content": error_text,
             "tools_used": [],
             "metadata": {
-                "pattern_mode": True,
-                "pattern_id": intent_result.matched_pattern,
+                "template_mode": True,
+                "template_id": intent_result.matched_template,
                 "needs_clarification": True,
                 "error": error,
                 "params": params,
@@ -307,7 +338,7 @@ class PatternHandler:
     def _format_sql_response(self, intent_result: IntentAnalysisResult, params: dict, sql: str) -> str:
         """格式化SQL响应"""
         response_lines = [
-            f"## 🎯 模板模式: {intent_result.pattern_config.name}",
+            f"## 🎯 模板模式: {intent_result.template_config.name}",
             f"",
             f"已为您生成SQL查询语句：",
             f"",
@@ -320,7 +351,7 @@ class PatternHandler:
         ]
 
         if params:
-            params_schema = intent_result.pattern_config.params_schema or {}
+            params_schema = intent_result.template_config.params_schema or {}
             for key, value in params.items():
                 label = params_schema[key].get("label", key) if key in params_schema else key
                 response_lines.append(f"- **{label}**: `{value}`")

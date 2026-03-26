@@ -5,25 +5,62 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
-      <change afterPath="$PROJECT_DIR$/参考代码.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2026_3_16_10_41_[更改]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_2026_3_16_10_41___.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/messages.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/messages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MODE_CONFIG_AND_RAG_INTEGRATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/MODE_CONFIG_AND_RAG_INTEGRATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PARAM_MAPPING_AND_SQL_GENERATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PARAM_MAPPING_AND_SQL_GENERATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PATTERN_CONTINUATION_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_CONTINUATION_FIX.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PATTERN_MODE_FALLBACK_ANALYSIS.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_MODE_FALLBACK_ANALYSIS.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PATTERN_PARAM_DESIGN_ISSUES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_PARAM_DESIGN_ISSUES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PATTERN_TEMPLATE_ID_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_TEMPLATE_ID_FIX.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PATTERN_TUPLE_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_TUPLE_FIX.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_IMPLEMENTATION_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_IMPLEMENTATION_SUMMARY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_SYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_SYSTEM.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_TROUBLESHOOTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_TROUBLESHOOTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/QUICK_START_QA_TEMPLATES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QUICK_START_QA_TEMPLATES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_CHATBI.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README_CHATBI.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README_QA_TEMPLATE_IMPLEMENTATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README_QA_TEMPLATE_IMPLEMENTATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/REFACTORING_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/REFACTORING_SUMMARY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SQL_GENERATION_ONLY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/SQL_GENERATION_ONLY.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEMPLATE_MODE_FIXES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_FIXES.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TEMPLATE_MODE_IMPLEMENTATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_IMPLEMENTATION.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/api/patterns.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/patterns.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/message_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/message_processor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/sse_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sse_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_memory_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test_memory_integration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/intent_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/intent_analyzer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/llm_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/llm_client.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/param_mapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/param_mapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/pattern_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/pattern_handler.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/pattern_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/pattern_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/sql_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sql_builder.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_file_storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_file_storage.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_logging.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_memory.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_memory_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_memory_integration.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_pattern_mode.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_pattern_mode.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test_sandbox_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_sandbox_files.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/QA模板库/general_bi/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/general_bi/templates.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/QA模板库/sales_analysis/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/sales_analysis/templates.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/QA模板库/user_behavior/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/user_behavior/templates.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/pattern_config.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/config/scenes.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/scenes.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/system_prompts/v3.md" beforeDir="false" afterPath="$PROJECT_DIR$/config/system_prompts/v3.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nanobot_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/nanobot_logo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_fallback_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_fallback_analysis.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_file_display.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_file_display.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_image_url_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_image_url_flow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_param_mapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_param_mapper.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_pattern_continuation.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_pattern_continuation.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_pattern_load.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_pattern_load.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_persistent_kernel.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_persistent_kernel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_qa_api.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_qa_api.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_qa_frontend.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_qa_frontend.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_routes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_token_limits.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_token_limits.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,9 +128,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/chatbi/test" />
+      <recent name="$PROJECT_DIR$/test_files" />
+      <recent name="$PROJECT_DIR$/useless_md" />
       <recent name="$PROJECT_DIR$/workspace/memory/conversations" />
       <recent name="$PROJECT_DIR$/uesless" />
-      <recent name="$PROJECT_DIR$/nanobot" />
     </key>
   </component>
   <component name="RunManager" selected="Shell Script.start_with_image_server.sh">
@@ -171,7 +210,7 @@
       <envs />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for chatbi.test.test_sandbox_files.test_sandbox_file_operations" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="nanobot" />
       <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -184,7 +223,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;chatbi.test_sandbox_files.test_sandbox_file_operations&quot;" />
+      <option name="_new_target" value="&quot;chatbi.test.test_sandbox_files.test_sandbox_file_operations&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -193,7 +232,7 @@
         <item itemvalue="Shell Script.start_with_image_server.sh" />
         <item itemvalue="Shell Script.stop_servers.sh" />
         <item itemvalue="Python.main" />
-        <item itemvalue="Python tests.pytest for chatbi.test_sandbox_files.test_sandbox_file_operations" />
+        <item itemvalue="Python tests.pytest for chatbi.test.test_sandbox_files.test_sandbox_file_operations" />
         <item itemvalue="Python.sse_manager" />
       </list>
     </recent_temporary>
@@ -243,7 +282,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/chatbi/core/agent_wrapper.py</url>
-          <line>284</line>
+          <line>297</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>

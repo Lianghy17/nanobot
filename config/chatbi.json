@@ -68,10 +68,22 @@
     "config_path": "config/pattern_config.json",
     "match_threshold": 0.6
   },
+  "intent_analyzer": {
+    "enabled": true,
+    "model": "qwen3.5-27b",
+    "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "api_key": "sk-ddd2a2bdee29410a8ca9ec5d4ea510d8",
+    "temperature": 0.1,
+    "max_tokens": 4096,
+    "timeout": 30,
+    "thinking_disabled": true
+  },
   "param_mapper": {
     "enabled": true,
-    "model": "kimi-k2.5",
-    "temperature": 0.6,
+    "model": "qwen3.5-27b",
+    "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "api_key": "sk-ddd2a2bdee29410a8ca9ec5d4ea510d8",
+    "temperature": 0.1,
     "max_tokens": 4096,
     "timeout": 30,
     "thinking_disabled": true,
@@ -94,6 +106,18 @@
       },
       "time_grain": {
         "description": "将中文时间粒度映射为标准枚举值",
+        "allowed_values": ["DAY", "WEEK", "MONTH", "QUARTER", "YEAR"],
+        "examples": {
+          "日": "DAY", "每日": "DAY", "每天": "DAY", "天": "DAY",
+          "周": "WEEK", "每周": "WEEK",
+          "月": "MONTH", "每月": "MONTH",
+          "季度": "QUARTER", "每季度": "QUARTER",
+          "年": "YEAR", "每年": "YEAR"
+        },
+        "output_format": "enum string (DAY/WEEK/MONTH/QUARTER/YEAR)"
+      },
+      "granularity": {
+        "description": "将中文时间粒度映射为标准枚举值（同time_grain）",
         "allowed_values": ["DAY", "WEEK", "MONTH", "QUARTER", "YEAR"],
         "examples": {
           "日": "DAY", "每日": "DAY", "每天": "DAY", "天": "DAY",

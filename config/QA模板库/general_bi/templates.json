@@ -1,326 +1,454 @@
 {
+  "datasource": "business_data",
   "templates": [
     {
-      "id": "flexible_query",
-      "name": "灵活查询",
-      "category": "自由查询",
-      "description": "使用自然语言进行灵活的数据查询",
-      "question_template": "查询{{description}}",
-      "pattern_id": "react",
-      "default_params": {},
-      "params_schema": {},
-      "examples": [
-        "查询最近30天的销售额",
-        "查看销售额最高的5个产品",
-        "对比本月和上月的订单量"
-      ]
-    },
-    {
-      "id": "data_exploration",
-      "name": "数据探索",
-      "category": "自由查询",
-      "description": "自由探索数据，发现业务洞察",
-      "question_template": "探索{{data_topic}}数据",
-      "pattern_id": "react",
-      "default_params": {},
-      "params_schema": {},
-      "examples": [
-        "探索销售数据的季节性规律",
-        "分析用户行为的异常点",
-        "发现产品销售的增长机会"
-      ]
-    },
-    {
-      "id": "custom_report",
-      "name": "自定义报表",
-      "category": "自由查询",
-      "description": "根据业务需求自定义报表",
-      "question_template": "生成{{report_type}}报表",
-      "pattern_id": "react",
-      "default_params": {},
-      "params_schema": {},
-      "examples": [
-        "生成月度销售报表",
-        "创建用户活跃度报表",
-        "制作产品分析报表"
-      ]
-    },
-    {
-      "id": "quick_point_query",
-      "name": "快速点查",
-      "category": "快速查询",
-      "description": "快速查询特定指标的值",
-      "question_template": "查询{{time_point}}的{{metric}}",
+      "id": "general_point_query",
+      "name": "数据点查",
+      "category": "基础查询",
+      "description": "查询单个时间点的指标值",
       "pattern_id": "point_query",
+      "sql_template": "SELECT {metric_field} as value FROM {table_name} WHERE {time_filter}",
       "default_params": {
-        "metric": "total_amount",
-        "time_point": "today"
+        "metric": "数量",
+        "time_point": "今天"
       },
       "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
+        },
         "time_point": {
           "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "today"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "total_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "active_users", "label": "活跃用户数"}
-          ],
-          "default": "total_amount"
+          "type": "time_point",
+          "required": true
         }
       },
+      "user_prompt": "查询单个时间点的指标值，适合快速获取数据快照。",
+      "important_notes": [
+        "指标和时间点是必填参数",
+        "支持相对时间和绝对时间"
+      ],
       "examples": [
-        "今天的销售额是多少",
-        "本月的订单量",
-        "上周的活跃用户数"
+        "查询今天的订单数量",
+        "查询昨天的总金额"
       ]
     },
     {
-      "id": "trend_overview",
-      "name": "趋势概览",
-      "category": "趋势分析",
-      "description": "查看关键指标的趋势变化",
-      "question_template": "查看{{metric}}的趋势",
-      "pattern_id": "trend_analysis",
+      "id": "general_detail_query",
+      "name": "数据明细查询",
+      "category": "明细查询",
+      "description": "查询符合条件的详细数据记录",
+      "pattern_id": "detail_query",
+      "sql_template": "SELECT {fields} FROM {table_name} WHERE {time_filter} {filters} LIMIT {limit}",
       "default_params": {
-        "metric": "total_amount",
-        "time_grain": "DAY",
-        "time_range": {
-          "start": "2024-01-01",
-          "end": "2024-01-31"
+        "fields": ["*"],
+        "limit": 100
+      },
+      "params_schema": {
+        "fields": {
+          "label": "返回字段",
+          "type": "field_array",
+          "required": true,
+          "default": ["*"],
+          "description": "要返回的字段列表"
+        },
+        "filters": {
+          "label": "过滤条件",
+          "type": "string",
+          "required": false,
+          "description": "WHERE过滤条件，如：status='completed'"
+        },
+        "limit": {
+          "label": "返回数量",
+          "type": "integer",
+          "required": false,
+          "default": 100,
+          "max": 10000
         }
+      },
+      "user_prompt": "查询符合条件的详细数据记录，可指定返回字段、筛选条件和返回数量。",
+      "important_notes": [
+        "字段列表是必填参数",
+        "默认返回100条，最多10000条",
+        "支持自定义过滤条件"
+      ],
+      "examples": [
+        "查询最近一周的订单明细"
+      ]
+    },
+    {
+      "id": "general_agg_query",
+      "name": "数据聚合查询",
+      "category": "聚合分析",
+      "description": "按维度分组聚合数据",
+      "pattern_id": "agg_query",
+      "sql_template": "SELECT {dimensions}, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimensions} ORDER BY value DESC",
+      "default_params": {
+        "dimensions": ["类型"],
+        "metric": "数量"
+      },
+      "params_schema": {
+        "dimensions": {
+          "label": "分组维度",
+          "type": "array",
+          "required": true,
+          "min_items": 1,
+          "max_items": 3,
+          "items": {
+            "type": "string",
+            "options": ["类型", "状态", "分类"],
+            "field_mapping": {
+              "类型": "type",
+              "状态": "status",
+              "分类": "category"
+            }
+          }
+        },
+        "metric": {
+          "label": "聚合指标",
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
+        }
+      },
+      "user_prompt": "按一个或多个维度对指标进行分组汇总，适合做数据透视分析。",
+      "important_notes": [
+        "维度和指标是必填参数",
+        "最多支持3个维度进行分组",
+        "结果按指标值降序排列"
+      ],
+      "examples": [
+        "按类型统计本月的记录数量"
+      ]
+    },
+    {
+      "id": "general_trend_analysis",
+      "name": "数据趋势分析",
+      "category": "趋势分析",
+      "description": "分析指标随时间的变化趋势",
+      "pattern_id": "trend_analysis",
+      "sql_template": "SELECT {time_trunc} as period, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {time_trunc} ORDER BY period",
+      "default_params": {
+        "metric": "数量",
+        "time_grain": "DAY",
+        "time_range": "最近30天"
       },
       "params_schema": {
         "metric": {
           "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "total_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "active_users", "label": "活跃用户数"}
-          ],
-          "default": "total_amount"
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
         },
         "time_grain": {
           "label": "时间粒度",
-          "type": "select",
-          "options": [
-            {"value": "DAY", "label": "日"},
-            {"value": "WEEK", "label": "周"},
-            {"value": "MONTH", "label": "月"}
-          ],
-          "default": "DAY"
+          "type": "time_grain",
+          "required": false,
+          "default": "DAY",
+          "options": ["DAY", "WEEK", "MONTH"],
+          "time_trunc_mapping": {
+            "DAY": "DATE({time_field})",
+            "WEEK": "DATE_TRUNC('week', {time_field})",
+            "MONTH": "DATE_TRUNC('month', {time_field})"
+          }
         },
         "time_range": {
           "label": "时间范围",
-          "type": "date_range",
-          "required": true,
-          "default": "last_30_days"
+          "type": "time_range",
+          "required": true
         }
       },
+      "user_prompt": "分析指标随时间的变化趋势，按日/周/月粒度查看数据走势。",
+      "important_notes": [
+        "时间范围和指标是必填参数",
+        "适合发现数据变化趋势"
+      ],
       "examples": [
-        "查看最近30天的销售额趋势",
-        "显示今年的订单量变化",
-        "上周活跃用户数的趋势"
+        "分析最近30天的数量趋势"
       ]
     },
     {
-      "id": "multi_dimension_analysis",
-      "name": "多维度分析",
-      "category": "维度分析",
-      "description": "从多个维度交叉分析数据",
-      "question_template": "分析{{dimensions}}的{{metric}}",
-      "pattern_id": "agg_query",
-      "default_params": {
-        "dimensions": ["category_name", "region"],
-        "metric": "total_amount",
-        "time_point": "2024-01"
-      },
-      "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
-        "metric": {
-          "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "total_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "active_users", "label": "活跃用户数"}
-          ],
-          "default": "total_amount"
-        },
-        "dimensions": {
-          "label": "分析维度",
-          "type": "multi_select",
-          "options": [
-            {"value": "category_name", "label": "产品类别"},
-            {"value": "brand", "label": "品牌"},
-            {"value": "region", "label": "地区"},
-            {"value": "customer_type", "label": "客户类型"}
-          ],
-          "default": ["category_name", "region"]
-        }
-      },
-      "examples": [
-        "按产品和地区分析销售额",
-        "按品牌和客户类型分析订单量",
-        "多维度交叉分析活跃用户"
-      ]
-    },
-    {
-      "id": "ranking_analysis",
-      "name": "排名分析",
+      "id": "general_topn",
+      "name": "数据排名",
       "category": "排名分析",
-      "description": "查询TopN排名数据",
-      "question_template": "查询{{metric}}Top{{n}}的{{dimension}}",
+      "description": "按指标值进行排名分析，获取TOP N的数据项",
       "pattern_id": "topn",
+      "sql_template": "SELECT {dimension} as item, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimension} ORDER BY value DESC LIMIT {n}",
       "default_params": {
-        "metric": "total_amount",
-        "dimension": "product_name",
+        "metric": "数量",
+        "dimension": "类型",
         "n": 10,
-        "time_point": "2024-01"
+        "time_point": "本月"
       },
       "params_schema": {
-        "time_point": {
-          "label": "时间点",
-          "type": "date",
-          "required": true,
-          "default": "current_month"
-        },
         "metric": {
           "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "total_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "active_users", "label": "活跃用户数"}
-          ],
-          "default": "total_amount"
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
         },
         "dimension": {
           "label": "排名维度",
-          "type": "select",
-          "options": [
-            {"value": "product_name", "label": "产品"},
-            {"value": "category_name", "label": "产品类别"},
-            {"value": "brand", "label": "品牌"},
-            {"value": "region", "label": "地区"}
-          ],
-          "default": "product_name"
+          "type": "string",
+          "required": true,
+          "options": ["类型", "状态", "分类"],
+          "field_mapping": {
+            "类型": "type",
+            "状态": "status",
+            "分类": "category"
+          }
         },
         "n": {
-          "label": "Top N",
-          "type": "number",
+          "label": "排名数量",
+          "type": "integer",
+          "required": false,
+          "default": 10,
           "min": 1,
-          "max": 100,
-          "default": 10
+          "max": 100
+        },
+        "time_point": {
+          "label": "统计时间",
+          "type": "time_point",
+          "required": true
         }
       },
+      "user_prompt": "按指标值进行排名分析，获取TOP N的数据项，快速识别头部数据。",
+      "important_notes": [
+        "N的范围是1-100，默认10",
+        "结果按降序排列"
+      ],
       "examples": [
-        "销售额Top10的产品",
-        "订单量Top5的品牌",
-        "活跃用户Top20的地区"
+        "本月数量TOP10的类型"
       ]
     },
     {
-      "id": "comparison_analysis",
-      "name": "对比分析",
-      "category": "对比分析",
-      "description": "对比不同时间、维度的数据",
-      "question_template": "对比{{comparison_type}}的{{metric}}",
-      "pattern_id": "yoy_mom",
+      "id": "general_breakdown",
+      "name": "数据维度拆解",
+      "category": "多维分析",
+      "description": "从多个维度交叉拆解分析指标",
+      "pattern_id": "breakdown",
+      "sql_template": "SELECT {dimensions}, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimensions} ORDER BY value DESC",
       "default_params": {
-        "metric": "total_amount",
-        "time_grain": "MONTH",
-        "time_range": {
-          "start": "2024-01-01",
-          "end": "2024-03-31"
-        },
-        "comparison_types": ["yoy", "mom"]
+        "metric": "数量",
+        "dimensions": ["类型", "状态"],
+        "time_point": "本月"
       },
       "params_schema": {
         "metric": {
           "label": "指标",
-          "type": "select",
-          "options": [
-            {"value": "total_amount", "label": "销售额"},
-            {"value": "order_count", "label": "订单量"},
-            {"value": "active_users", "label": "活跃用户数"}
-          ],
-          "default": "total_amount"
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
+        },
+        "dimensions": {
+          "label": "拆解维度",
+          "type": "array",
+          "required": true,
+          "min_items": 1,
+          "max_items": 3,
+          "items": {
+            "type": "string",
+            "options": ["类型", "状态", "分类"],
+            "field_mapping": {
+              "类型": "type",
+              "状态": "status",
+              "分类": "category"
+            }
+          }
+        },
+        "time_point": {
+          "label": "分析时间",
+          "type": "time_point",
+          "required": true
+        }
+      },
+      "user_prompt": "从多个维度交叉拆解分析指标，找出贡献最大的维度组合，支持多维数据透视。",
+      "important_notes": [
+        "支持1-3个维度的交叉分析",
+        "适合进行细粒度的结构分析"
+      ],
+      "examples": [
+        "分析本月各类型各状态的数量分布"
+      ]
+    },
+    {
+      "id": "general_comparison",
+      "name": "数据维度对比",
+      "category": "对比分析",
+      "description": "对比不同维度值之间的指标差异",
+      "pattern_id": "comparison",
+      "sql_template": "SELECT {dimension}, {metric_field} as value FROM {table_name} WHERE {time_filter} GROUP BY {dimension} ORDER BY value DESC",
+      "default_params": {
+        "metric": "数量",
+        "dimension": "类型",
+        "time_point": "本月"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "对比指标",
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
+        },
+        "dimension": {
+          "label": "对比维度",
+          "type": "string",
+          "required": true,
+          "options": ["类型", "状态", "分类"],
+          "field_mapping": {
+            "类型": "type",
+            "状态": "status",
+            "分类": "category"
+          }
+        },
+        "time_point": {
+          "label": "分析时间",
+          "type": "time_point",
+          "required": true
+        }
+      },
+      "user_prompt": "对比不同维度值之间的指标差异，支持多维度横向对比分析。",
+      "important_notes": [
+        "需要指定对比维度和分析时间",
+        "最多支持多个维度值对比"
+      ],
+      "examples": [
+        "对比本月不同类型的数量"
+      ]
+    },
+    {
+      "id": "general_yoy_mom",
+      "name": "数据同环比分析",
+      "category": "对比分析",
+      "description": "对比分析指标的同比(与去年同期)和环比(与上一周期)变化",
+      "pattern_id": "yoy_mom",
+      "sql_template": "SELECT {time_trunc} as period, {metric_field} as current_value, LAG({metric_field}, 1) OVER (ORDER BY {time_trunc}) as mom_value, LAG({metric_field}, 12) OVER (ORDER BY {time_trunc}) as yoy_value FROM (SELECT {time_trunc}, {metric_field} FROM {table_name} WHERE {time_filter} GROUP BY {time_trunc}) t ORDER BY period",
+      "default_params": {
+        "metric": "数量",
+        "time_grain": "MONTH",
+        "time_range": "最近12个月"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
         },
         "time_grain": {
           "label": "时间粒度",
-          "type": "select",
-          "options": [
-            {"value": "DAY", "label": "日"},
-            {"value": "WEEK", "label": "周"},
-            {"value": "MONTH", "label": "月"}
-          ],
-          "default": "MONTH"
+          "type": "time_grain",
+          "required": false,
+          "default": "MONTH",
+          "options": ["DAY", "WEEK", "MONTH"],
+          "time_trunc_mapping": {
+            "DAY": "DATE({time_field})",
+            "WEEK": "DATE_TRUNC('week', {time_field})",
+            "MONTH": "DATE_TRUNC('month', {time_field})"
+          }
         },
         "time_range": {
           "label": "时间范围",
-          "type": "date_range",
-          "required": true,
-          "default": "last_6_months"
-        },
-        "comparison_types": {
-          "label": "对比类型",
-          "type": "multi_select",
-          "options": [
-            {"value": "yoy", "label": "同比"},
-            {"value": "mom", "label": "环比"}
-          ],
-          "default": ["yoy", "mom"]
+          "type": "time_range",
+          "required": true
         }
       },
+      "user_prompt": "对比分析指标的同比(与去年同期)和环比(与上一周期)变化，发现增长或下降趋势。",
+      "important_notes": [
+        "时间范围是必填参数",
+        "建议以月为粒度进行同比分析"
+      ],
       "examples": [
-        "销售额的同比增长率",
-        "订单量的环比变化",
-        "活跃用户的同环比对比"
+        "分析本月数量的同比环比情况"
+      ]
+    },
+    {
+      "id": "general_cumulative",
+      "name": "数据累积分析",
+      "category": "累积分析",
+      "description": "计算指标的累计值，用于追踪目标完成进度",
+      "pattern_id": "cumulative",
+      "sql_template": "SELECT {time_trunc} as period, {metric_field} as period_value, SUM({metric_field}) OVER (ORDER BY {time_trunc}) as cumulative_value FROM (SELECT {time_trunc}, {metric_field} FROM {table_name} WHERE {time_filter} GROUP BY {time_trunc}) t ORDER BY period",
+      "default_params": {
+        "metric": "金额",
+        "time_grain": "DAY",
+        "time_range": "今年"
+      },
+      "params_schema": {
+        "metric": {
+          "label": "指标",
+          "type": "string",
+          "required": true,
+          "options": ["数量", "金额", "人数"],
+          "field_mapping": {
+            "数量": "COUNT(*)",
+            "金额": "SUM(amount)",
+            "人数": "COUNT(DISTINCT user_id)"
+          }
+        },
+        "time_grain": {
+          "label": "时间粒度",
+          "type": "time_grain",
+          "required": false,
+          "default": "DAY",
+          "options": ["DAY", "WEEK", "MONTH"],
+          "time_trunc_mapping": {
+            "DAY": "DATE({time_field})",
+            "WEEK": "DATE_TRUNC('week', {time_field})",
+            "MONTH": "DATE_TRUNC('month', {time_field})"
+          }
+        },
+        "time_range": {
+          "label": "时间范围",
+          "type": "time_range",
+          "required": true
+        }
+      },
+      "user_prompt": "计算指标的累计值，用于追踪目标完成进度，展示每个时间点的当期值和累计值。",
+      "important_notes": [
+        "时间范围是必填参数",
+        "适合用于追踪年度目标、月度目标的完成率"
+      ],
+      "examples": [
+        "分析今年以来金额的累计趋势"
       ]
     }
-  ],
-  "categories": {
-    "自由查询": {
-      "templates": ["flexible_query", "data_exploration", "custom_report"],
-      "icon": "🔍",
-      "description": "使用自然语言灵活查询"
-    },
-    "快速查询": {
-      "templates": ["quick_point_query"],
-      "icon": "⚡",
-      "description": "快速获取指标值"
-    },
-    "趋势分析": {
-      "templates": ["trend_overview"],
-      "icon": "📈",
-      "description": "查看指标趋势变化"
-    },
-    "维度分析": {
-      "templates": ["multi_dimension_analysis"],
-      "icon": "📊",
-      "description": "多维度交叉分析"
-    },
-    "排名分析": {
-      "templates": ["ranking_analysis"],
-      "icon": "🏆",
-      "description": "查询TopN排名"
-    },
-    "对比分析": {
-      "templates": ["comparison_analysis"],
-      "icon": "🔄",
-      "description": "同环比对比分析"
-    }
-  }
+  ]
 }

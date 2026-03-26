@@ -1,0 +1,58 @@
+{
+  "datasource_id": "sales_orders",
+  "name": "销售订单表",
+  "description": "记录销售订单明细数据",
+  "table_name": "sales_orders",
+  "time_field": "order_date",
+  "primary_key": "order_id",
+  
+  "metrics": [
+    {
+      "id": "sales_amount",
+      "name": "销售额",
+      "field": "total_amount",
+      "type": "decimal",
+      "agg": "SUM",
+      "description": "订单总金额"
+    },
+    {
+      "id": "sales_volume",
+      "name": "销售量",
+      "field": "quantity",
+      "type": "integer",
+      "agg": "SUM",
+      "description": "销售商品数量"
+    },
+    {
+      "id": "order_count",
+      "name": "订单数",
+      "field": "order_id",
+      "type": "count",
+      "agg": "COUNT",
+      "description": "订单数量"
+    },
+    {
+      "id": "avg_order_value",
+      "name": "客单价",
+      "field": "total_amount",
+      "type": "decimal",
+      "agg": "AVG",
+      "description": "平均订单金额"
+    }
+  ],
+  
+  "dimensions": [
+    {"id": "category", "name": "商品分类", "field": "category", "description": "商品所属类别"},
+    {"id": "brand", "name": "品牌", "field": "brand", "description": "商品品牌"},
+    {"id": "region", "name": "地区", "field": "region", "description": "销售地区"},
+    {"id": "province", "name": "省份", "field": "province", "description": "省份"},
+    {"id": "city", "name": "城市", "field": "city", "description": "城市"},
+    {"id": "channel", "name": "渠道", "field": "channel", "description": "销售渠道(线上/线下/代理)"},
+    {"id": "store", "name": "门店", "field": "store_name", "description": "门店名称"}
+  ],
+  
+  "common_filters": [
+    {"field": "order_status", "name": "订单状态", "type": "enum", "values": ["completed", "pending", "cancelled"]},
+    {"field": "payment_method", "name": "支付方式", "type": "enum", "values": ["alipay", "wechat", "card", "cash"]}
+  ]
+}

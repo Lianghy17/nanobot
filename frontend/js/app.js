@@ -178,6 +178,41 @@ function useTemplate(templateId) {
     });
 }
 
+// 显示场景欢迎提示
+function showSceneWelcome(scene) {
+    if (!scene) return;
+    
+    // 构建欢迎消息
+    let welcomeContent = `## 🎉 欢迎使用${scene.scene_name}\n\n`;
+    
+    // 添加场景描述
+    if (scene.description) {
+        welcomeContent += `**场景说明**：${scene.description}\n\n`;
+    }
+    
+    // 添加 user_prompt
+    if (scene.user_prompt) {
+        welcomeContent += `${scene.user_prompt}\n\n`;
+    }
+    
+    // 添加 important_notes
+    if (scene.important_notes && scene.important_notes.length > 0) {
+        welcomeContent += `**注意事项**：\n`;
+        scene.important_notes.forEach(note => {
+            welcomeContent += `- ${note}\n`;
+        });
+        welcomeContent += `\n`;
+    }
+    
+    // 添加模板提示
+    welcomeContent += `---\n\n`;
+    welcomeContent += `💡 **提示**：您可以点击右侧的「📋 QA模板库」选择预设问题模板，快速生成数据分析查询。\n\n`;
+    welcomeContent += `也可以直接输入您的问题，系统将自动选择最合适的分析模式。`;
+    
+    // 显示欢迎消息（作为 assistant 消息）
+    appendMessage('assistant', welcomeContent, [], { mode: 'react', is_welcome: true });
+}
+
 // 显示模式提示（已废弃，使用switchMode）
 function showModeTip() {
     // 使用默认模板模式
@@ -266,7 +301,7 @@ async function createConversation() {
 
         // 更新UI
         document.getElementById('convTitle').textContent = conversation.scene_name;
-        document.getElementById('messageList').innerHTML = '<div class="loading"><p>新对话已创建，开始提问吧！</p></div>';
+        document.getElementById('messageList').innerHTML = '';
         document.getElementById('sendBtn').disabled = false;
 
         hideSceneDialog();
@@ -274,6 +309,9 @@ async function createConversation() {
 
         // 默认显示React模式（未选择模板时）
         switchMode('react');
+
+        // 显示场景欢迎提示
+        showSceneWelcome(selectedScene);
 
         // 加载QA模板
         loadHotQuestions(selectedScene.scene_code);
@@ -1002,9 +1040,9 @@ function appendMessage(role, content, files = [], metadata = {}) {
             `;
         }
 
-        // 如果是React模式，显示提示（可选，可以根据需要显示或隐藏）
+        // 如果是React模式且不是欢迎消息，显示提示（可选，可以根据需要显示或隐藏）
         let modeTipHtml = '';
-        if (metadata.mode === 'react' && !isPatternMode) {
+        if (metadata.mode === 'react' && !isPatternMode && !metadata.is_welcome) {
             modeTipHtml = `
                 <div class="message-mode-indicator">
                     <span class="mode-icon">🤖</span>

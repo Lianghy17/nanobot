@@ -278,19 +278,7 @@ class ChatBIConfig:
         """图片上传超时时间"""
         return int(self._config.get("image_server", {}).get("upload_timeout", 30))
 
-    @property
-    def pattern_config_path(self) -> str:
-        """Pattern配置文件路径"""
-        # 优先使用配置文件中的路径
-        configured_path = self._config.get("pattern", {}).get("config_path")
-        if configured_path:
-            path = Path(configured_path)
-            if not path.is_absolute():
-                path = get_project_root() / configured_path
-            return str(path)
-        
-        # 默认路径
-        return str(get_project_root() / "config" / "pattern_config.json")
+    # pattern_config_path 属性已删除，系统现在只使用 scenes.json
 
     @property
     def pattern_enabled(self) -> bool:
@@ -341,6 +329,51 @@ class ChatBIConfig:
     def param_mapper_thinking_disabled(self) -> bool:
         """参数映射是否禁用思考"""
         return self._config.get("param_mapper", {}).get("thinking_disabled", True)
+
+    @property
+    def intent_analyzer_enabled(self) -> bool:
+        """是否启用意图分析器"""
+        return self._config.get("intent_analyzer", {}).get("enabled", True)
+
+    @property
+    def intent_analyzer_config(self) -> Dict[str, Any]:
+        """意图分析器完整配置"""
+        return self._config.get("intent_analyzer", {})
+
+    @property
+    def intent_analyzer_model(self) -> str:
+        """意图分析使用的模型"""
+        return self._config.get("intent_analyzer", {}).get("model", self.llm_model)
+
+    @property
+    def intent_analyzer_api_base(self) -> str:
+        """意图分析API基础URL"""
+        return self._config.get("intent_analyzer", {}).get("api_base", self.llm_api_base)
+
+    @property
+    def intent_analyzer_api_key(self) -> str:
+        """意图分析API密钥"""
+        return self._config.get("intent_analyzer", {}).get("api_key", self.llm_api_key)
+
+    @property
+    def intent_analyzer_temperature(self) -> float:
+        """意图分析LLM温度"""
+        return float(self._config.get("intent_analyzer", {}).get("temperature", 0.1))
+
+    @property
+    def intent_analyzer_max_tokens(self) -> int:
+        """意图分析最大token数"""
+        return int(self._config.get("intent_analyzer", {}).get("max_tokens", 4096))
+
+    @property
+    def intent_analyzer_timeout(self) -> int:
+        """意图分析超时时间"""
+        return int(self._config.get("intent_analyzer", {}).get("timeout", 30))
+
+    @property
+    def intent_analyzer_thinking_disabled(self) -> bool:
+        """意图分析是否禁用思考"""
+        return self._config.get("intent_analyzer", {}).get("thinking_disabled", True)
 
     def get_tool_config(self, tool_name: str) -> Optional[Dict[str, Any]]:
         """获取特定工具的配置"""
