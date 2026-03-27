@@ -11,8 +11,16 @@
     "channel": "dingtalk",
     "chat_id": "01531937510226598025",
     "user_name": "梁浩云",
-    "created_at": "2026-03-09T19:35:19.397936",
-    "updated_at": "2026-03-09T19:35:21.535549",
+    "created_at": "2026-03-27T15:50:06.354299",
+    "updated_at": "2026-03-27T15:51:40.929846",
+    "message_count": 4
+  },
+  "web:1774599835259": {
+    "channel": "web",
+    "chat_id": "1774599835259",
+    "user_name": null,
+    "created_at": "2026-03-27T16:23:57.642817",
+    "updated_at": "2026-03-27T16:24:00.857304",
     "message_count": 2
   }
 }

@@ -59,6 +59,22 @@ def create_app() -> Flask:
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
 
+    # CORS support
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+        return response
+
+    @app.route("/<path:path>", methods=["OPTIONS"])
+    def options_handler(path):
+        return "", 200
+
+    @app.route("/", methods=["OPTIONS"])
+    def root_options():
+        return "", 200
+
     # Initialize components
     config = load_config()
     workspace = get_workspace_path()
@@ -131,7 +147,16 @@ def create_app() -> Flask:
 
     @app.route("/")
     def index():
-        """Root endpoint."""
+        """Root endpoint - serve the frontend."""
+        try:
+            # Try to serve the frontend HTML file
+            from pathlib import Path
+            frontend_path = Path(__file__).parent.parent.parent / "frontend" / "index.html"
+            if frontend_path.exists():
+                return frontend_path.read_text(encoding="utf-8"), 200, {"Content-Type": "text/html; charset=utf-8"}
+        except Exception as e:
+            logger.warning(f"Could not serve frontend: {e}")
+
         return jsonify({
             "name": "nanobot",
             "version": __version__,
