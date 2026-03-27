@@ -16,6 +16,22 @@
       "description": "订单总金额"
     },
     {
+      "id": "actual_amount",
+      "name": "实付金额",
+      "field": "actual_amount",
+      "type": "decimal",
+      "agg": "SUM",
+      "description": "实际支付金额"
+    },
+    {
+      "id": "discount_amount",
+      "name": "优惠金额",
+      "field": "discount_amount",
+      "type": "decimal",
+      "agg": "SUM",
+      "description": "订单优惠金额"
+    },
+    {
       "id": "sales_volume",
       "name": "销售量",
       "field": "quantity",
@@ -38,6 +54,22 @@
       "type": "decimal",
       "agg": "AVG",
       "description": "平均订单金额"
+    },
+    {
+      "id": "cost",
+      "name": "成本",
+      "field": "cost",
+      "type": "decimal",
+      "agg": "SUM",
+      "description": "商品成本"
+    },
+    {
+      "id": "profit",
+      "name": "利润",
+      "field": "actual_amount - cost",
+      "type": "calculated",
+      "agg": "SUM",
+      "description": "销售利润"
     }
   ],
   

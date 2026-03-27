@@ -140,9 +140,15 @@ class PlaceholderResolver:
         "steps": "steps",
     }
     
-    def __init__(self, time_field: str = "created_at", params_schema: Dict[str, Any] = None):
+    def __init__(self, time_field: str = "created_at", params_schema: Dict[str, Any] = None, datasource_id: str = None):
         self.time_field = time_field
         self.params_schema = params_schema or {}
+        self.datasource_id = datasource_id
+        self._datasource_field_mapping = {}  # 缓存 datasource 的 field_mapping
+        
+        # 如果有 datasource_id，预加载 datasource 的指标映射
+        if datasource_id:
+            self._load_datasource_field_mapping()
     
     def resolve(self, placeholder: str, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         """解析单个占位符"""
@@ -166,26 +172,85 @@ class PlaceholderResolver:
         
         return str(value) if value is not None else ""
     
+    def _load_datasource_field_mapping(self):
+        """从 datasource 配置加载指标→SQL表达式的映射"""
+        if not self.datasource_id:
+            return
+        try:
+            from .datasource_loader import datasource_loader
+            ds = datasource_loader.get_datasource(self.datasource_id)
+            if ds:
+                for metric in ds.metrics:
+                    expr = datasource_loader.resolve_metric_field(self.datasource_id, metric.name)
+                    if expr:
+                        self._datasource_field_mapping[metric.name] = expr
+                if self._datasource_field_mapping:
+                    logger.info(f"[SQL构建器] 从datasource加载指标映射({self.datasource_id}): {list(self._datasource_field_mapping.keys())}")
+        except Exception as e:
+            logger.warning(f"[SQL构建器] 加载datasource指标映射失败: {e}")
+    
     def _resolve_metric_field(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
-        """解析指标字段映射"""
+        """解析指标字段映射，支持单指标和多指标
+        
+        优先使用 template 的 field_mapping，fallback 到 datasource 配置。
+        明细表场景下 datasource 会自动添加 SUM/COUNT/AVG 聚合函数。
+        
+        单指标: 返回原始表达式，如 SUM(total_amount)
+        多指标: 返回带别名的表达式，如 SUM(total_amount) AS '销售额', SUM(quantity) AS '销售量'
+        """
         metric = params.get("metric")
         if not metric:
             return "COUNT(*)"  # 默认值
         
-        # 从 params_schema 中获取 field_mapping
+        # 合并 field_mapping：template 优先，datasource 兜底
         metric_schema = self.params_schema.get("metric", {})
-        field_mapping = metric_schema.get("field_mapping", {})
+        field_mapping = dict(metric_schema.get("field_mapping", {}))
+        field_mapping.update(self._datasource_field_mapping)  # datasource 不覆盖 template
         
-        # 映射指标名称到 SQL 字段
-        mapped_value = field_mapping.get(metric)
-        if mapped_value:
-            return mapped_value
+        # 如果 template 没有任何 field_mapping 且 datasource 也没有，用 datasource 兜底
+        if not metric_schema.get("field_mapping") and self._datasource_field_mapping:
+            field_mapping = dict(self._datasource_field_mapping)
         
-        # 如果 metric 本身就是 SQL 表达式（包含函数）
-        if "(" in metric:
-            return metric
+        # 解析多指标（支持 list 或逗号/顿号分隔的字符串）
+        metrics = self._parse_metric_list(metric)
         
-        return metric
+        if len(metrics) > 1:
+            # 多指标：返回带别名的表达式列表
+            parts = []
+            for m in metrics:
+                mapped = field_mapping.get(m)
+                if mapped:
+                    parts.append(f"{mapped} AS '{m}'")
+                elif "(" in m:
+                    parts.append(f"{m} AS '{m}'")
+                else:
+                    # 未找到映射，默认用 SUM（明细表场景）
+                    parts.append(f"SUM({m}) AS '{m}'")
+            return ", ".join(parts)
+        else:
+            # 单指标：返回原始表达式（模板中会添加 as value）
+            single = metrics[0]
+            mapped = field_mapping.get(single)
+            if mapped:
+                return mapped
+            if "(" in single:
+                return single
+            # 未找到映射，默认用 SUM（明细表场景）
+            return f"SUM({single})"
+    
+    def _parse_metric_list(self, metric) -> list:
+        """解析指标值，支持 list 和逗号/顿号分隔的字符串"""
+        if isinstance(metric, list):
+            return [m.strip() for m in metric if m.strip()]
+        
+        metric_str = str(metric)
+        for sep in [',', '，', '、']:
+            if sep in metric_str:
+                items = [m.strip() for m in metric_str.split(sep) if m.strip()]
+                if len(items) > 1:
+                    return items
+        
+        return [metric_str.strip()]
     
     def _resolve_dimension_single(self, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         """解析单个维度字段映射"""
@@ -332,10 +397,11 @@ class UniversalSQLBuilder(SQLBuilder):
     def build_sql(self, template_config: TemplateConfig, params: Dict[str, Any], context: Dict[str, Any]) -> str:
         time_field = context.get("time_field", "created_at")
         table_name = context.get("table_name", "unknown_table")
+        datasource_id = context.get("datasource_id")
         params_schema = template_config.params_schema or context.get("params_schema", {})
         
-        # 创建占位符解析器（传入 params_schema 用于字段映射）
-        resolver = PlaceholderResolver(time_field, params_schema)
+        # 创建占位符解析器（传入 params_schema 和 datasource_id）
+        resolver = PlaceholderResolver(time_field, params_schema, datasource_id)
         
         # 提取模板中的所有占位符
         placeholders_needed = self.extract_placeholders(template_config.sql_template)
@@ -361,7 +427,19 @@ class UniversalSQLBuilder(SQLBuilder):
         logger.info(f"[SQL构建器] 占位符映射: {placeholders}")
         
         # 渲染模板
-        return self.render_template(template_config.sql_template, placeholders)
+        sql = self.render_template(template_config.sql_template, placeholders)
+        
+        # 后处理：多指标时去掉模板中多余的 " as value/alias" 后缀
+        # 因为多指标已经在 resolver 中自带了 AS '指标名' 别名
+        metric_resolved = placeholders.get("metric_field", "")
+        if " AS '" in metric_resolved:
+            sql = re.sub(
+                re.escape(metric_resolved) + r'\s+as\s+\w+',
+                metric_resolved,
+                sql
+            )
+        
+        return sql
 
 
 class SQLBuilderFactory:

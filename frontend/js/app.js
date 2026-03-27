@@ -12,6 +12,7 @@ let currentMode = 'template';  // 当前问答模式: template/react/qa
 let qaTemplates = {};  // QA模板数据
 let currentTemplate = null;  // 当前选中的模板
 let inTemplateMode = false;  // 是否在模板模式中
+let forceReactMode = false;  // 是否强制使用React模式（退出模板模式后）
 
 // API基础URL
 const API_BASE = '/api';
@@ -720,6 +721,12 @@ async function sendMessage(messageContent = null, customMetadata = {}) {
     // 构建元数据
     let metadata = { ...customMetadata };
     
+    // 如果强制React模式（退出模板模式后），通知后端不走模板续接
+    if (forceReactMode) {
+        metadata.fallback_to_react = true;
+        forceReactMode = false;  // 只触发一次
+    }
+    
     // 如果在模板模式中，添加模板状态信息
     if (inTemplateMode && currentTemplate && !metadata.template_mode) {
         metadata.template_mode = true;
@@ -1091,12 +1098,13 @@ function exitTemplateMode() {
 
     inTemplateMode = false;
     currentTemplate = null;
+    forceReactMode = true;  // 标记后续消息强制走React模式
 
     // 切换到React模式
     switchMode('react');
 
-    // 发送系统消息
-    appendMessage('assistant', '已退出模板模式，现在将使用React模式进行灵活分析。', [], { mode: 'react' });
+    // 提示用户
+    appendMessage('assistant', '✅ 已退出模板模式，请输入您的问题。', [], { mode: 'react' });
 }
 
 // 键盘事件处理

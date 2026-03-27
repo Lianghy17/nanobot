@@ -10,6 +10,7 @@ from .sse_manager import sse_manager
 from .intent_analyzer import IntentAnalysisResult
 from .template_loader import SceneTemplateLoader, TemplateConfig
 from .sql_builder import PatternSQLBuilder
+from .datasource_loader import datasource_loader
 
 logger = logging.getLogger(__name__)
 
@@ -81,13 +82,20 @@ class PatternHandler:
             if not params:
                 params = self._apply_defaults(params, intent_result.template_config.params_schema)
 
-            # 构建SQL上下文
+            # 构建SQL上下文（优先从 datasource 配置获取正确的表名和时间字段）
+            template_datasource = intent_result.template_config.datasource
+            ds_config = datasource_loader.get_datasource(template_datasource) if template_datasource else None
+            
             sql_context = {
-                "table_name": conversation.scene_code,
-                "time_field": "created_at",
+                "table_name": ds_config.table_name if ds_config else conversation.scene_code,
+                "time_field": ds_config.time_field if ds_config else "created_at",
+                "datasource_id": template_datasource,
                 "scene_code": conversation.scene_code,
                 "params_schema": intent_result.template_config.params_schema or {}
             }
+            
+            if ds_config:
+                logger.info(f"[Template模式] datasource配置: table={ds_config.table_name}, time_field={ds_config.time_field}, metrics={len(ds_config.metrics)}")
 
             # 🎯 硬编码逻辑：只生成SQL，不执行SQL
             # 原因：当前系统没有真实数据库，execute_sql 是假的

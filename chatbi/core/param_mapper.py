@@ -131,15 +131,34 @@ class ParamMapper:
             logger.info("[参数映射] LLM映射已禁用，跳过映射")
             return params, None
 
+        # 检测多值参数（逗号/顿号分隔），跳过LLM映射
+        # 多值参数（如多指标）由SQL构建器的 field_mapping 处理中文→SQL映射
+        multi_value_separators = [',', '，', '、']
+        params_for_llm = {}
+        skipped_multi = []
+
+        for key, value in params_to_map.items():
+            if isinstance(value, str) and any(sep in value for sep in multi_value_separators):
+                skipped_multi.append(key)
+            else:
+                params_for_llm[key] = value
+
+        if skipped_multi:
+            logger.info(f"[参数映射] 跳过多值参数（由SQL构建器field_mapping处理）: {skipped_multi}")
+
+        if not params_for_llm:
+            logger.info("[参数映射] 所有参数均为多值，跳过LLM映射")
+            return params, None
+
         # 获取 params_schema（从 context 或 template 配置中）
         params_schema = {}
         if context and "params_schema" in context:
             params_schema = context["params_schema"]
 
-        # 构建 prompt
-        user_prompt = self._build_user_prompt(params_to_map, params_schema)
+        # 构建 prompt（使用过滤后的参数）
+        user_prompt = self._build_user_prompt(params_for_llm, params_schema)
 
-        logger.info(f"[参数映射] 开始LLM映射, template={template_id}, params={list(params_to_map.keys())}")
+        logger.info(f"[参数映射] 开始LLM映射, template={template_id}, params={list(params_for_llm.keys())}")
         logger.info(f"[参数映射] 使用模型: {chatbi_config.param_mapper_model}")
         logger.info(f"[参数映射] Prompt长度: {len(user_prompt)} 字符")
         logger.debug(f"[参数映射] Prompt:\n{user_prompt}")
@@ -168,10 +187,13 @@ class ParamMapper:
             mapped_params = result.get("mapped_params", {})
             notes = result.get("notes", {})
 
-            # 将映射结果合并回原始 params（保留未映射的参数）
+            # 将映射结果合并回原始 params（保留未映射的和跳过的多值参数）
             final_params = {}
             for key, value in params.items():
                 if value is None:
+                    final_params[key] = value
+                elif key in skipped_multi:
+                    # 跳过的多值参数保留原始值
                     final_params[key] = value
                 elif key in mapped_params and mapped_params[key] is not None:
                     final_params[key] = mapped_params[key]
@@ -179,8 +201,8 @@ class ParamMapper:
                     final_params[key] = value
 
             # 日志记录映射详情
-            for key in params_to_map:
-                old_val = params_to_map[key]
+            for key in params_for_llm:
+                old_val = params_for_llm[key]
                 new_val = final_params.get(key, old_val)
                 note = notes.get(key, "")
                 if old_val != new_val:

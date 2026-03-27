@@ -39,8 +39,20 @@ class ToolExecutor:
             if hasattr(tool, 'set_conversation_id') and conversation_id:
                 tool.set_conversation_id(conversation_id)
 
-    def get_tool_definitions(self, scene_code: Optional[str] = None) -> List[Dict[str, Any]]:
-        """获取工具的定义，可按场景过滤"""
+    # React模式允许的工具白名单（仅文件读写和沙箱Python）
+    REACT_ALLOWED_TOOLS = {"read_file", "write_file", "execute_python"}
+
+    def get_tool_definitions(self, scene_code: Optional[str] = None, run_mode: str = "react") -> List[Dict[str, Any]]:
+        """获取工具的定义，可按场景和运行模式过滤"""
+        # React模式下只允许文件读写和Python执行
+        if run_mode == "react":
+            logger.info(f"[React模式工具] 仅允许: {self.REACT_ALLOWED_TOOLS}")
+            return [
+                self._tools[skill].get_definition()
+                for skill in self.REACT_ALLOWED_TOOLS
+                if skill in self._tools
+            ]
+        # template模式或无模式限制时，按场景过滤
         if scene_code:
             supported_skills = chatbi_config.get_scene_supported_skills(scene_code)
             if supported_skills:
@@ -52,8 +64,10 @@ class ToolExecutor:
                 ]
         return [tool.get_definition() for tool in self._tools.values()]
 
-    def get_tool_names(self, scene_code: Optional[str] = None) -> str:
+    def get_tool_names(self, scene_code: Optional[str] = None, run_mode: str = "react") -> str:
         """获取工具名称列表（逗号分隔），用于系统提示"""
+        if run_mode == "react":
+            return ", ".join(self.REACT_ALLOWED_TOOLS)
         if scene_code:
             supported_skills = chatbi_config.get_scene_supported_skills(scene_code)
             if supported_skills:

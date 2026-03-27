@@ -17,7 +17,7 @@
           "label": "指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数", "客单价"],
+          "options": ["销售额", "销售量", "订单数", "客单价", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",
@@ -60,11 +60,12 @@
           "label": "指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数"],
+          "options": ["销售额", "销售量", "订单数", "客单价", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",
-            "订单数": "COUNT(order_id)"
+            "订单数": "COUNT(order_id)",
+            "客单价": "AVG(total_amount)"
           }
         },
         "time_grain": {
@@ -115,11 +116,12 @@
           "label": "指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数"],
+          "options": ["销售额", "销售量", "订单数", "客单价", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",
-            "订单数": "COUNT(order_id)"
+            "订单数": "COUNT(order_id)",
+            "客单价": "AVG(total_amount)"
           }
         },
         "dimension": {
@@ -179,11 +181,12 @@
           "label": "指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数"],
+          "options": ["销售额", "销售量", "订单数", "客单价", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",
-            "订单数": "COUNT(order_id)"
+            "订单数": "COUNT(order_id)",
+            "客单价": "AVG(total_amount)"
           }
         },
         "dimensions": {
@@ -259,11 +262,12 @@
           "label": "聚合指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数"],
+          "options": ["销售额", "销售量", "订单数", "客单价", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",
-            "订单数": "COUNT(order_id)"
+            "订单数": "COUNT(order_id)",
+            "客单价": "AVG(total_amount)"
           }
         }
       },
@@ -295,7 +299,7 @@
           "label": "指标",
           "type": "string",
           "required": true,
-          "options": ["销售额", "销售量", "订单数"],
+          "options": ["销售额", "销售量", "订单数", "实付金额", "优惠金额", "成本", "利润"],
           "field_mapping": {
             "销售额": "SUM(total_amount)",
             "销售量": "SUM(quantity)",

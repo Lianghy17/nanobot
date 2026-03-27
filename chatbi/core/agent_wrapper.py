@@ -144,7 +144,7 @@ class AgentWrapper:
     ) -> List[Dict[str, Any]]:
         """构建发送给LLM的消息列表"""
         memory_context = self.memory_manager.get_memory_context()
-        tool_names = self.tool_executor.get_tool_names(conversation.scene_code)
+        tool_names = self.tool_executor.get_tool_names(conversation.scene_code, run_mode=run_mode)
         files_context = await self._get_files_context(conversation.conversation_id)
 
         run_mode_name = "模板模式（Template Mode）" if run_mode == "template" else "React模式（Flex Mode）"
@@ -236,7 +236,7 @@ class AgentWrapper:
             try:
                 response: LLMResponse = await self.llm_client.chat(
                     messages=messages,
-                    tools=self.tool_executor.get_tool_definitions(conversation.scene_code)
+                    tools=self.tool_executor.get_tool_definitions(conversation.scene_code, run_mode=run_mode)
                 )
             except Exception as e:
                 logger.error(f"[Agent Loop] LLM调用失败: {type(e).__name__}: {e}")

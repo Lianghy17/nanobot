@@ -34,7 +34,7 @@ class LLMClient:
             temperature: 温度参数
             max_tokens: 最大token数
             timeout: 超时时间（秒）
-            thinking_disabled: 是否禁用思考能力（kimi-k2.5专用）
+            thinking_disabled: 是否禁用思考能力（kimi-k2.5、qwen3等）
         """
         self.api_base = api_base
         self.api_key = api_key
@@ -44,11 +44,12 @@ class LLMClient:
         self.timeout = timeout
         self.thinking_disabled = thinking_disabled
 
-        # 创建OpenAI客户端
+        # 创建OpenAI客户端（禁用SDK内置重试，由自定义重试机制处理）
         self._client = AsyncOpenAI(
             api_key=api_key,
             base_url=api_base,
-            timeout=timeout
+            timeout=timeout,
+            max_retries=0
         )
 
         logger.info(f"LLM客户端初始化: api_base={api_base}, model={model}, thinking_disabled={thinking_disabled}")
@@ -121,11 +122,14 @@ class LLMClient:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
 
-        # 对于kimi-k2.5，如果需要禁用思考能力，使用extra_body参数
+        # 禁用思考能力（适用于 kimi-k2.5、qwen3 等支持思考模式的模型）
         extra_body = {}
-        if self.thinking_disabled and "kimi-k2.5" in current_model:
-            extra_body["thinking"] = {"type": "disabled"}
-            logger.info("[LLM 请求] 添加 thinking={disabled} 参数")
+        if self.thinking_disabled:
+            if "kimi-k2.5" in current_model:
+                extra_body["thinking"] = {"type": "disabled"}
+            elif "qwen3" in current_model:
+                extra_body["enable_thinking"] = False
+            logger.info(f"[LLM 请求] 禁用思考模式 (model={current_model})")
 
         # 如果有extra_body参数，添加到请求中
         if extra_body:
@@ -133,7 +137,7 @@ class LLMClient:
 
         # 重试机制
         max_retries = 3
-        base_delay = 2  # 初始延迟2秒
+        base_delay = 1  # 初始延迟1秒
         last_error = None
 
         for attempt in range(max_retries + 1):

@@ -5,62 +5,99 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4fcff3b-c13e-4500-bd32-67978a918569" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MODE_CONFIG_AND_RAG_INTEGRATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/MODE_CONFIG_AND_RAG_INTEGRATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PARAM_MAPPING_AND_SQL_GENERATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PARAM_MAPPING_AND_SQL_GENERATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PATTERN_CONTINUATION_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_CONTINUATION_FIX.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PATTERN_MODE_FALLBACK_ANALYSIS.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_MODE_FALLBACK_ANALYSIS.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PATTERN_PARAM_DESIGN_ISSUES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_PARAM_DESIGN_ISSUES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PATTERN_TEMPLATE_ID_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_TEMPLATE_ID_FIX.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PATTERN_TUPLE_FIX.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/PATTERN_TUPLE_FIX.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_IMPLEMENTATION_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_IMPLEMENTATION_SUMMARY.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_SYSTEM.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_SYSTEM.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QA_TEMPLATE_TROUBLESHOOTING.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_TROUBLESHOOTING.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QUICK_START_QA_TEMPLATES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/QUICK_START_QA_TEMPLATES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README_CHATBI.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README_CHATBI.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README_QA_TEMPLATE_IMPLEMENTATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/README_QA_TEMPLATE_IMPLEMENTATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/REFACTORING_SUMMARY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/REFACTORING_SUMMARY.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SQL_GENERATION_ONLY.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/SQL_GENERATION_ONLY.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TEMPLATE_MODE_FIXES.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_FIXES.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TEMPLATE_MODE_IMPLEMENTATION.md" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_IMPLEMENTATION.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/api/patterns.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/api/patterns.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLARIFICATION_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/COMMUNICATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DEBUG_FILE_DISPLAY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FILE_STORAGE_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/FRONTEND_QA_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/INTENT_ANALYSIS_LOG_IMPROVEMENT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TOKEN_FIX_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/FILE_STORAGE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/FILE_STORAGE_EXAMPLE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/FRONTEND_ENHANCEMENT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/FRONTEND_TEST_GUIDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/MEMORY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/QUICK_START.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/REFACTOR_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/SANDBOX_REFACTOR.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/check_deps.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/agent_wrapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/intent_analyzer.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/intent_analyzer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/llm_client.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/llm_client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/param_mapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/param_mapper.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/pattern_handler.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/pattern_handler.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/core/pattern_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/pattern_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/pattern_loader.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/chatbi/core/sql_builder.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/sql_builder.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_api.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_file_storage.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_file_storage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_logging.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_logging.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_memory.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_memory.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_memory_integration.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_memory_integration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_pattern_mode.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_pattern_mode.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/chatbi/test_sandbox_files.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/test/test_sandbox_files.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/QA模板库/general_bi/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/general_bi/templates.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/core/tool_executor.py" beforeDir="false" afterPath="$PROJECT_DIR$/chatbi/core/tool_executor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_api.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_file_storage.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_logging.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_memory.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_memory_integration.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_pattern_mode.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/chatbi/test/test_sandbox_files.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/config/QA模板库/sales_analysis/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/sales_analysis/templates.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/QA模板库/user_behavior/templates.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/QA模板库/user_behavior/templates.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/chatbi.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/chatbi.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/pattern_config.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/scenes.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/scenes.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/datasources/sales_orders.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/datasources/sales_orders.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/daily_sales.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/debug_frontend.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/diagnose_file_display.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/diagnose_qa_system.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/fixes_summary.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/ModeIndicator.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/README_Layout.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/debug_dom.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/js/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/test_layout.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/test_qa.html" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/logs/chatbi.log" beforeDir="false" afterPath="$PROJECT_DIR$/logs/chatbi.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nanobot_logo.png" beforeDir="false" afterPath="$PROJECT_DIR$/useless_md/nanobot_logo.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_fallback_analysis.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_fallback_analysis.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_file_display.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_file_display.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_image_url_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_image_url_flow.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_param_mapper.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_param_mapper.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_pattern_continuation.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_pattern_continuation.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_pattern_load.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_pattern_load.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_persistent_kernel.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_persistent_kernel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_qa_api.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_qa_api.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_qa_frontend.html" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_qa_frontend.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_routes.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_routes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_token_limits.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_files/test_token_limits.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_fallback_analysis.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_file_display.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_image_url_flow.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_param_mapper.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_pattern_continuation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_pattern_load.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_persistent_kernel.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_qa_api.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_qa_frontend.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_routes.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_files/test_token_limits.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/.dockerignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/Dockerfile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/MIGRATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/core_agent_lines.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/docker-compose.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/fix_sessions.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/nanobot_arch.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/pyproject.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/test_exa.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/uesless/test_web_search.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/MODE_CONFIG_AND_RAG_INTEGRATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PARAM_MAPPING_AND_SQL_GENERATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PATTERN_CONTINUATION_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PATTERN_MODE_FALLBACK_ANALYSIS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PATTERN_PARAM_DESIGN_ISSUES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PATTERN_TEMPLATE_ID_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/PATTERN_TUPLE_FIX.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_IMPLEMENTATION_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_SYSTEM.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/QA_TEMPLATE_TROUBLESHOOTING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/QUICK_START_QA_TEMPLATES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/README_CHATBI.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/README_QA_TEMPLATE_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/REFACTORING_SUMMARY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/SQL_GENERATION_ONLY.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_FIXES.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/TEMPLATE_MODE_IMPLEMENTATION.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/TEMPLATE_REFACTORING.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/useless_md/nanobot_logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/AGENTS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/HEARTBEAT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/SOUL.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/TOOLS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/workspace/USER.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/参考代码.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
