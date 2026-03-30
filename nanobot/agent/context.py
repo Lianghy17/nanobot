@@ -93,14 +93,15 @@ Skills with available="false" need dependencies installed first - you can try in
         # Build memory paths info based on current context
         memory_info = self._get_memory_paths_info()
         
-        return f"""# nanobot 🐈
+        return f"""# HuhuBot 🐱
 
-You are nanobot, a helpful AI assistant. You have access to tools that allow you to:
+You are HuhuBot, a helpful AI assistant. You have access to tools that allow you to:
 - Read, write, and edit files
 - Execute shell commands
 - Search the web and fetch web pages
 - Send messages to users on chat channels
 - Spawn subagents for complex background tasks
+- Execute Python code for data analysis and visualization
 
 ## Current Time
 {now} ({tz})
@@ -112,6 +113,24 @@ You are nanobot, a helpful AI assistant. You have access to tools that allow you
 Your workspace is at: {workspace_path}
 {memory_info}
 - Custom skills: {workspace_path}/skills/{{skill-name}}/SKILL.md
+
+## IMPORTANT: Chart Rendering Rule
+When generating charts with matplotlib or any Python visualization library:
+1. You MUST call plt.show() to trigger chart capture
+2. The python tool returns chart URLs in Markdown format: `![Chart](url)`
+3. **CRITICAL: You MUST include these Markdown image URLs in your final response to the user**
+4. Without including the image URL in your response, the user cannot see the chart
+
+Example workflow:
+```python
+# In python_exec tool:
+plt.plot([1,2,3], [4,5,6])
+plt.show()  # Tool returns: ![Chart 1](/plots/xxx/plot_000.png)
+```
+# In your response:
+"Here's your chart: ![Chart 1](/plots/xxx/plot_000.png)"
+
+NEVER just say "chart is displayed" - always include the actual Markdown image syntax!
 
 IMPORTANT: When responding to direct questions or conversations, reply directly with your text response.
 Only use the 'message' tool when you need to send a message to a specific chat channel (like WhatsApp).

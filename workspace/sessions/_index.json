@@ -20,7 +20,71 @@
     "chat_id": "1774599835259",
     "user_name": null,
     "created_at": "2026-03-27T16:23:57.642817",
-    "updated_at": "2026-03-27T16:24:00.857304",
+    "updated_at": "2026-03-27T16:25:52.561607",
+    "message_count": 4
+  },
+  "web:1774850735925": {
+    "channel": "web",
+    "chat_id": "1774850735925",
+    "user_name": null,
+    "created_at": "2026-03-30T14:05:35.936328",
+    "updated_at": "2026-03-30T14:06:12.135373",
     "message_count": 2
+  },
+  "web:1774851142203": {
+    "channel": "web",
+    "chat_id": "1774851142203",
+    "user_name": null,
+    "created_at": "2026-03-30T14:12:23.527370",
+    "updated_at": "2026-03-30T14:20:44.179465",
+    "message_count": 4
+  },
+  "web:1774852381619": {
+    "channel": "web",
+    "chat_id": "1774852381619",
+    "user_name": null,
+    "created_at": "2026-03-30T14:33:15.259481",
+    "updated_at": "2026-03-30T14:33:28.450977",
+    "message_count": 2
+  },
+  "web:1774852853691": {
+    "channel": "web",
+    "chat_id": "1774852853691",
+    "user_name": null,
+    "created_at": "2026-03-30T14:41:03.745895",
+    "updated_at": "2026-03-30T14:42:17.888594",
+    "message_count": 6
+  },
+  "web:1774853089457": {
+    "channel": "web",
+    "chat_id": "1774853089457",
+    "user_name": null,
+    "created_at": "2026-03-30T14:44:51.164720",
+    "updated_at": "2026-03-30T14:48:09.758334",
+    "message_count": 4
+  },
+  "web:1774853365626": {
+    "channel": "web",
+    "chat_id": "1774853365626",
+    "user_name": null,
+    "created_at": "2026-03-30T14:49:26.987333",
+    "updated_at": "2026-03-30T14:49:47.529297",
+    "message_count": 2
+  },
+  "web:1774853400913": {
+    "channel": "web",
+    "chat_id": "1774853400913",
+    "user_name": null,
+    "created_at": "2026-03-30T14:50:15.434186",
+    "updated_at": "2026-03-30T14:54:04.931398",
+    "message_count": 6
+  },
+  "web:1774854000668": {
+    "channel": "web",
+    "chat_id": "1774854000668",
+    "user_name": null,
+    "created_at": "2026-03-30T15:00:07.339050",
+    "updated_at": "2026-03-30T15:00:58.202247",
+    "message_count": 4
   }
 }

@@ -21,6 +21,7 @@ from nanobot.agent.tools.web import WebSearchTool, WebFetchTool
 from nanobot.agent.tools.message import MessageTool
 from nanobot.agent.tools.spawn import SpawnTool
 from nanobot.agent.tools.cron import CronTool
+from nanobot.agent.tools.python import PythonExecTool, FileUploadTool
 from nanobot.agent.memory import MemoryStore
 from nanobot.agent.subagent import SubagentManager
 from nanobot.session.manager import Session, SessionManager
@@ -99,26 +100,36 @@ class AgentLoop:
         self.tools.register(WriteFileTool(allowed_dir=allowed_dir))
         self.tools.register(EditFileTool(allowed_dir=allowed_dir))
         self.tools.register(ListDirTool(allowed_dir=allowed_dir))
-        
+
         # Shell tool
         self.tools.register(ExecTool(
             working_dir=str(self.workspace),
             timeout=self.exec_config.timeout,
             restrict_to_workspace=self.restrict_to_workspace,
         ))
-        
+
+        # Python execution tool with notebook persistence
+        self.tools.register(PythonExecTool(
+            workspace=self.workspace,
+            timeout=self.exec_config.timeout,
+            session_manager=self.sessions,
+        ))
+
+        # File upload tool
+        self.tools.register(FileUploadTool(workspace=self.workspace))
+
         # Web tools
         self.tools.register(WebSearchTool(api_key=self.exa_api_key))
         self.tools.register(WebFetchTool())
-        
+
         # Message tool
         message_tool = MessageTool(send_callback=self.bus.publish_outbound)
         self.tools.register(message_tool)
-        
+
         # Spawn tool (for subagents)
         spawn_tool = SpawnTool(manager=self.subagents)
         self.tools.register(spawn_tool)
-        
+
         # Cron tool (for scheduling)
         if self.cron_service:
             self.tools.register(CronTool(self.cron_service))
@@ -133,7 +144,7 @@ class AgentLoop:
         await self._mcp_stack.__aenter__()
         await connect_mcp_servers(self._mcp_servers, self.tools, self._mcp_stack)
 
-    def _set_tool_context(self, channel: str, chat_id: str) -> None:
+    def _set_tool_context(self, channel: str, chat_id: str, session_key: str | None = None) -> None:
         """Update context for all tools that need routing info."""
         if message_tool := self.tools.get("message"):
             if isinstance(message_tool, MessageTool):
@@ -146,6 +157,11 @@ class AgentLoop:
         if cron_tool := self.tools.get("cron"):
             if isinstance(cron_tool, CronTool):
                 cron_tool.set_context(channel, chat_id)
+        
+        # Set session for Python execution tool
+        if python_tool := self.tools.get("python_exec"):
+            if isinstance(python_tool, PythonExecTool):
+                python_tool.set_session(session_key or f"{channel}:{chat_id}")
 
     @staticmethod
     def _strip_think(text: str | None) -> str | None:
@@ -352,7 +368,7 @@ class AgentLoop:
         if len(session.messages) > self.memory_window:
             asyncio.create_task(self._consolidate_memory(session))
 
-        self._set_tool_context(msg.channel, msg.chat_id)
+        self._set_tool_context(msg.channel, msg.chat_id, session_key=key)
         
         # Create context builder with memory_key (user_id:channel) for memory isolation
         context = ContextBuilder(self.workspace, memory_key=msg.memory_key)
@@ -413,7 +429,7 @@ class AgentLoop:
         
         session_key = f"{origin_channel}:{origin_chat_id}"
         session = self.sessions.get_or_create(session_key)
-        self._set_tool_context(origin_channel, origin_chat_id)
+        self._set_tool_context(origin_channel, origin_chat_id, session_key=session_key)
         
         # Create context builder with memory_key (user_id:channel) for memory isolation
         # For system messages, use origin_chat_id as user_id

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NanoBot AI Assistant</title>
+    <title>HuhuBot AI Assistant</title>
     <style>
         * {
             margin: 0;
@@ -137,12 +137,38 @@
             padding: 20px;
             border-bottom: 1px solid #e5e7eb;
             background: #ffffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .chat-title {
             font-size: 18px;
             font-weight: 600;
             color: #1f2937;
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            background: #f3f4f6;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background: #e5e7eb;
         }
 
         .messages-container {
@@ -153,7 +179,7 @@
         }
 
         .message {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto 20px;
             display: flex;
             gap: 12px;
@@ -191,7 +217,7 @@
         }
 
         .message-content {
-            max-width: 70%;
+            max-width: 80%;
             padding: 12px 16px;
             border-radius: 12px;
             line-height: 1.6;
@@ -214,38 +240,221 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .message-content pre {
-            background: #1f2937;
-            color: #f3f4f6;
-            padding: 12px;
-            border-radius: 8px;
-            overflow-x: auto;
+        /* Markdown 内容样式 */
+        .message-content h1, .message-content h2, .message-content h3,
+        .message-content h4, .message-content h5, .message-content h6 {
+            margin: 16px 0 8px;
+            line-height: 1.4;
+            color: #111827;
+        }
+
+        .message-content h1 { font-size: 1.5em; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+        .message-content h2 { font-size: 1.3em; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+        .message-content h3 { font-size: 1.15em; }
+        .message-content h4 { font-size: 1em; }
+
+        .message-content p {
             margin: 8px 0;
+            line-height: 1.7;
+        }
+
+        .message-content ul, .message-content ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .message-content li {
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .message-content ul li { list-style-type: disc; }
+        .message-content ol li { list-style-type: decimal; }
+
+        .message-content blockquote {
+            margin: 12px 0;
+            padding: 8px 16px;
+            border-left: 4px solid #6366f1;
+            background: #f9fafb;
+            color: #4b5563;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .message-content hr {
+            margin: 16px 0;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .message-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 14px;
+        }
+
+        .message-content th, .message-content td {
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            text-align: left;
+        }
+
+        .message-content th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .message-content tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .message-content pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 12px 0;
+            font-family: 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .message-content code {
-            background: #f3f4f6;
-            color: #1f2937;
+            background: #f1f5f9;
+            color: #be185d;
             padding: 2px 6px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 0.9em;
+            font-family: 'Fira Code', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        }
+
+        .message.user .message-content code {
+            background: rgba(255,255,255,0.2);
+            color: white;
         }
 
         .message-content pre code {
             background: none;
             padding: 0;
+            color: inherit;
+            font-size: inherit;
         }
 
-        /* 输入区域 */
+        .message-content strong {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .message-content em {
+            font-style: italic;
+            color: #4b5563;
+        }
+
+        .message-content a {
+            color: #6366f1;
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .message-content a:hover {
+            border-bottom-color: #6366f1;
+        }
+
+        /* 首个段落无上边距，末个无下边距 */
+        .message-content > p:first-child { margin-top: 0; }
+        .message-content > p:last-child { margin-bottom: 0; }
+
+        /* 图表样式 */
+        .plot-container {
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .plot-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* 文件上传区域 */
         .input-container {
-            padding: 20px;
+            padding: 16px 20px;
             border-top: 1px solid #e5e7eb;
             background: #ffffff;
         }
 
         .input-wrapper {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
+            position: relative;
+        }
+
+        .file-upload-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px dashed #d1d5db;
+        }
+
+        .file-upload-btn {
+            background: none;
+            border: none;
+            color: #6366f1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .file-upload-btn:hover {
+            background: #eef2ff;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .uploaded-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .file-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: #eef2ff;
+            color: #6366f1;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .file-tag .remove {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .file-tag .remove:hover {
+            opacity: 1;
+        }
+
+        .message-input-container {
             position: relative;
         }
 
@@ -361,12 +570,48 @@
         .empty-state-text {
             font-size: 18px;
         }
+
+        /* 代码执行结果样式 */
+        .execution-result {
+            background: #f3f4f6;
+            border-left: 4px solid #6366f1;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* 工具调用样式 */
+        .tool-call {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .tool-call-header {
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: 8px;
+        }
+
+        .tool-call-content {
+            font-family: monospace;
+            background: #ffffff;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="logo">🤖 NanoBot</div>
+            <div class="logo">🐱 HuhuBot</div>
             <button class="new-chat-btn" onclick="createNewChat()">
                 <span>+</span> 新建会话
             </button>
@@ -378,7 +623,12 @@
 
     <div class="main-content">
         <div class="chat-header">
-            <div class="chat-title" id="chatTitle">NanoBot AI Assistant</div>
+            <div class="chat-title" id="chatTitle">HuhuBot AI Assistant</div>
+            <div class="chat-actions">
+                <button class="action-btn" onclick="viewNotebook()" title="查看 Notebook">
+                    📓 Notebook
+                </button>
+            </div>
         </div>
         <div class="messages-container" id="messagesContainer">
             <div class="empty-state">
@@ -388,20 +638,35 @@
         </div>
         <div class="input-container">
             <div class="input-wrapper">
-                <textarea 
-                    class="message-input" 
-                    id="messageInput" 
-                    placeholder="输入消息..." 
-                    rows="1"
-                    onkeydown="handleKeyDown(event)"
-                    oninput="autoResize(this)"
-                ></textarea>
-                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="22" y1="2" x2="11" y2="13"></line>
-                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                    </svg>
-                </button>
+                <div class="file-upload-area">
+                    <button class="file-upload-btn" onclick="document.getElementById('fileInput').click()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        上传文件
+                    </button>
+                    <span style="color: #6b7280; font-size: 13px;">支持 CSV, Excel, JSON, 图片等</span>
+                    <input type="file" id="fileInput" class="file-input" onchange="handleFileSelect(event)" multiple>
+                </div>
+                <div class="uploaded-files" id="uploadedFiles"></div>
+                <div class="message-input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="输入消息...使用 /code 执行 Python 代码" 
+                        rows="1"
+                        onkeydown="handleKeyDown(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -410,6 +675,7 @@
         const API_BASE = 'http://localhost:5088/api';
         let currentSessionId = null;
         let sessions = [];
+        let uploadedFiles = [];
 
         // 页面加载时初始化
         window.onload = function() {
@@ -461,6 +727,8 @@
         // 创建新会话
         function createNewChat() {
             currentSessionId = `web:${Date.now()}`;
+            uploadedFiles = [];
+            updateUploadedFiles();
             document.getElementById('chatTitle').textContent = '新对话';
             document.getElementById('messagesContainer').innerHTML = `
                 <div class="empty-state">
@@ -475,6 +743,8 @@
         // 加载会话历史
         async function loadSession(sessionId) {
             currentSessionId = sessionId;
+            uploadedFiles = [];
+            updateUploadedFiles();
             const title = sessionId.split(':')[1] || '会话';
             document.getElementById('chatTitle').textContent = title;
 
@@ -500,10 +770,27 @@
                     `;
                 }
 
+                // 加载会话文件
+                loadSessionFiles(sessionId);
+
                 renderSessionList();
                 scrollToBottom();
             } catch (error) {
                 console.error('加载会话失败:', error);
+            }
+        }
+
+        // 加载会话文件
+        async function loadSessionFiles(sessionId) {
+            try {
+                const response = await fetch(`${API_BASE}/files/${sessionId.replace(':', '_')}`);
+                const data = await response.json();
+                if (data.files) {
+                    uploadedFiles = data.files;
+                    updateUploadedFiles();
+                }
+            } catch (error) {
+                console.error('加载文件列表失败:', error);
             }
         }
 
@@ -520,7 +807,9 @@
 
                 if (currentSessionId === sessionId) {
                     currentSessionId = null;
-                    document.getElementById('chatTitle').textContent = 'NanoBot AI Assistant';
+                    uploadedFiles = [];
+                    updateUploadedFiles();
+                    document.getElementById('chatTitle').textContent = 'HuhuBot AI Assistant';
                     document.getElementById('messagesContainer').innerHTML = `
                         <div class="empty-state">
                             <div class="empty-state-icon">💬</div>
@@ -534,6 +823,75 @@
                 console.error('删除会话失败:', error);
                 alert('删除会话失败');
             }
+        }
+
+        // 处理文件选择
+        async function handleFileSelect(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+
+            if (!currentSessionId) {
+                createNewChat();
+            }
+
+            for (const file of files) {
+                await uploadFile(file);
+            }
+
+            // 清空input以便可以再次选择相同文件
+            event.target.value = '';
+        }
+
+        // 上传文件
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_id', currentSessionId);
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    uploadedFiles.push({
+                        name: data.filename,
+                        path: data.path,
+                        size: data.size
+                    });
+                    updateUploadedFiles();
+                    
+                    // 添加系统消息
+                    addMessageToUI('assistant', `✅ 文件已上传: ${data.filename} (${data.size})\n路径: ${data.path}`);
+                }
+            } catch (error) {
+                console.error('上传文件失败:', error);
+                alert('上传文件失败');
+            }
+        }
+
+        // 更新已上传文件显示
+        function updateUploadedFiles() {
+            const container = document.getElementById('uploadedFiles');
+            container.innerHTML = '';
+
+            uploadedFiles.forEach((file, index) => {
+                const tag = document.createElement('div');
+                tag.className = 'file-tag';
+                tag.innerHTML = `
+                    📄 ${file.name}
+                    <span class="remove" onclick="removeFile(${index})">✕</span>
+                `;
+                container.appendChild(tag);
+            });
+        }
+
+        // 移除文件
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            updateUploadedFiles();
         }
 
         // 发送消息
@@ -552,6 +910,21 @@
             addMessageToUI('user', message);
             input.value = '';
             input.style.height = 'auto';
+
+                // 检查是否是代码执行命令
+                if (message.startsWith('/code')) {
+                    const code = message.replace('/code', '').trim();
+                    await executePythonCode(code);
+                    return;
+                }
+
+                // 如果用户代码中包含 matplotlib 相关代码，自动添加 plt.show()
+                if (message.includes('import matplotlib') || message.includes('from matplotlib')) {
+                    if (!message.includes('plt.show()') && !message.includes('pyplot.show()')) {
+                        // 在代码末尾添加 plt.show()
+                        message = message + '\n\nplt.show()  # Auto-added for chart display';
+                    }
+                }
 
             // 显示加载动画
             const loadingDiv = document.createElement('div');
@@ -610,6 +983,115 @@
             scrollToBottom();
         }
 
+        // 执行 Python 代码
+        async function executePythonCode(code) {
+            if (!code.trim()) {
+                addMessageToUI('assistant', '请输入要执行的 Python 代码');
+                return;
+            }
+
+            // 添加用户代码到UI
+            addMessageToUI('user', `/code\n${code}`);
+
+            // 显示加载动画
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.id = 'loadingMessage';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="typing-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            document.getElementById('messagesContainer').appendChild(loadingDiv);
+            scrollToBottom();
+
+            try {
+                const response = await fetch(`${API_BASE}/python/exec`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        code: code,
+                        session_id: currentSessionId
+                    })
+                });
+
+                const data = await response.json();
+
+                // 移除加载动画
+                const loadingMsg = document.getElementById('loadingMessage');
+                if (loadingMsg) {
+                    loadingMsg.remove();
+                }
+
+                // 显示执行结果
+                let resultMessage = '';
+                if (data.success) {
+                    resultMessage = data.output || '执行完成';
+                    if (data.plots && data.plots.length > 0) {
+                        resultMessage += `\n\n✅ 成功生成 ${data.plots.length} 个图表`;
+                    }
+                } else {
+                    resultMessage = `❌ 执行失败:\n${data.output}`;
+                    if (data.error) {
+                        resultMessage += `\n\n错误详情:\n${data.error}`;
+                    }
+                }
+
+                addMessageToUI('assistant', resultMessage);
+
+                // 单独显示图表
+                if (data.plots && data.plots.length > 0) {
+                    data.plots.forEach(plotUrl => {
+                        const container = document.getElementById('messagesContainer');
+                        const plotDiv = document.createElement('div');
+                        plotDiv.className = 'message assistant';
+
+                        // Construct full URL - plotUrl is like /plots/session_id/plot_name.png
+                        const fullUrl = API_BASE.replace('/api', '') + plotUrl;
+
+                        plotDiv.innerHTML = `
+                            <div class="message-avatar">📊</div>
+                            <div class="message-content">
+                                <div class="plot-container">
+                                    <img src="${fullUrl}" alt="Chart" style="max-width: 100%; border-radius: 8px;"
+                                         onload="console.log('✅ 图片加载成功: ${fullUrl}')"
+                                         onerror="this.onerror=null; console.error('❌ 图片加载失败: ${fullUrl}'); this.parentElement.innerHTML='<div style=\'color: #ef4444; padding: 20px;\'>❌ 图片加载失败<br>URL: ${fullUrl}</div>';">
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(plotDiv);
+                    });
+                }
+
+            } catch (error) {
+                console.error('执行代码失败:', error);
+                const loadingMsg = document.getElementById('loadingMessage');
+                if (loadingMsg) {
+                    loadingMsg.remove();
+                }
+                addMessageToUI('assistant', '❌ 执行代码时出错: ' + error.message);
+            }
+
+            scrollToBottom();
+        }
+
+        // 查看 Notebook
+        async function viewNotebook() {
+            if (!currentSessionId) {
+                alert('请先选择一个会话');
+                return;
+            }
+
+            window.open(`${API_BASE}/notebooks/${currentSessionId.replace(':', '_')}`, '_blank');
+        }
+
         // 添加消息到UI
         function addMessageToUI(role, content) {
             const container = document.getElementById('messagesContainer');
@@ -625,12 +1107,38 @@
 
             const avatar = role === 'user' ? '👤' : '🤖';
             
-            // 简单的markdown处理
-            let formattedContent = content
-                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
-                .replace(/`([^`]+)`/g, '<code>$1</code>')
-                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                .replace(/\n/g, '<br>');
+            // 处理内容中的代码块
+            let formattedContent = content;
+            
+            // 转义HTML特殊字符
+            formattedContent = formattedContent
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // 处理代码块 (```...```)
+            formattedContent = formattedContent.replace(/```([\s\S]*?)```/g, (match, code) => {
+                return `<pre><code>${code}</code></pre>`;
+            });
+            
+            // 处理行内代码 (`...`)
+            formattedContent = formattedContent.replace(/`([^`]+)`/g, '<code>$1</code>');
+            
+            // 处理加粗 (**...**)
+            formattedContent = formattedContent.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            
+            // 处理 Markdown 图片 ![alt](url) - 必须在处理链接之前
+            formattedContent = formattedContent.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+                // Construct full URL if relative
+                const fullUrl = url.startsWith('http') ? url : (API_BASE.replace('/api', '') + url);
+                return `<div class="plot-container"><img src="${fullUrl}" alt="${alt}" style="max-width: 100%; border-radius: 8px;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\\'color: #ef4444; padding: 20px;\\'>❌ 图片加载失败</div>';"></div>`;
+            });
+            
+            // 处理 Markdown 链接 [text](url)
+            formattedContent = formattedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #6366f1;">$1</a>');
+            
+            // 处理换行
+            formattedContent = formattedContent.replace(/\n/g, '<br>');
 
             messageDiv.innerHTML = `
                 <div class="message-avatar">${avatar}</div>

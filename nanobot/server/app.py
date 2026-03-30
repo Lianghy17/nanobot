@@ -1,8 +1,11 @@
 """Flask server for nanobot REST API."""
 
 import asyncio
+import json
+from datetime import datetime
+from pathlib import Path
 import threading
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from loguru import logger
 
 from nanobot import __logo__, __version__
@@ -15,6 +18,7 @@ from nanobot.cron.service import CronService
 from nanobot.cron.types import CronSchedule, CronPayload, CronJob
 from nanobot.channels.manager import ChannelManager
 from nanobot.utils.helpers import get_workspace_path, get_data_path
+from nanobot.plot_server import PlotServer
 
 # Global state
 _app = None
@@ -25,6 +29,7 @@ _cron_service: CronService | None = None
 _channel_manager: ChannelManager | None = None
 _bus: MessageBus | None = None
 _async_loop: asyncio.AbstractEventLoop | None = None
+_plot_server: PlotServer | None = None
 
 
 def _run_background_tasks():
@@ -54,10 +59,11 @@ def _run_background_tasks():
 
 def create_app() -> Flask:
     """Create and configure the Flask application."""
-    global _agent, _session_manager, _memory_manager, _cron_service, _channel_manager, _bus
+    global _agent, _session_manager, _memory_manager, _cron_service, _channel_manager, _bus, _plot_server
 
     app = Flask(__name__)
     app.config["JSON_SORT_KEYS"] = False
+    app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 
     # CORS support
     @app.after_request
@@ -74,6 +80,10 @@ def create_app() -> Flask:
     @app.route("/", methods=["OPTIONS"])
     def root_options():
         return "", 200
+
+    # Initialize plot server
+    workspace = get_workspace_path()
+    _plot_server = PlotServer(workspace)
 
     # Initialize components
     config = load_config()
@@ -224,6 +234,176 @@ def create_app() -> Flask:
             "response": response,
             "session_id": session_id,
         })
+
+    # ========== File Upload Routes ==========
+
+    @app.route("/api/upload", methods=["POST"])
+    def upload_file():
+        """Upload a file for analysis."""
+        if 'file' not in request.files:
+            return jsonify({"error": "No file part"}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({"error": "No selected file"}), 400
+
+        session_id = request.form.get('session_id', 'default')
+        safe_session_id = session_id.replace(":", "_")
+
+        # Create upload directory
+        upload_dir = workspace / "uploads" / safe_session_id
+        upload_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save file
+        file_path = upload_dir / file.filename
+        file.save(str(file_path))
+
+        # Get file info
+        file_size = file_path.stat().st_size
+        size_str = f"{file_size} bytes"
+        if file_size > 1024:
+            size_str = f"{file_size / 1024:.1f} KB"
+        if file_size > 1024 * 1024:
+            size_str = f"{file_size / (1024 * 1024):.1f} MB"
+
+        return jsonify({
+            "success": True,
+            "filename": file.filename,
+            "path": str(file_path),
+            "size": size_str,
+            "session_id": session_id,
+        })
+
+    @app.route("/api/files/<path:session_id>", methods=["GET"])
+    def list_uploaded_files(session_id):
+        """List all uploaded files for a session."""
+        safe_session_id = session_id.replace("_", ":", 1).replace(":", "_")
+        upload_dir = workspace / "uploads" / safe_session_id
+
+        if not upload_dir.exists():
+            return jsonify({"files": []})
+
+        files = []
+        for f in upload_dir.iterdir():
+            if f.is_file():
+                stat = f.stat()
+                files.append({
+                    "name": f.name,
+                    "path": str(f),
+                    "size": stat.st_size,
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                })
+
+        return jsonify({"files": files})
+
+    @app.route("/api/files/<path:session_id>/<path:filename>", methods=["GET"])
+    def get_file(session_id, filename):
+        """Get a file by session and filename."""
+        safe_session_id = session_id.replace("_", ":", 1).replace(":", "_")
+        file_path = workspace / "uploads" / safe_session_id / filename
+
+        if not file_path.exists():
+            return jsonify({"error": "File not found"}), 404
+
+        from flask import send_file
+        return send_file(str(file_path), as_attachment=False)
+
+    @app.route("/api/notebooks/<path:session_id>", methods=["GET"])
+    def get_notebook(session_id):
+        """Get the Jupyter notebook for a session."""
+        global _plot_server
+
+        if _plot_server is None:
+            return jsonify({"error": "Plot server not initialized"}), 500
+
+        safe_session_id = session_id.replace(":", "_")
+        notebook_path = _plot_server.notebooks_dir / safe_session_id / "analysis.ipynb"
+
+        if not notebook_path.exists():
+            return jsonify({"error": "Notebook not found"}), 404
+
+        with open(notebook_path, 'r', encoding='utf-8') as f:
+            notebook = json.load(f)
+
+        return jsonify(notebook)
+
+    # ========== Plot Server Routes ==========
+
+    @app.route("/plots/<path:session_id>/<path:plot_name>", methods=["GET"])
+    def serve_plot(session_id, plot_name):
+        """Serve a plot image file."""
+        global _plot_server
+
+        if _plot_server is None:
+            return jsonify({"error": "Plot server not initialized"}), 500
+
+        plot_path = _plot_server.get_plot_path(session_id, plot_name)
+
+        if plot_path is None:
+            logger.warning(f"Plot not found: {session_id}/{plot_name}")
+            return jsonify({"error": "Plot not found"}), 404
+
+        response = send_file(
+            str(plot_path),
+            mimetype='image/png',
+            as_attachment=False,
+            etag=True,
+            last_modified=datetime.fromtimestamp(plot_path.stat().st_mtime)
+        )
+        # Add CORS and caching headers
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Cache-Control', 'public, max-age=3600')
+        return response
+
+    @app.route("/api/plots/<path:session_id>", methods=["GET"])
+    def list_plots(session_id):
+        """List all plots for a session."""
+        global _plot_server
+
+        if _plot_server is None:
+            return jsonify({"error": "Plot server not initialized"}), 500
+
+        plots = _plot_server.list_session_plots(session_id)
+        return jsonify({
+            "session_id": session_id,
+            "plots": plots,
+            "count": len(plots)
+        })
+
+    @app.route("/api/python/exec", methods=["POST"])
+    def execute_python_code():
+        """Execute Python code and return results with plots."""
+        global _plot_server, _async_loop
+
+        if _plot_server is None:
+            return jsonify({"error": "Plot server not initialized"}), 500
+
+        data = request.get_json()
+        if not data or "code" not in data:
+            return jsonify({"error": "Missing 'code' field"}), 400
+
+        code = data["code"]
+        session_id = data.get("session_id", "default")
+
+        async def _run():
+            return await _plot_server.execute_python(code, session_id)
+
+        if _async_loop is None:
+            return jsonify({"error": "Server not initialized"}), 500
+
+        try:
+            future = asyncio.run_coroutine_threadsafe(_run(), _async_loop)
+            result = future.result(timeout=120)
+
+            return jsonify(result)
+        except Exception as e:
+            logger.error(f"Python execution failed: {e}")
+            return jsonify({
+                "success": False,
+                "output": f"Execution failed: {str(e)}",
+                "plots": [],
+                "error": str(e)
+            }), 500
 
     # ========== Config Routes ==========
 
