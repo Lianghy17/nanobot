@@ -1,5 +1,0 @@
-{"_type": "metadata", "created_at": "2026-02-26T18:50:18.178205", "updated_at": "2026-02-26T19:04:07.486656", "metadata": {}, "last_consolidated": 0}
-{"role": "user", "content": "你好，测试一下配置是否正确", "timestamp": "2026-02-26T18:50:23.774533"}
-{"role": "assistant", "content": "你好！👋 配置一切正常，我已经准备好为你服务了。\n\n**当前状态：**\n- 工作目录：`/Users/lianghaoyun/project/nanobot/workspace`\n- 时间：2026-02-26 18:50 (CST，周四)\n- 系统：macOS arm64, Python 3.14.2\n\n**我可以帮你：**\n- 📁 读写文件、执行命令\n- 🔍 搜索网页、获取信息\n- ⏰ 设置提醒、定时任务\n- 📝 管理笔记和待办事项\n\n有什么我可以帮你的吗？", "timestamp": "2026-02-26T18:50:23.774546", "tools_used": null}
-{"role": "user", "content": "测试一下工具调用", "timestamp": "2026-02-26T19:02:44.071067"}
-{"role": "user", "content": "列出 workspace 目录下的文件", "timestamp": "2026-02-26T19:04:07.486643"}
