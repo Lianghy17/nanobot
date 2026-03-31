@@ -22,7 +22,7 @@ We aim to respond to security reports within 48 hours.
 
 ```bash
 # ✅ Good: Store in config file with restricted permissions
-chmod 600 ~/.nanobot/config.json
+chmod 600 ~/.nanobot/config_backup.json
 
 # ❌ Bad: Hardcoding keys in code or committing them
 ```
@@ -145,7 +145,7 @@ For production use:
 3. **Set Proper Permissions**
    ```bash
    chmod 700 ~/.nanobot
-   chmod 600 ~/.nanobot/config.json
+   chmod 600 ~/.nanobot/config_backup.json
    chmod 700 ~/.nanobot/whatsapp-auth
    ```
 

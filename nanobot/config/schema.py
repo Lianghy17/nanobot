@@ -206,6 +206,8 @@ class ProviderConfig(Base):
 class ProvidersConfig(Base):
     """Configuration for LLM providers."""
 
+    requests: ProviderConfig = Field(default_factory=ProviderConfig)  # Direct requests calls
+    pingan: ProviderConfig = Field(default_factory=ProviderConfig)  # Pingan local service
     custom: ProviderConfig = Field(default_factory=ProviderConfig)  # Any OpenAI-compatible endpoint
     anthropic: ProviderConfig = Field(default_factory=ProviderConfig)
     openai: ProviderConfig = Field(default_factory=ProviderConfig)

@@ -823,7 +823,7 @@ nanobot cron remove <job_id>
 
 ```bash
 docker compose run --rm nanobot-cli onboard   # first-time setup
-vim ~/.nanobot/config.json                     # add API keys
+vim ~/.nanobot/config_backup.json                     # add API keys
 docker compose up -d nanobot-gateway           # start gateway
 ```
 
@@ -843,7 +843,7 @@ docker build -t nanobot .
 docker run -v ~/.nanobot:/root/.nanobot --rm nanobot onboard
 
 # Edit config on host to add API keys
-vim ~/.nanobot/config.json
+vim ~/.nanobot/config_backup.json
 
 # Run gateway (connects to enabled channels, e.g. Telegram/Discord/Mochat)
 docker run -v ~/.nanobot:/root/.nanobot -p 18790:18790 nanobot gateway

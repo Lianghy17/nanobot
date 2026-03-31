@@ -86,5 +86,53 @@
     "created_at": "2026-03-30T15:00:07.339050",
     "updated_at": "2026-03-30T15:00:58.202247",
     "message_count": 4
+  },
+  "web:1774865941028": {
+    "channel": "web",
+    "chat_id": "1774865941028",
+    "user_name": null,
+    "created_at": "2026-03-30T18:19:01.041160",
+    "updated_at": "2026-03-30T18:19:04.044223",
+    "message_count": 2
+  },
+  "web:1774865995241": {
+    "channel": "web",
+    "chat_id": "1774865995241",
+    "user_name": null,
+    "created_at": "2026-03-30T18:19:55.251769",
+    "updated_at": "2026-03-30T18:19:57.558522",
+    "message_count": 2
+  },
+  "web:1774866039239": {
+    "channel": "web",
+    "chat_id": "1774866039239",
+    "user_name": null,
+    "created_at": "2026-03-30T18:20:41.364534",
+    "updated_at": "2026-03-30T18:20:46.144968",
+    "message_count": 2
+  },
+  "web:1774866065841": {
+    "channel": "web",
+    "chat_id": "1774866065841",
+    "user_name": null,
+    "created_at": "2026-03-30T18:21:13.661353",
+    "updated_at": "2026-03-30T18:21:24.064522",
+    "message_count": 2
+  },
+  "web:1774866119807": {
+    "channel": "web",
+    "chat_id": "1774866119807",
+    "user_name": null,
+    "created_at": "2026-03-30T18:22:06.365281",
+    "updated_at": "2026-03-30T18:22:11.881765",
+    "message_count": 2
+  },
+  "web:1774868269265": {
+    "channel": "web",
+    "chat_id": "1774868269265",
+    "user_name": null,
+    "created_at": "2026-03-30T18:57:49.281718",
+    "updated_at": "2026-03-30T18:58:10.884852",
+    "message_count": 2
   }
 }

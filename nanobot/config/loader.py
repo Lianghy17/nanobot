@@ -7,8 +7,8 @@ from loguru import logger
 
 def get_config_path() -> Path:
     """Get the default configuration file path."""
-    # 优先使用当前项目的 config.json
-    project_config = Path(__file__).parent.parent.parent / "config.json"
+    # 优先使用当前项目的 config_backup.json
+    project_config = Path(__file__).parent.parent.parent / "config_backup.json"
     if project_config.exists():
         return project_config
     else:

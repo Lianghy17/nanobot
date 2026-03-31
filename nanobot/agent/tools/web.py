@@ -67,7 +67,7 @@ class WebSearchTool(Tool):
                 category: str | None = None, **kwargs: Any) -> str:
         """Execute search using Exa AI API."""
         if not self.api_key:
-            return "Error: EXA_API_KEY not configured. Set the api_key in config.json or EXA_API_KEY env var."
+            return "Error: EXA_API_KEY not configured. Set the api_key in config_backup.json or EXA_API_KEY env var."
 
         try:
             from exa_py import Exa

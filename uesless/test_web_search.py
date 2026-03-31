@@ -5,7 +5,7 @@ import asyncio
 import json
 
 # Load config
-with open("config.json") as f:
+with open("config_backup.json") as f:
     config = json.load(f)
 
 api_key = config.get("tools", {}).get("web", {}).get("search", {}).get("apiKey", "")

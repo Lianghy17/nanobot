@@ -829,6 +829,8 @@ def _make_provider(config):
     from nanobot.providers.litellm_provider import LiteLLMProvider
     from nanobot.providers.openai_codex_provider import OpenAICodexProvider
     from nanobot.providers.custom_provider import CustomProvider
+    from nanobot.providers.requests_llm import RequestsLLMProvider
+    from nanobot.providers.pingan_provider import PinganProvider
 
     model = config.agents.defaults.model
     provider_name = config.get_provider_name(model)
@@ -837,6 +839,22 @@ def _make_provider(config):
     # OpenAI Codex (OAuth)
     if provider_name == "openai_codex" or model.startswith("openai-codex/"):
         return OpenAICodexProvider(default_model=model)
+
+    # Requests: direct HTTP calls (like 本地服务.py)
+    if provider_name == "requests":
+        return RequestsLLMProvider(
+            api_key=p.api_key if p else "",
+            api_base=config.get_api_base(model) or "https://api.moonshot.cn/v1",
+            default_model=model or "moonshot-v1-8k",
+        )
+
+    # Pingan: local service provider
+    if provider_name == "pingan":
+        return PinganProvider(
+            api_key=p.api_key if p else "no-key",
+            api_base=config.get_api_base(model) or "http://localhost:8000/v1",
+            default_model=model,
+        )
 
     # Custom: direct OpenAI-compatible endpoint, bypasses LiteLLM
     if provider_name == "custom":
@@ -849,7 +867,7 @@ def _make_provider(config):
     from nanobot.providers.registry import find_by_name
     spec = find_by_name(provider_name)
     if not model.startswith("bedrock/") and not (p and p.api_key) and not (spec and spec.is_oauth):
-        raise ValueError("No API key configured. Set one in config.json under providers section")
+        raise ValueError("No API key configured. Set one in config_backup.json under providers section")
 
     return LiteLLMProvider(
         api_key=p.api_key if p else None,

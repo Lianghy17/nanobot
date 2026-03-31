@@ -68,6 +68,28 @@ class ProviderSpec:
 
 PROVIDERS: tuple[ProviderSpec, ...] = (
 
+    # === Requests (direct HTTP calls, bypasses provider system) ======
+    ProviderSpec(
+        name="requests",
+        keywords=("requests",),
+        env_key="",
+        display_name="Requests Direct",
+        litellm_prefix="",
+        is_direct=True,
+    ),
+
+    # === Pingan (local service) ==========
+    ProviderSpec(
+        name="pingan",
+        keywords=("pingan",),
+        env_key="",
+        display_name="Pingan",
+        litellm_prefix="",
+        is_direct=True,
+        is_local=True,
+        default_api_base="http://localhost:8000/v1",
+    ),
+
     # === Custom (direct OpenAI-compatible endpoint, bypasses LiteLLM) ======
     ProviderSpec(
         name="custom",

@@ -40,7 +40,7 @@ def get_config_path() -> Path:
     """Get the default configuration file path."""
     # Get project root (parent of nanobot package)
     project_root = Path(__file__).parent.parent.parent
-    return project_root / "config.json"
+    return project_root / "config_backup.json"
 ```
 
 ### 2. `nanobot/utils/helpers.py`
